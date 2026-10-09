@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
 from tqdm import tqdm
+import argparse
 from datetime import datetime, timedelta
 class ResearchPaperExtraction(BaseModel):
     expected_return: float
@@ -21,21 +22,35 @@ load_dotenv()
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 model_name = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
+# Options for small test runs (defaults reproduce the full experiment)
+parser = argparse.ArgumentParser()
+parser.add_argument("--start", type=str, default="2024-06-01", help="first month (YYYY-MM-01)")
+parser.add_argument("--end", type=str, default="2024-12-01", help="last month (YYYY-MM-01)")
+parser.add_argument("--tickers", type=str, default=None, help="comma-separated tickers (default: all S&P500)")
+parser.add_argument("--n_samples", type=int, default=30, help="number of LLM queries per ticker")
+parser.add_argument("--out_dir", type=str, default=".", help="directory to save yfinance/ and responses/")
+args = parser.parse_args()
+
 """
 data
 """
 
 # Create date range from June 2024 to November 2024
-date_range = pd.date_range(start="2024-06-01", end="2024-12-01", freq='MS')
+date_range = pd.date_range(start=args.start, end=args.end, freq='MS')
 
 # Create directories if they don't exist
-os.makedirs('yfinance', exist_ok=True)
-os.makedirs('responses', exist_ok=True)
+yfinance_dir = os.path.join(args.out_dir, 'yfinance')
+responses_dir = os.path.join(args.out_dir, 'responses')
+os.makedirs(yfinance_dir, exist_ok=True)
+os.makedirs(responses_dir, exist_ok=True)
 
 # 1. S&P500 ticker data
 url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-tables = pd.read_html(url)[0]  # Wikipedia table data
+# Wikipedia rejects requests without a User-Agent (HTTP 403)
+tables = pd.read_html(url, storage_options={'User-Agent': 'Mozilla/5.0 (LLM-BLM research script)'})[0]  # Wikipedia table data
 sp500_table = tables[['Symbol', 'Security', 'GICS Sector', 'GICS Sub-Industry']]
+if args.tickers:
+    sp500_table = sp500_table[sp500_table['Symbol'].isin(args.tickers.split(','))]
 
 for current_date in tqdm(date_range):
     month_start = current_date.strftime('%Y-%m-%d')
@@ -45,11 +60,11 @@ for current_date in tqdm(date_range):
     # Download data using yfinance
     data = yf.download(sp500_table['Symbol'].tolist(), start=month_start, end=month_end)['Close']
     # Save raw data
-    data.to_csv(f'yfinance/data_{month_start}_{month_end}.csv')
+    data.to_csv(f'{yfinance_dir}/data_{month_start}_{month_end}.csv')
     
     # Process returns
     returns = data.pct_change().iloc[1:]
-    returns.to_csv(f'yfinance/returns_{month_start}_{month_end}.csv')
+    returns.to_csv(f'{yfinance_dir}/returns_{month_start}_{month_end}.csv')
     sp500_tickers = returns.columns
 
     # Organize data
@@ -94,7 +109,7 @@ for current_date in tqdm(date_range):
 
         # Get responses 30 times, and use the variance of those values as the confidence of the view.
         answers = []
-        for _ in range(30):
+        for _ in range(args.n_samples):
             completion = client.chat.completions.create(
                 model=model_name,
                 messages=[
@@ -123,5 +138,5 @@ for current_date in tqdm(date_range):
         data_dict[ticker]['expected_return'] = answers
 
     # Save responses for this month
-    with open(f'responses/{model_name}_{month_start}_{month_end}.json', 'w') as f:
+    with open(f'{responses_dir}/{model_name}_{month_start}_{month_end}.json', 'w') as f:
         json.dump(data_dict, f)
