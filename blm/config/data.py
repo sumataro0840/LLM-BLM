@@ -18,3 +18,6 @@ TICKERS = [] if _tickers.upper() == "ALL" else [t.strip() for t in _tickers.spli
 
 # Base directory for yfinance/ and responses/
 OUT_DIR = os.environ["OUT_DIR"]
+
+# SQLite database file
+DB_PATH = os.environ["DB_PATH"]
