@@ -17,9 +17,11 @@ def month_ranges(start, end):
     return ranges
 
 
-def download_prices(tickers, month_start, month_end):
-    """Daily close prices (rows: dates, columns: tickers)."""
-    return yf.download(tickers, start=month_start, end=month_end)['Close']
+def download_prices(tickers, start, end):
+    """Daily close prices from start to end, both inclusive (rows: dates, columns: tickers)."""
+    # yfinance excludes the end date, so ask for one day more to keep the last day of the month
+    end_exclusive = (pd.Timestamp(end) + timedelta(days=1)).strftime('%Y-%m-%d')
+    return yf.download(tickers, start=start, end=end_exclusive)['Close']
 
 
 def to_daily_returns(prices):
