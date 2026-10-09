@@ -5,38 +5,21 @@ import yfinance as yf
 from tqdm import tqdm
 import json
 import os
+from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
 from tqdm import tqdm
-import argparse
 from datetime import datetime, timedelta
 class ResearchPaperExtraction(BaseModel):
     expected_return: float
 
-# make model_name arg parser
-parser = argparse.ArgumentParser()
-parser.add_argument("--model_name", type=str, default="llama")
-args = parser.parse_args()
-
 """
 model
 """
-model_name = args.model_name
-if model_name == 'llama':
-    client = OpenAI(
-        base_url=f"https://{YOUR_API_ENDPOINT}", 
-        api_key="-",
-    )
-elif model_name == 'gemma':
-    client = OpenAI(
-        base_url=f"https://{YOUR_API_ENDPOINT}",
-        api_key="-",
-    )
-elif model_name == 'qwen':
-    client = OpenAI(
-        base_url=f"https://{YOUR_API_ENDPOINT}", 
-        api_key="-",
-    )
+# Load OPENAI_API_KEY and OPENAI_MODEL from .env
+load_dotenv()
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+model_name = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
 """
 data
@@ -108,42 +91,30 @@ for current_date in tqdm(date_range):
         pct_change = data_dict[ticker]['pct_change']
         system_prompt = make_system_prompt()
         user_prompt = make_user_prompt(ticker, data_dict)
-        if model_name == 'gemma':   
-            # concat system prompt and user prompt (cuz gemma does not support system prompt)
-            user_prompt = system_prompt + "\n\n" + user_prompt
 
         # Get responses 30 times, and use the variance of those values as the confidence of the view.
         answers = []
         for _ in range(30):
-            if model_name == 'llama':
-                completion = client.chat.completions.create(
-                    model="meta-llama/Meta-Llama-3.1-8B-Instruct",
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                    extra_body={"guided_json": ResearchPaperExtraction.model_json_schema()}
-                )
-            elif model_name == 'gemma':
-                completion = client.chat.completions.create(
-                    model="google/gemma-7b-it",
-                    messages=[
-                        # {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    extra_body={"guided_json": ResearchPaperExtraction.model_json_schema()}
-                )
-            elif model_name == 'qwen':
-                completion = client.chat.completions.create(
-                    model="qwen2-7b-instruct",
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    extra_body={"guided_json": ResearchPaperExtraction.model_json_schema()}
-                )
+            completion = client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "expected_return",
+                        "strict": True,
+                        "schema": {
+                            **ResearchPaperExtraction.model_json_schema(),
+                            "additionalProperties": False,
+                        },
+                    },
+                },
+            )
             try:
-                expected_return_dict = eval(completion.choices[0].message.content)
+                expected_return_dict = json.loads(completion.choices[0].message.content)
                 print(expected_return_dict)
             except:
                 # print(completion.choices[0].message.content)
