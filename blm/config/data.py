@@ -1,15 +1,20 @@
 """
-Data settings (defaults reproduce the full experiment).
+Data settings (read from .env).
 """
+import os
 
 # S&P500 constituents
-SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+SP500_URL = os.environ["SP500_URL"]
 # Wikipedia rejects requests without a User-Agent (HTTP 403)
-USER_AGENT = "Mozilla/5.0 (LLM-BLM research script)"
+USER_AGENT = os.environ["USER_AGENT"]
 
 # Months to process (first day of each month)
-START_MONTH = "2024-06-01"
-END_MONTH = "2024-12-01"
+START_MONTH = os.environ["START_MONTH"]
+END_MONTH = os.environ["END_MONTH"]
+
+# Comma-separated tickers, or ALL for every S&P500 stock ([] means all)
+_tickers = os.environ["TICKERS"]
+TICKERS = [] if _tickers.upper() == "ALL" else [t.strip() for t in _tickers.split(",")]
 
 # Base directory for yfinance/ and responses/
-OUT_DIR = "."
+OUT_DIR = os.environ["OUT_DIR"]
