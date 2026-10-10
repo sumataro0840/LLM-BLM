@@ -12,8 +12,9 @@ class ResearchPaperExtraction(BaseModel):
 
 
 def make_client(api_key):
-    # rate limits and timeouts are retried by the client (with increasing waits)
-    return OpenAI(api_key=api_key, max_retries=6)
+    # rate limits and timeouts are retried by the client (with increasing waits);
+    # the default timeout is 10 minutes, so one stuck request would hold the whole run for that long
+    return OpenAI(api_key=api_key, max_retries=6, timeout=60)
 
 
 def sample_expected_returns(client, model, system_prompt, user_prompt, n, temperature):
