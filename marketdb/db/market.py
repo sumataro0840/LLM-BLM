@@ -87,6 +87,13 @@ def load_trading_days(conn, start, end):
     return [r[0] for r in rows]
 
 
+def last_trading_days(conn, date, n):
+    """The n trading days up to and including `date`, oldest first."""
+    rows = conn.execute("SELECT date FROM prices WHERE symbol = '^GSPC' AND date <= ? ORDER BY date DESC LIMIT ?",
+                        (date, n)).fetchall()
+    return [r[0] for r in rows][::-1]
+
+
 def last_trading_day_before(conn, date):
     return conn.execute("SELECT MAX(date) FROM prices WHERE symbol = '^GSPC' AND date < ?", (date,)).fetchone()[0]
 

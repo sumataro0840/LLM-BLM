@@ -11,6 +11,7 @@ Steps (each one is skipped when its table already has rows, so stored data is ne
   5-6. members without prices or shares for most of their membership are excluded
      (tickers.excluded_reason) and their prices / shares are deleted
   7. sector of stocks that left the index (old Wikipedia revisions) -> tickers.gics_*
+  8. indices listed in INDEX_TICKERS that are not stored yet           -> prices
 
 Tickers are stored as the latest yfinance tickers ('BRK-B', not 'BRK.B'): old tickers often
 fail on yfinance or now point to another company.
@@ -31,13 +32,16 @@ from marketdb.transform.membership import build_membership
 from marketdb.transform.shares import clip_to_period, to_current_split_basis
 from marketdb.db.connection import connect, init_db
 from marketdb.db.index import save_index_changes, save_membership
-from marketdb.db.market import fill_gics, mark_excluded, save_prices, save_shares, save_tickers
+from marketdb.db.market import fill_gics, mark_excluded, missing_tickers, save_prices, save_shares, save_tickers
 
 # Tickers that changed after the change was recorded on Wikipedia (old -> latest)
 TICKER_ALIASES = {
     'SATS': 'ECHO',  # EchoStar: added on 2026-03-23 as SATS, now listed as ECHO
 }
-INDEX_TICKERS = [('^GSPC', 'S&P 500 Index')]
+INDEX_TICKERS = [
+    ('^GSPC', 'S&P 500 Index'),
+    ('^IRX', '13 Week Treasury Bill Yield (percent per year, used as the risk-free rate)'),
+]
 # Companies with several share classes in the index: yfinance reports the company-wide share count
 # for each class, so it is split by the current class ratio (otherwise the company is counted twice)
 MULTI_CLASS = [('GOOGL', 'GOOG'), ('FOXA', 'FOX'), ('NWSA', 'NWS')]
@@ -164,6 +168,15 @@ def exclude_without_shares(conn, max_missing=0.5):
     print(f"[6] excluded (no shares history): {symbols}")
 
 
+def step_index_prices(conn):
+    """Indices added to INDEX_TICKERS after the database was built are fetched here."""
+    save_tickers(conn, [(s, name, None, None) for s, name in INDEX_TICKERS])
+    missing = missing_tickers(conn, [s for s, _ in INDEX_TICKERS], START, END)
+    if missing:
+        save_prices(conn, download_prices(missing, START, END))
+    print(f"[8] index prices added: {missing}")
+
+
 def fill_missing_gics(conn):
     """Stocks that left the index are not on the current Wikipedia page, so their sector is read from
     older revisions of the page (newest first: the classification closest to today is kept)."""
@@ -219,6 +232,7 @@ def main():
     exclude_without_member_prices(conn)
     exclude_without_shares(conn)
     fill_missing_gics(conn)
+    step_index_prices(conn)
     report(conn)
 
 

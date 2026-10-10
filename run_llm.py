@@ -2,7 +2,7 @@
 Collect LLM views (expected returns) for S&P500 stocks and store them in the database.
 Settings (months, tickers, number of samples, run to continue) are read from .env.
 
-    python run.py
+    python run_llm.py
 
 For each month: the members of the index on the last trading day are asked, using only the daily
 returns of that month. Every ticker is saved as soon as it is answered, so an interrupted run can be

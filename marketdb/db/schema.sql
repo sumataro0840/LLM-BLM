@@ -227,6 +227,29 @@ CREATE TABLE IF NOT EXISTS llm_views (
 ) WITHOUT ROWID;
 
 -- ============================================================
+-- Portfolios
+-- ============================================================
+
+-- One strategy computed by run_blm.py (the coefficients used are kept for reproducibility)
+CREATE TABLE IF NOT EXISTS portfolio_runs (
+    portfolio_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    strategy     TEXT NOT NULL,                 -- 'market_cap', 'equal_weight', 'mean_variance', 'black_litterman', ...
+    llm_run_id   INTEGER REFERENCES llm_runs(run_id),  -- LLM answers used as views (NULL = none)
+    params       TEXT NOT NULL,                 -- JSON of the coefficients, e.g. {"tau": 0.025, "risk_aversion": 2.5}
+    note         TEXT,
+    created_at   TEXT NOT NULL
+);
+
+-- Weights decided on as_of_date and held until the last trading day of the following month
+CREATE TABLE IF NOT EXISTS portfolio_weights (
+    portfolio_id INTEGER NOT NULL REFERENCES portfolio_runs(portfolio_id),
+    as_of_date   TEXT NOT NULL,                 -- decision date (nothing after it was used)
+    symbol       TEXT NOT NULL REFERENCES tickers(symbol),
+    weight       REAL NOT NULL CHECK (weight >= 0),  -- every stock of the universe has a row (0 = not held); sums to 1
+    PRIMARY KEY (portfolio_id, as_of_date, symbol)
+) WITHOUT ROWID;
+
+-- ============================================================
 -- Views (computed when read; nothing is stored)
 -- ============================================================
 
@@ -269,3 +292,21 @@ SELECT run_id,
        AVG(expected_return * expected_return) - AVG(expected_return) * AVG(expected_return) AS variance  -- population variance (same as numpy.var)
 FROM llm_views
 GROUP BY run_id, as_of_date, symbol;
+
+-- Return of each portfolio over the month after the decision date (buy on as_of_date, hold, no rebalancing)
+CREATE VIEW IF NOT EXISTS portfolio_returns AS
+WITH period AS (
+    SELECT DISTINCT as_of_date,
+           (SELECT MAX(date) FROM prices
+             WHERE symbol = '^GSPC' AND date <= date(as_of_date, 'start of month', '+2 months', '-1 day')) AS end_date
+    FROM portfolio_weights
+)
+SELECT w.portfolio_id,
+       w.as_of_date,
+       p.end_date,
+       SUM(w.weight > 0) AS n_holdings,
+       SUM(w.weight * ((SELECT adj_close FROM prices WHERE symbol = w.symbol AND date <= p.end_date ORDER BY date DESC LIMIT 1)
+                       / (SELECT adj_close FROM prices WHERE symbol = w.symbol AND date = w.as_of_date) - 1)) AS period_return
+FROM portfolio_weights w
+JOIN period p ON p.as_of_date = w.as_of_date
+GROUP BY w.portfolio_id, w.as_of_date;

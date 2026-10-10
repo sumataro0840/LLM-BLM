@@ -1,6 +1,8 @@
 """
 Save / load S&P500 constituent changes and membership periods.
 """
+import pandas as pd
+
 from marketdb.db.market import now_utc
 
 
@@ -28,3 +30,9 @@ def load_members(conn, date):
         "WHERE (m.start_date IS NULL OR m.start_date <= ?) AND (m.end_date IS NULL OR m.end_date > ?) "
         "ORDER BY m.symbol", (date, date)).fetchall()
     return [r[0] for r in rows]
+
+
+def load_index_weights(conn, date):
+    """Market-cap weights of the members on `date` (Series indexed by symbol, sums to 1)."""
+    return pd.read_sql("SELECT symbol, weight FROM index_weights WHERE date = ?", conn,
+                       params=(date,), index_col='symbol')['weight']

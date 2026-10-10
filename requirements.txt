@@ -2,6 +2,8 @@
 numpy==2.5.3
 pandas==3.0.6
 scipy==1.18.1
+scikit-learn==1.9.1
+cvxpy==1.9.3
 
 # 株価データ取得（pd.read_html で Wikipedia を読むために lxml も必要）
 yfinance==1.7.0

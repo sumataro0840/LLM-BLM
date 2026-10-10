@@ -1,6 +1,8 @@
 """
-Save LLM runs and answers (llm_runs / llm_views).
+Save / load LLM runs and answers (llm_runs / llm_views).
 """
+import pandas as pd
+
 from marketdb.db.market import now_utc
 
 
@@ -37,3 +39,17 @@ def save_views(conn, run_id, as_of_date, symbol, answers, model_version):
     conn.execute("UPDATE llm_runs SET model_version = ? WHERE run_id = ? AND model_version IS NULL",
                  (model_version, run_id))
     conn.commit()
+
+
+def load_as_of_dates(conn, run_id):
+    """Decision dates answered in this run."""
+    rows = conn.execute("SELECT DISTINCT as_of_date FROM llm_views WHERE run_id = ? ORDER BY as_of_date", (run_id,))
+    return [r[0] for r in rows]
+
+
+def load_view_stats(conn, run_id, as_of_date):
+    """Mean and variance of the answers per symbol (columns: mean_return, variance, n_answers)."""
+    return pd.read_sql(
+        "SELECT symbol, mean_return, variance, n_answers FROM llm_view_stats WHERE run_id = ? AND as_of_date = ?",
+        conn, params=(run_id, as_of_date), index_col='symbol',
+    )

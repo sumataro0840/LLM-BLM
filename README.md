@@ -4,13 +4,14 @@
 元の実装（[youngandbin/LLM-BLM](https://github.com/youngandbin/LLM-BLM)）をもとに、OpenAI API だけを使う形に作り直しています。
 
 今あるのは、**S&P500 のデータを DB に入れる部分**と、**LLM に予想（ビュー）を聞く部分**です。
-Black-Litterman の計算と評価は、まだ入っていません。
+それに加えて、**予想から比率を計算する部分**（Black-Litterman と最適化）があります。
 
 ## 構成
 
 ```
 .
-├── run.py          LLM に各銘柄の予想リターンを聞く
+├── run_llm.py      LLM に各銘柄の予想リターンを聞く
+├── run_blm.py      予想から比率を計算する
 ├── marketdb/       データの取得・加工・DB
 │   ├── config.py
 │   ├── sources/    取得（Wikipedia、yfinance、SEC EDGAR）
@@ -18,11 +19,12 @@ Black-Litterman の計算と評価は、まだ入っていません。
 │   ├── db/         テーブル定義と読み書き
 │   ├── build_db.py             株価・銘柄・発行済株式数を DB に入れる
 │   └── build_fundamentals.py   財務諸表を DB に入れる
-├── llm/            LLM に渡す情報、プロンプト、API 呼び出し、出力
+├── llm/            LLM に渡す情報、プロンプト、API 呼び出し
+├── blm/            共分散、均衡リターン、Black-Litterman、最適化
 └── data/           SQLite の DB ファイル（Git には入れない）
 ```
 
-`llm` は `marketdb` を使いますが、`marketdb` は `llm` を使いません。
+`llm` と `blm` は `marketdb` を使いますが、互いには使いません（DB を通してつながります）。
 
 ## 準備
 
@@ -39,5 +41,6 @@ cp .env.example .env    # OPENAI_API_KEY を入れる
 ```bash
 python marketdb/build_db.py             # DB を作る（取得済みのテーブルはスキップ）
 python marketdb/build_fundamentals.py   # 財務諸表を追加する
-python run.py                           # LLM に聞く（OUT_DIR に CSV と JSON を出力）
+python run_llm.py                       # LLM に聞く（回答は DB に保存）
+python run_blm.py                       # 比率を計算する（結果は DB に保存）
 ```
