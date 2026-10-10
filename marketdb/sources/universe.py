@@ -3,7 +3,7 @@ S&P500 constituents (ticker, company name, GICS sector / sub-industry) and their
 """
 import pandas as pd
 
-from blm.config.data import SP500_URL, SP500_HISTORY_URL, USER_AGENT
+from marketdb.config import SP500_URL, SP500_HISTORY_URL, USER_AGENT
 
 
 def to_yf_symbol(symbol, aliases=None):

@@ -1,7 +1,7 @@
 """
 Build the SQLite database for the study period (DB_START_DATE .. DB_END_DATE in .env).
 
-    python scripts/build_db.py
+    python marketdb/build_db.py
 
 Steps (each one is skipped when its table already has rows, so stored data is never refetched):
   1. S&P500 constituent changes (Wikipedia)          -> index_changes
@@ -22,14 +22,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pandas as pd
 
-from blm.config import data as data_config
-from blm.data.membership import build_membership
-from blm.data.prices import download_prices
-from blm.data.shares import class_ratios, clip_to_period, download_shares_and_splits, to_current_split_basis
-from blm.data.universe import load_index_changes, load_sp500_table, to_yf_symbol
-from blm.db.connection import connect, init_db
-from blm.db.index import save_index_changes, save_membership
-from blm.db.market import mark_excluded, save_prices, save_shares, save_tickers
+from marketdb import config
+from marketdb.sources.prices import download_prices
+from marketdb.sources.shares import class_ratios, download_shares_and_splits
+from marketdb.sources.universe import load_index_changes, load_sp500_table, to_yf_symbol
+from marketdb.transform.membership import build_membership
+from marketdb.transform.shares import clip_to_period, to_current_split_basis
+from marketdb.db.connection import connect, init_db
+from marketdb.db.index import save_index_changes, save_membership
+from marketdb.db.market import mark_excluded, save_prices, save_shares, save_tickers
 
 # Tickers that changed after the change was recorded on Wikipedia (old -> latest)
 TICKER_ALIASES = {
@@ -40,7 +41,7 @@ INDEX_TICKERS = [('^GSPC', 'S&P 500 Index')]
 # for each class, so it is split by the current class ratio (otherwise the company is counted twice)
 MULTI_CLASS = [('GOOGL', 'GOOG'), ('FOXA', 'FOX'), ('NWSA', 'NWS')]
 
-START, END = data_config.DB_START_DATE, data_config.DB_END_DATE
+START, END = config.DB_START_DATE, config.DB_END_DATE
 
 
 def is_empty(conn, table):
@@ -186,9 +187,9 @@ def report(conn):
 
 
 def main():
-    conn = connect(data_config.DB_PATH)
+    conn = connect(config.DB_PATH)
     init_db(conn)
-    print(f"DB: {data_config.DB_PATH} | period: {START} .. {END}")
+    print(f"DB: {config.DB_PATH} | period: {START} .. {END}")
     for table, step in [('index_changes', step_index_changes), ('index_membership', step_membership),
                         ('prices', step_prices), ('shares_outstanding', step_shares)]:
         if is_empty(conn, table):

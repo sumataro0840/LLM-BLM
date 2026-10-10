@@ -1,7 +1,7 @@
 """
 Save S&P500 constituent changes and membership periods.
 """
-from blm.db.market import now_utc
+from marketdb.db.market import now_utc
 
 
 def save_index_changes(conn, changes):

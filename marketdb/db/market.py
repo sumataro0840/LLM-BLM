@@ -41,7 +41,7 @@ def missing_tickers(conn, tickers, start, end):
 
 
 def save_prices(conn, prices):
-    """prices: the frame returned by blm.data.prices.download_prices (columns: ('Close' | 'Adj Close', ticker))."""
+    """prices: the frame returned by marketdb.sources.prices.download_prices (columns: ('Close' | 'Adj Close', ticker))."""
     fetched_at = now_utc()
     long = prices.stack(level=1, future_stack=True).rename_axis(['date', 'symbol']).reset_index().dropna()
     long['date'] = pd.to_datetime(long['date']).dt.strftime('%Y-%m-%d')
