@@ -22,7 +22,7 @@ sp500_table = load_sp500_table(data_config.TICKERS)
 
 for month_start, month_end in tqdm(month_ranges(data_config.START_MONTH, data_config.END_MONTH)):
     print(f"Processing data for {month_start} - {month_end}")
-    prices = download_prices(sp500_table['Symbol'].tolist(), month_start, month_end)
+    prices = download_prices(sp500_table['Symbol'].tolist(), month_start, month_end)['Adj Close']
     returns = to_daily_returns(prices)
     save_prices(prices, data_config.OUT_DIR, month_start, month_end)
     save_returns(returns, data_config.OUT_DIR, month_start, month_end)

@@ -5,6 +5,8 @@ import os
 
 # S&P500 constituents
 SP500_URL = os.environ["SP500_URL"]
+# S&P500 constituent changes
+SP500_HISTORY_URL = os.environ["SP500_HISTORY_URL"]
 # Wikipedia rejects requests without a User-Agent (HTTP 403)
 USER_AGENT = os.environ["USER_AGENT"]
 
@@ -21,3 +23,7 @@ OUT_DIR = os.environ["OUT_DIR"]
 
 # SQLite database file
 DB_PATH = os.environ["DB_PATH"]
+
+# Period stored in the database (scripts/build_db.py)
+DB_START_DATE = os.environ["DB_START_DATE"]
+DB_END_DATE = os.environ["DB_END_DATE"]
