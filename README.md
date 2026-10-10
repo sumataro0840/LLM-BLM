@@ -1,87 +1,43 @@
-# Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model 
+# LLM-BLM
 
- > This is an official implementation of the paper [Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model](https://arxiv.org/abs/2504.14345), presented at ICLR 2025 Workshop on Advances in Financial AI.
+論文 [Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model](https://arxiv.org/abs/2504.14345) の再現用リポジトリです。
+元の実装（[youngandbin/LLM-BLM](https://github.com/youngandbin/LLM-BLM)）をもとに、OpenAI API だけを使う形に作り直しています。
 
-![model](figure/model.png)
+今あるのは、**S&P500 のデータを DB に入れる部分**と、**LLM に予想（ビュー）を聞く部分**です。
+Black-Litterman の計算と評価は、まだ入っていません。
 
-
-
-
-## Project Structure
+## 構成
 
 ```
 .
-├── run.py                  # Main file to run LLMs and collect their views
-├── baselines.py           # Implementation of baseline portfolio strategies
-├── calculate_llm_returns.py # Calculates returns for LLM-based portfolios
-├── evaluate_multiple.py    # Evaluates multiple portfolio strategies
-├── responses/             # Stores LLM predictions and views
-├── responses_portfolios/  # Contains baseline portfolio weights and returns
-├── results/              # Final evaluation results
-└── yfinance/             # Downloaded stock price data
+├── run.py          LLM に各銘柄の予想リターンを聞く
+├── marketdb/       データの取得・加工・DB
+│   ├── config.py
+│   ├── sources/    取得（Wikipedia、yfinance、SEC EDGAR）
+│   ├── transform/  加工（在籍期間、株式分割の調整）
+│   ├── db/         テーブル定義と読み書き
+│   ├── build_db.py             株価・銘柄・発行済株式数を DB に入れる
+│   └── build_fundamentals.py   財務諸表を DB に入れる
+├── llm/            LLM に渡す情報、プロンプト、API 呼び出し、出力
+└── data/           SQLite の DB ファイル（Git には入れない）
 ```
 
-## Workflow Description
+`llm` は `marketdb` を使いますが、`marketdb` は `llm` を使いません。
 
-### 1. Data Collection and LLM Views (`run.py`)
-- Downloads S&P 500 stock price data using yfinance API
-- Data is stored in the `yfinance/` directory
-- Queries different LLM models (Qwen, LLaMA, Gemma, GPT) for stock return predictions
-- LLM responses are stored in `responses/` directory as JSON files
+## 準備
 
-### 2. Baseline Portfolio Construction (`baselines.py`)
-- Implements two baseline portfolio strategies:
-  1. Equal-weighted portfolio
-  2. Mean-variance optimized portfolio
-- Processes data monthly from June 2024 to February 2025
-- Portfolio weights and returns are stored in `responses_portfolios/`
-
-### 3. Portfolio Evaluation
-The evaluation process is split into two main components:
-
-#### a. LLM Returns Calculation (`calculate_llm_returns.py`)
-- Processes the LLM-based portfolio weights
-- Calculates portfolio returns for each LLM strategy
-- Results are stored in `results/` directory
-
-#### b. Multiple Strategy Evaluation (`evaluate_multiple.py`)
-- Implements Black-Litterman portfolio optimization using LLM views
-- Processes multiple time periods
-- Generates final performance metrics and comparisons
-- Stores final evaluation results in `results/` directory
-
-![model](figure/cumulative_returns2.png)
-![model](figure/boxplot_all2.png)
-![model](figure/compare_weight2.png)
-
-## File Descriptions
-
-### Main Files
-- `run.py`: Main entry point for collecting LLM views on stock returns
-- `baselines.py`: Implements baseline portfolio construction strategies
-- `calculate_llm_returns.py`: Calculates returns for LLM-based portfolios
-- `evaluate_multiple.py`: Evaluates and compares different portfolio strategies
-
-### Directories
-- `responses/`: Contains JSON files with LLM predictions for each stock
-- `responses_portfolios/`: Stores baseline portfolio weights and returns
-- `results/`: Contains final evaluation results and performance metrics
-- `yfinance/`: Stores downloaded stock price data and returns
-
-## Usage
-
-1. Run LLM predictions:
 ```bash
-python run.py --model_name [qwen|llama|gemma|gpt]
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt
+cp .env.example .env    # OPENAI_API_KEY を入れる
 ```
 
-2. Generate baseline portfolios:
-```bash
-python baselines.py
-```
+設定はすべて `.env` に書きます。
 
-3. Calculate returns and evaluate strategies:
+## 使い方
+
 ```bash
-python calculate_llm_returns.py
-python evaluate_multiple.py
-``` 
+python marketdb/build_db.py             # DB を作る（取得済みのテーブルはスキップ）
+python marketdb/build_fundamentals.py   # 財務諸表を追加する
+python run.py                           # LLM に聞く（OUT_DIR に CSV と JSON を出力）
+```
