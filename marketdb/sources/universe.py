@@ -1,9 +1,16 @@
 """
 S&P500 constituents (ticker, company name, GICS sector / sub-industry) and their change history.
 """
+import io
+import json
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
 import pandas as pd
 
-from marketdb.config import SP500_URL, SP500_HISTORY_URL, USER_AGENT
+from marketdb.config import SP500_URL, SP500_HISTORY_URL, USER_AGENT, WIKIPEDIA_API_URL, WIKIPEDIA_REVISION_URL
 
 
 def to_yf_symbol(symbol, aliases=None):
@@ -18,6 +25,28 @@ def load_sp500_table(tickers=None):
     if tickers:
         sp500_table = sp500_table[sp500_table['Symbol'].isin(tickers)]
     return sp500_table
+
+
+def _get(url, attempts=4, wait=30):
+    """Wikipedia answers HTTP 429 after several requests in a row, so wait and try again."""
+    for attempt in range(attempts):
+        try:
+            return urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': USER_AGENT})).read()
+        except urllib.error.HTTPError as e:
+            if e.code != 429 or attempt == attempts - 1:
+                raise
+            time.sleep(wait)
+
+
+def load_sp500_table_at(date):
+    """The constituents table as it was on Wikipedia at the start of `date` (same columns as load_sp500_table)."""
+    query = urllib.parse.urlencode({
+        'action': 'query', 'prop': 'revisions', 'titles': urllib.parse.unquote(SP500_URL.rsplit('/', 1)[1]),
+        'rvlimit': 1, 'rvstart': f'{date}T00:00:00Z', 'rvdir': 'older', 'rvprop': 'ids', 'format': 'json'})
+    pages = json.loads(_get(f'{WIKIPEDIA_API_URL}?{query}'))['query']['pages']
+    revid = next(iter(pages.values()))['revisions'][0]['revid']
+    table = pd.read_html(io.BytesIO(_get(WIKIPEDIA_REVISION_URL.format(revid=revid))))[0]
+    return table[['Symbol', 'Security', 'GICS Sector', 'GICS Sub-Industry']]
 
 
 def load_index_changes():

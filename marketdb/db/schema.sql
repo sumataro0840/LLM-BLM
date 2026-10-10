@@ -1,5 +1,5 @@
 -- LLM-BLM database schema (SQLite)
--- Dates are stored as ISO 8601 text: date = 'YYYY-MM-DD', month = 'YYYY-MM', *_at = 'YYYY-MM-DDTHH:MM:SS+00:00' (UTC)
+-- Dates are stored as ISO 8601 text: date = 'YYYY-MM-DD', *_at = 'YYYY-MM-DDTHH:MM:SS+00:00' (UTC)
 -- Symbols use the yfinance format ('BRK-B', not Wikipedia's 'BRK.B')
 -- Returns and market caps are computed from these tables, not stored
 -- Split basis: everything is on the split basis of the fetch date (yfinance prices already are;
@@ -202,25 +202,29 @@ HAVING filed_date IS NOT NULL;
 -- LLM results
 -- ============================================================
 
--- One execution of run.py (model and prompt are kept for reproducibility)
+-- One execution of run.py (everything that defines the question is kept for reproducibility)
 CREATE TABLE IF NOT EXISTS llm_runs (
     run_id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    model         TEXT NOT NULL,                -- e.g. 'gpt-4o-mini'
+    model         TEXT NOT NULL,                -- requested model, e.g. 'gpt-4o-mini'
+    model_version TEXT,                         -- model that actually answered, e.g. 'gpt-4o-mini-2024-07-18'
     system_prompt TEXT NOT NULL,
+    temperature   REAL NOT NULL,
     n_samples     INTEGER NOT NULL CHECK (n_samples > 0),
+    input_months  INTEGER NOT NULL,             -- length of the daily returns given to the LLM (1 = one month, 3 = a quarter)
+    target_months INTEGER NOT NULL,             -- length of the period the LLM predicts
     note          TEXT,                         -- free memo (what was changed in this run)
     created_at    TEXT NOT NULL
 );
 
--- Each LLM answer: the view on the month after `month`
+-- Each LLM answer: the view on the target_months that follow as_of_date
 CREATE TABLE IF NOT EXISTS llm_views (
     run_id          INTEGER NOT NULL REFERENCES llm_runs(run_id),
-    month           TEXT NOT NULL,              -- month of the input returns (the prediction is for the next month)
+    as_of_date      TEXT NOT NULL,              -- last trading day of the input returns (nothing after it was shown)
     symbol          TEXT NOT NULL REFERENCES tickers(symbol),
     sample_no       INTEGER NOT NULL,           -- 1 .. n_samples
-    expected_return REAL,                       -- NULL when the answer could not be parsed
-    PRIMARY KEY (run_id, month, symbol, sample_no)
-);
+    expected_return REAL,                       -- average daily return as a decimal fraction; NULL = answer not parsed
+    PRIMARY KEY (run_id, as_of_date, symbol, sample_no)
+) WITHOUT ROWID;
 
 -- ============================================================
 -- Views (computed when read; nothing is stored)
@@ -254,3 +258,14 @@ JOIN index_membership m
   ON m.symbol = mc.symbol
  AND (m.start_date IS NULL OR m.start_date <= mc.date)
  AND (m.end_date IS NULL OR m.end_date > mc.date);
+
+-- Black-Litterman inputs from the LLM answers: mean = view (Q), variance = uncertainty of the view (Omega)
+CREATE VIEW IF NOT EXISTS llm_view_stats AS
+SELECT run_id,
+       as_of_date,
+       symbol,
+       COUNT(expected_return) AS n_answers,     -- parsed answers (n_samples when nothing failed)
+       AVG(expected_return)   AS mean_return,
+       AVG(expected_return * expected_return) - AVG(expected_return) * AVG(expected_return) AS variance  -- population variance (same as numpy.var)
+FROM llm_views
+GROUP BY run_id, as_of_date, symbol;

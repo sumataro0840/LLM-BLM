@@ -1,1 +1,1 @@
-"""LLM views: input context, prompts, API calls and file outputs."""
+"""LLM views: input context, prompts and API calls."""

@@ -14,6 +14,9 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 SP500_URL = os.environ["SP500_URL"]
 # S&P500 constituent changes
 SP500_HISTORY_URL = os.environ["SP500_HISTORY_URL"]
+# Old revisions of the constituents page ({revid} = revision id)
+WIKIPEDIA_API_URL = os.environ["WIKIPEDIA_API_URL"]
+WIKIPEDIA_REVISION_URL = os.environ["WIKIPEDIA_REVISION_URL"]
 # Wikipedia rejects requests without a User-Agent (HTTP 403)
 USER_AGENT = os.environ["USER_AGENT"]
 

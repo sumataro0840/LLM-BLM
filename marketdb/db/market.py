@@ -24,6 +24,15 @@ def save_tickers(conn, tickers):
     conn.commit()
 
 
+def fill_gics(conn, rows):
+    """rows: (symbol, gics_sector, gics_sub_industry); only tickers without a sector are updated."""
+    conn.executemany(
+        "UPDATE tickers SET gics_sector = ?, gics_sub_industry = ? WHERE symbol = ? AND gics_sector IS NULL",
+        [(sector, sub_industry, symbol) for symbol, sector, sub_industry in rows],
+    )
+    conn.commit()
+
+
 def mark_excluded(conn, symbols, reason):
     conn.executemany("UPDATE tickers SET excluded_reason = ? WHERE symbol = ?", [(reason, s) for s in symbols])
     conn.commit()
@@ -62,6 +71,24 @@ def save_shares(conn, symbol, shares):
         [(symbol, d, int(v), fetched_at) for d, v in shares.items()],
     )
     conn.commit()
+
+
+def load_ticker_table(conn):
+    """Company information in the same shape as the Wikipedia table (Symbol, Security, GICS Sector, GICS Sub-Industry)."""
+    return pd.read_sql(
+        'SELECT symbol AS "Symbol", security AS "Security", gics_sector AS "GICS Sector", '
+        'gics_sub_industry AS "GICS Sub-Industry" FROM tickers', conn)
+
+
+def load_trading_days(conn, start, end):
+    """Trading days between start and end (both inclusive)."""
+    rows = conn.execute("SELECT date FROM prices WHERE symbol = '^GSPC' AND date BETWEEN ? AND ? ORDER BY date",
+                        (start, end)).fetchall()
+    return [r[0] for r in rows]
+
+
+def last_trading_day_before(conn, date):
+    return conn.execute("SELECT MAX(date) FROM prices WHERE symbol = '^GSPC' AND date < ?", (date,)).fetchone()[0]
 
 
 def load_prices(conn, tickers, start, end, column='adj_close'):

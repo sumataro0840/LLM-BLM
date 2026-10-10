@@ -1,5 +1,5 @@
 """
-Settings of the LLM run: API / model / sampling, months, tickers and output
+Settings of the LLM run: API / model / sampling, months and tickers
 (read from LLM-BLM/.env, every value is expected to be set there).
 """
 import os
@@ -13,10 +13,19 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 OPENAI_MODEL = os.environ["OPENAI_MODEL"]
 
-# Number of LLM queries per ticker (the variance is used as the confidence of the view)
+# Number of answers per ticker (the variance is used as the confidence of the view)
 N_SAMPLES = int(os.environ["N_SAMPLES"])
+# Sampling temperature (must stay above 0, otherwise the answers do not vary)
+TEMPERATURE = float(os.environ["TEMPERATURE"])
+# Tickers asked at the same time
+MAX_WORKERS = int(os.environ["MAX_WORKERS"])
 
-# Months to process (first day of each month)
+# Empty = start a new run, a number = continue that run (answered tickers are skipped)
+RUN_ID = int(os.environ["RUN_ID"]) if os.environ["RUN_ID"] else None
+# Free memo stored with a new run
+RUN_NOTE = os.environ["RUN_NOTE"]
+
+# Months given to the LLM (first day of each month); the prediction is for the month after each
 START_MONTH = os.environ["START_MONTH"]
 END_MONTH = os.environ["END_MONTH"]
 
@@ -24,5 +33,5 @@ END_MONTH = os.environ["END_MONTH"]
 _tickers = os.environ["TICKERS"]
 TICKERS = [] if _tickers.upper() == "ALL" else [t.strip() for t in _tickers.split(",")]
 
-# Base directory for yfinance/ and responses/
-OUT_DIR = os.environ["OUT_DIR"]
+# SQLite database file (input prices and the answers)
+DB_PATH = os.environ["DB_PATH"]

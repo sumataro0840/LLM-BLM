@@ -10,6 +10,7 @@ Steps (each one is skipped when its table already has rows, so stored data is ne
   4. shares outstanding on the current split basis   -> shares_outstanding
   5-6. members without prices or shares for most of their membership are excluded
      (tickers.excluded_reason) and their prices / shares are deleted
+  7. sector of stocks that left the index (old Wikipedia revisions) -> tickers.gics_*
 
 Tickers are stored as the latest yfinance tickers ('BRK-B', not 'BRK.B'): old tickers often
 fail on yfinance or now point to another company.
@@ -25,12 +26,12 @@ import pandas as pd
 from marketdb import config
 from marketdb.sources.prices import download_prices
 from marketdb.sources.shares import class_ratios, download_shares_and_splits
-from marketdb.sources.universe import load_index_changes, load_sp500_table, to_yf_symbol
+from marketdb.sources.universe import load_index_changes, load_sp500_table, load_sp500_table_at, to_yf_symbol
 from marketdb.transform.membership import build_membership
 from marketdb.transform.shares import clip_to_period, to_current_split_basis
 from marketdb.db.connection import connect, init_db
 from marketdb.db.index import save_index_changes, save_membership
-from marketdb.db.market import mark_excluded, save_prices, save_shares, save_tickers
+from marketdb.db.market import fill_gics, mark_excluded, save_prices, save_shares, save_tickers
 
 # Tickers that changed after the change was recorded on Wikipedia (old -> latest)
 TICKER_ALIASES = {
@@ -163,6 +164,25 @@ def exclude_without_shares(conn, max_missing=0.5):
     print(f"[6] excluded (no shares history): {symbols}")
 
 
+def fill_missing_gics(conn):
+    """Stocks that left the index are not on the current Wikipedia page, so their sector is read from
+    older revisions of the page (newest first: the classification closest to today is kept)."""
+    def missing():
+        return {r[0] for r in conn.execute(
+            "SELECT symbol FROM tickers WHERE gics_sector IS NULL AND symbol NOT LIKE '^%'")}
+
+    before = missing()
+    # every quarter, plus the first day of the period for stocks that left right after it
+    dates = [*pd.date_range(START, END, freq='QS').strftime('%Y-%m-%d')[::-1], START] if before else []
+    for date in dates:
+        if not missing():
+            break
+        table = load_sp500_table_at(date).dropna(subset=['GICS Sector'])
+        fill_gics(conn, [(to_yf_symbol(r['Symbol'], TICKER_ALIASES), r['GICS Sector'], r['GICS Sub-Industry'])
+                         for _, r in table.iterrows()])
+    print(f"[7] GICS filled from old Wikipedia revisions: {len(before) - len(missing())} | still missing: {sorted(missing())}")
+
+
 def report(conn):
     """Checks that need a human look (nothing is changed here)."""
     print("\n[check] members whose prices do not cover their membership period:")
@@ -198,6 +218,7 @@ def main():
             print(f"skip: {table} already has data")
     exclude_without_member_prices(conn)
     exclude_without_shares(conn)
+    fill_missing_gics(conn)
     report(conn)
 
 
