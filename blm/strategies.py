@@ -46,6 +46,13 @@ def black_litterman_original(inputs):
     return optimize_original(expected, covariance, config.ORIGINAL_RETURN_WEIGHT)
 
 
+def mean_variance_original(inputs):
+    """The mean-variance baseline of the original implementation: mean and covariance of the
+    decision month only, and scipy's optimizer with its default settings."""
+    covariance = sample_covariance(inputs.month_returns)
+    return optimize_original(inputs.month_returns.mean(), covariance, config.ORIGINAL_RETURN_WEIGHT)
+
+
 COMMON_PARAMS = {'cov_window_days': config.COV_WINDOW_DAYS, 'min_history_ratio': config.MIN_HISTORY_RATIO}
 
 # name -> (function, uses the LLM views, coefficients stored with the portfolio)
@@ -55,6 +62,8 @@ STRATEGIES = {
     'mean_variance': (mean_variance, False, {'risk_aversion': config.RISK_AVERSION, 'covariance': 'ledoit_wolf'}),
     'black_litterman': (black_litterman, True, {'tau': config.TAU, 'risk_aversion': config.RISK_AVERSION,
                                                 'covariance': 'ledoit_wolf'}),
+    'mean_variance_original': (mean_variance_original, False, {
+        'return_weight': config.ORIGINAL_RETURN_WEIGHT, 'covariance': 'sample (decision month)'}),
     'black_litterman_original': (black_litterman_original, True, {
         'tau': config.TAU, 'risk_free_rate': config.ORIGINAL_RISK_FREE_RATE,
         'return_weight': config.ORIGINAL_RETURN_WEIGHT, 'covariance': 'sample (decision month)'}),

@@ -26,6 +26,8 @@ DB_PATH = os.environ["DB_PATH"]
 # Period stored in the database (marketdb/build_db.py)
 DB_START_DATE = os.environ["DB_START_DATE"]
 DB_END_DATE = os.environ["DB_END_DATE"]
+# First day of the sector ETF prices (earlier than DB_START_DATE, for the 12-month momentum)
+ETF_START_DATE = os.environ["ETF_START_DATE"]
 
 # Financial statements (marketdb/build_fundamentals.py)
 EDGAR_FACTS_URL = os.environ["EDGAR_FACTS_URL"]              # {cik} = 10-digit company id

@@ -41,7 +41,7 @@ START = config.FUNDAMENTALS_START_DATE
 
 
 def step_ciks(conn):
-    rows = conn.execute("SELECT symbol, security FROM tickers WHERE symbol NOT LIKE '^%' AND cik IS NULL").fetchall()
+    rows = conn.execute("SELECT symbol, security FROM tickers WHERE symbol IN (SELECT symbol FROM index_membership) AND cik IS NULL").fetchall()
     rows = [(s, n) for s, n in rows if s not in SAME_COMPANY]
     if not rows:
         print("[1] cik: nothing to look up")
@@ -106,7 +106,7 @@ def step_facts(conn):
 def report(conn):
     print("[check] tickers without financial facts:")
     print("   ", [r[0] for r in conn.execute("""
-        SELECT symbol FROM tickers t WHERE symbol NOT LIKE '^%'
+        SELECT symbol FROM tickers t WHERE symbol IN (SELECT symbol FROM index_membership)
         AND NOT EXISTS (SELECT 1 FROM financial_facts f WHERE f.symbol = t.symbol) ORDER BY symbol""")])
     print("[check] tickers whose facts start late or end early (company id may have changed):")
     for symbol, first, last, n in conn.execute("""

@@ -10,10 +10,11 @@
 -- ============================================================
 
 -- Every stock that was in the S&P500 at any time in the study period, plus indices such as ^GSPC
+-- and one ETF per sector (stocks are the symbols that have a row in index_membership)
 CREATE TABLE IF NOT EXISTS tickers (
     symbol            TEXT PRIMARY KEY,         -- e.g. 'AAPL', 'BRK-B', '^GSPC'
     security          TEXT NOT NULL,            -- company / index name
-    gics_sector       TEXT,                     -- NULL for indices and stocks no longer listed on Wikipedia
+    gics_sector       TEXT,                     -- NULL for indices; for a sector ETF, the sector it tracks
     gics_sub_industry TEXT,
     excluded_reason   TEXT,                     -- NULL = used; otherwise why it is left out (e.g. no price data)
     cik               INTEGER,                  -- SEC EDGAR company id (NULL = not found)
@@ -250,6 +251,65 @@ CREATE TABLE IF NOT EXISTS portfolio_weights (
 ) WITHOUT ROWID;
 
 -- ============================================================
+-- Sectors
+-- ============================================================
+
+-- Indicators of each GICS sector on a decision date, computed by marketdb/build_sector_metrics.py
+-- from data known on that date (ETF prices up to it, financial statements filed by it)
+CREATE TABLE IF NOT EXISTS sector_metrics (
+    as_of_date  TEXT NOT NULL,                  -- last trading day of a month (nothing after it was used)
+    gics_sector TEXT NOT NULL,                  -- same names as tickers.gics_sector
+    metric      TEXT NOT NULL,                  -- 'momentum_3m' / 'momentum_6m' / 'momentum_12m': ETF return over that many months, the latest month left out
+                                                -- 'volatility_30d': yearly volatility of the ETF's daily returns over 30 trading days (mean of the last 5 days)
+                                                -- 'pe_trailing' / 'pb' / 'ps': market cap of the members / their net income, equity, revenue (last 4 quarters)
+                                                -- 'valuation_coverage': share of the sector's market cap that has the 4 quarters needed for pe_trailing
+    value       REAL NOT NULL,                  -- returns and volatility are decimal fractions (0.05 = 5%)
+    computed_at TEXT NOT NULL,
+    PRIMARY KEY (as_of_date, gics_sector, metric)
+) WITHOUT ROWID;
+
+-- ============================================================
+-- Monthly reports
+-- ============================================================
+
+-- One report file in data/reports (the file itself is not stored in the database)
+CREATE TABLE IF NOT EXISTS reports (
+    report_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    source         TEXT NOT NULL,               -- publisher, e.g. 'daiwa-am'
+    report_month   TEXT NOT NULL,               -- month on the cover, 'YYYY-MM'
+    published_date TEXT NOT NULL,               -- creation date of the PDF (the report can be used from this date on)
+    file_name      TEXT NOT NULL,               -- e.g. 'daiwa-am_2024-04.pdf'
+    file_sha256    TEXT NOT NULL,               -- to notice a replaced file
+    n_pages        INTEGER NOT NULL CHECK (n_pages > 0),
+    registered_at  TEXT NOT NULL,
+    UNIQUE (source, report_month)
+);
+
+-- One analysis of the reports by the LLM; changing the items or the prompt starts a new run
+CREATE TABLE IF NOT EXISTS report_runs (
+    report_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    model         TEXT NOT NULL,                -- requested model, e.g. 'gpt-4o-mini'
+    model_version TEXT,                         -- model that actually answered
+    system_prompt TEXT NOT NULL,
+    items         TEXT NOT NULL,                -- JSON list of the items asked: [{"name": ..., "type": ..., "description": ...}]
+    temperature   REAL NOT NULL,
+    note          TEXT,                         -- free memo (what was changed in this run)
+    created_at    TEXT NOT NULL
+);
+
+-- What the LLM read from a report: one row per item
+CREATE TABLE IF NOT EXISTS report_values (
+    report_run_id INTEGER NOT NULL REFERENCES report_runs(report_run_id),
+    report_id     INTEGER NOT NULL REFERENCES reports(report_id),
+    item          TEXT NOT NULL,                -- item name listed in report_runs.items, e.g. 'us_equity_stance'
+    value_num     REAL,                         -- numbers and scores
+    value_text    TEXT,                         -- summaries and other text
+    -- both NULL = the report does not mention the item
+    CHECK (value_num IS NULL OR value_text IS NULL),
+    PRIMARY KEY (report_run_id, report_id, item)
+) WITHOUT ROWID;
+
+-- ============================================================
 -- Views (computed when read; nothing is stored)
 -- ============================================================
 
@@ -310,3 +370,15 @@ SELECT w.portfolio_id,
 FROM portfolio_weights w
 JOIN period p ON p.as_of_date = w.as_of_date
 GROUP BY w.portfolio_id, w.as_of_date;
+
+-- Sector indicators with their z-score among the sectors of the same date
+-- (how far a sector is from the average of the sectors, in standard deviations)
+CREATE VIEW IF NOT EXISTS sector_metric_scores AS
+SELECT as_of_date,
+       gics_sector,
+       metric,
+       value,
+       (value - AVG(value) OVER w)
+         / NULLIF(sqrt(AVG(value * value) OVER w - AVG(value) OVER w * AVG(value) OVER w), 0) AS z_score
+FROM sector_metrics
+WINDOW w AS (PARTITION BY as_of_date, metric);

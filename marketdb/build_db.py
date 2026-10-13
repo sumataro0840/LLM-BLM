@@ -12,6 +12,7 @@ Steps (each one is skipped when its table already has rows, so stored data is ne
      (tickers.excluded_reason) and their prices / shares are deleted
   7. sector of stocks that left the index (old Wikipedia revisions) -> tickers.gics_*
   8. indices listed in INDEX_TICKERS that are not stored yet           -> prices
+  9. sector ETFs listed in SECTOR_ETFS (from ETF_START_DATE)           -> tickers, prices
 
 Tickers are stored as the latest yfinance tickers ('BRK-B', not 'BRK.B'): old tickers often
 fail on yfinance or now point to another company.
@@ -41,6 +42,15 @@ TICKER_ALIASES = {
 INDEX_TICKERS = [
     ('^GSPC', 'S&P 500 Index'),
     ('^IRX', '13 Week Treasury Bill Yield (percent per year, used as the risk-free rate)'),
+    ('^VIX', 'CBOE Volatility Index (implied volatility of the S&P 500 over 30 days, percent per year)'),
+    ('^VIX3M', 'CBOE 3-Month Volatility Index (implied volatility over 3 months, percent per year)'),
+    ('^SKEW', 'CBOE SKEW Index (price of protection against a large fall of the S&P 500)'),
+]
+# One ETF per GICS sector (Select Sector SPDR); stored in tickers with the sector it tracks
+SECTOR_ETFS = [
+    ('XLC', 'Communication Services'), ('XLY', 'Consumer Discretionary'), ('XLP', 'Consumer Staples'),
+    ('XLE', 'Energy'), ('XLF', 'Financials'), ('XLV', 'Health Care'), ('XLI', 'Industrials'),
+    ('XLK', 'Information Technology'), ('XLB', 'Materials'), ('XLRE', 'Real Estate'), ('XLU', 'Utilities'),
 ]
 # Companies with several share classes in the index: yfinance reports the company-wide share count
 # for each class, so it is split by the current class ratio (otherwise the company is counted twice)
@@ -98,7 +108,7 @@ def step_prices(conn):
 
 def step_shares(conn):
     symbols = [r[0] for r in conn.execute(
-        "SELECT symbol FROM tickers WHERE excluded_reason IS NULL AND symbol NOT LIKE '^%' ORDER BY symbol")]
+        "SELECT symbol FROM tickers WHERE excluded_reason IS NULL AND symbol IN (SELECT symbol FROM index_membership) ORDER BY symbol")]
     # one year before START so that a value exists on the first day
     since = (pd.Timestamp(START) - pd.DateOffset(years=1)).strftime('%Y-%m-%d')
     until = (pd.Timestamp(END) + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
@@ -177,12 +187,21 @@ def step_index_prices(conn):
     print(f"[8] index prices added: {missing}")
 
 
+def step_sector_etfs(conn):
+    """Sector ETFs start earlier than the stocks: the 12-month momentum of the first month needs 13 months of prices."""
+    save_tickers(conn, [(s, f"Select Sector SPDR ETF ({sector})", sector, None) for s, sector in SECTOR_ETFS])
+    missing = missing_tickers(conn, [s for s, _ in SECTOR_ETFS], config.ETF_START_DATE, END)
+    if missing:
+        save_prices(conn, download_prices(missing, config.ETF_START_DATE, END))
+    print(f"[9] sector ETF prices added: {missing}")
+
+
 def fill_missing_gics(conn):
     """Stocks that left the index are not on the current Wikipedia page, so their sector is read from
     older revisions of the page (newest first: the classification closest to today is kept)."""
     def missing():
         return {r[0] for r in conn.execute(
-            "SELECT symbol FROM tickers WHERE gics_sector IS NULL AND symbol NOT LIKE '^%'")}
+            "SELECT symbol FROM tickers WHERE gics_sector IS NULL AND symbol IN (SELECT symbol FROM index_membership)")}
 
     before = missing()
     # every quarter, plus the first day of the period for stocks that left right after it
@@ -233,6 +252,7 @@ def main():
     exclude_without_shares(conn)
     fill_missing_gics(conn)
     step_index_prices(conn)
+    step_sector_etfs(conn)
     report(conn)
 
 
