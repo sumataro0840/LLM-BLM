@@ -2,9 +2,10 @@
 Find the report files in data/reports and read what is registered in the database.
 """
 import hashlib
+import io
 import re
 
-from pypdf import PdfReader
+from pypdf import PdfReader, PdfWriter
 
 FILE_NAME = re.compile(r"(?P<source>.+)_(?P<month>\d{4}-\d{2})\.pdf")
 
@@ -31,3 +32,14 @@ def read_report_file(path):
         'file_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
         'n_pages': len(pdf.pages),
     }
+
+
+def first_pages(path, n_pages):
+    """The first n_pages of the file as a new PDF (bytes): the summary, the forecast tables and the US pages
+    come first, and the whole report is too long to send."""
+    writer = PdfWriter()
+    for page in PdfReader(path).pages[:n_pages]:
+        writer.add_page(page)
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    return buffer.getvalue()
