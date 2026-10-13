@@ -1,0 +1,8 @@
+# LLM_BACKEND=local（この PC の GPU でモデルを動かす）のときだけ必要
+# torch は CUDA 版を先に入れる:
+#   pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+#   pip install -r requirements-local.txt
+torch==2.11.0
+transformers==5.19.0
+bitsandbytes==0.50.2
+accelerate==1.15.0

@@ -16,25 +16,29 @@ from llm import config
 from llm.returns import month_ranges, to_daily_returns
 from llm.context import build_context
 from llm.prompts import SYSTEM_PROMPT, INPUT_MONTHS, TARGET_MONTHS, make_user_prompt
-from llm.client import make_client, sample_expected_returns
 from marketdb.db.connection import connect, init_db
 from marketdb.db.index import load_members
 from marketdb.db.llm import answered_symbols, create_run, load_run, save_views
 from marketdb.db.market import last_trading_day_before, load_prices, load_ticker_table, load_trading_days
 
-client = make_client(config.OPENAI_API_KEY)
+if config.LLM_BACKEND == 'local':
+    from llm.local import make_client, sample_expected_returns
+else:
+    from llm.client import make_client, sample_expected_returns
+
+client = make_client(config.LOCAL_MODEL if config.LLM_BACKEND == 'local' else config.OPENAI_API_KEY)
 conn = connect(config.DB_PATH)
 init_db(conn)
 
 if config.RUN_ID is None:
-    run_id = create_run(conn, config.OPENAI_MODEL, SYSTEM_PROMPT, config.TEMPERATURE, config.N_SAMPLES,
+    run_id = create_run(conn, config.MODEL, SYSTEM_PROMPT, config.TEMPERATURE, config.N_SAMPLES,
                         INPUT_MONTHS, TARGET_MONTHS, config.RUN_NOTE)
     print(f"new run: RUN_ID={run_id}")
 else:
     run_id = config.RUN_ID
     run = load_run(conn, run_id)
     # a run must hold answers to one question only
-    current = {'model': config.OPENAI_MODEL, 'system_prompt': SYSTEM_PROMPT, 'temperature': config.TEMPERATURE,
+    current = {'model': config.MODEL, 'system_prompt': SYSTEM_PROMPT, 'temperature': config.TEMPERATURE,
                'n_samples': config.N_SAMPLES, 'input_months': INPUT_MONTHS, 'target_months': TARGET_MONTHS}
     changed = [key for key, value in current.items() if run[key] != value]
     if changed:
@@ -47,7 +51,7 @@ ticker_table = load_ticker_table(conn)
 def ask(context):
     """One ticker -> (answers, model version), or the error when the request failed."""
     try:
-        return sample_expected_returns(client, config.OPENAI_MODEL, SYSTEM_PROMPT, make_user_prompt(context),
+        return sample_expected_returns(client, config.MODEL, SYSTEM_PROMPT, make_user_prompt(context),
                                        config.N_SAMPLES, config.TEMPERATURE)
     except Exception as e:
         return e

@@ -41,6 +41,14 @@ cp .env.example .env    # OPENAI_API_KEY を入れる
 
 設定はすべて `.env` に書きます。
 
+`run_llm.py` は、`.env` の `LLM_BACKEND=local` で、API の代わりにこの PC の GPU でモデル（`LOCAL_MODEL`）を動かせます。
+そのときは追加のライブラリを入れます（torch は CUDA 版）。月次レポート（`run_reports.py`）は常に OpenAI を使います。
+
+```bash
+pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+pip install -r requirements-local.txt
+```
+
 ## 使い方
 
 ```bash
