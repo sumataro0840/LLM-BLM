@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-BLM 元論文の計算の問題点</title>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --border: #dedad0;
+  --accent: #2f6fb3;
+  --accent-soft: #e4eef9;
+  --green: #2e7d4f;
+  --green-soft: #e3f3e9;
+  --orange: #b4621a;
+  --orange-soft: #fbeedf;
+  --purple: #6a4bb0;
+  --purple-soft: #eee8fa;
+  --red: #b23a3a;
+  --red-soft: #fbe6e6;
+  --code-bg: #f3f1ea;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #24282d;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #33383f;
+    --accent: #7cb2ec;
+    --accent-soft: #1f3248;
+    --green: #74c79a;
+    --green-soft: #1d3428;
+    --orange: #e9a462;
+    --orange-soft: #3a2a1a;
+    --purple: #b39cf0;
+    --purple-soft: #2c2440;
+    --red: #ec8a8a;
+    --red-soft: #3c2222;
+    --code-bg: #24282d;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --surface-2: #24282d; --text: #e6e8eb;
+  --muted: #9aa1ab; --border: #33383f; --accent: #7cb2ec; --accent-soft: #1f3248;
+  --green: #74c79a; --green-soft: #1d3428; --orange: #e9a462; --orange-soft: #3a2a1a;
+  --purple: #b39cf0; --purple-soft: #2c2440; --red: #ec8a8a; --red-soft: #3c2222;
+  --code-bg: #24282d; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15.5px;
+}
+code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+pre {
+  background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.55; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+nav.toc .label { font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .08em; margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--border); }
+nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+header.hero { margin-bottom: 36px; }
+header.hero .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; }
+header.hero h1 { font-size: 30px; line-height: 1.35; margin: 6px 0 12px; }
+header.hero p { color: var(--muted); margin: 0; max-width: 760px; }
+
+section { margin-bottom: 56px; scroll-margin-top: 20px; }
+h2 { font-size: 22px; margin: 0 0 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: var(--surface); border-radius: 6px; font-size: 14px; padding: 1px 9px; }
+h3 { font-size: 17px; margin: 26px 0 10px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { position: relative; padding-top: 44px; }
+.idea .badge { position: absolute; top: 16px; left: 22px; font-weight: 700; font-size: 13px; color: var(--accent); }
+.idea h4 { margin: 0 0 6px; font-size: 16px; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+
+/* directory tree */
+.tree { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.9; }
+.tree .row { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 12px; border-bottom: 1px dashed var(--border); }
+.tree .row:last-child { border-bottom: none; }
+.tree .name { white-space: pre; overflow-x: auto; }
+.tree .desc { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; font-family: "Hiragino Sans", sans-serif; }
+.t-script { background: var(--accent-soft); color: var(--accent); }
+.t-data { background: var(--green-soft); color: var(--green); }
+.t-out { background: var(--orange-soft); color: var(--orange); }
+.t-nb { background: var(--purple-soft); color: var(--purple); }
+
+/* flow */
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.stage { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.stage .step-label { text-align: right; padding-top: 16px; font-weight: 700; color: var(--muted); font-size: 13px; }
+.lane { display: flex; gap: 12px; flex-wrap: wrap; }
+.node { flex: 1 1 200px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid; background: var(--surface); }
+.node .title { font-weight: 700; font-size: 14.5px; }
+.node .sub { font-size: 12.5px; color: var(--muted); }
+.node.script { border-color: var(--accent); background: var(--accent-soft); }
+.node.data { border-color: var(--green); background: var(--green-soft); }
+.node.out { border-color: var(--orange); background: var(--orange-soft); }
+.node.nb { border-color: var(--purple); background: var(--purple-soft); }
+.node.ext { border-style: dashed; border-color: var(--muted); }
+.arrow { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+.arrow span { grid-column: 2; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.6; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid; }
+
+/* timeline */
+.timeline { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0 6px; }
+.tl-head { font-size: 12.5px; text-align: center; color: var(--muted); font-weight: 700; }
+.tl-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.tl-train { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.tl-test { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange); }
+.tl-empty { background: transparent; }
+
+/* step details */
+.step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.step .circle { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.step .card h3 { margin-top: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step .card h3 code { font-size: 14px; }
+.io { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 6px 0 12px; }
+.io .in, .io .outp { border-radius: 6px; padding: 2px 10px; }
+.io .in { background: var(--green-soft); color: var(--green); }
+.io .outp { background: var(--orange-soft); color: var(--orange); }
+.step ul, .step ol { padding-left: 1.3em; margin: 8px 0; }
+.step li { margin: 3px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.formula { background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 10px; padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+.formula .cm { color: var(--muted); font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+
+.callout { border-left: 4px solid var(--orange); background: var(--orange-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14.5px; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-soft); }
+
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sev { font-size: 12px; font-weight: 700; text-align: center; border-radius: 6px; padding: 3px 0; }
+.sev.high { background: var(--red-soft); color: var(--red); }
+.sev.mid { background: var(--orange-soft); color: var(--orange); }
+.sev.low { background: var(--surface-2); color: var(--muted); }
+.issue p { margin: 0; }
+.issue .where { font-size: 12.5px; color: var(--muted); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 20px 16px 60px; }
+  nav.toc { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .stage, .arrow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .stage .step-label { text-align: left; padding-top: 0; }
+  .arrow span { grid-column: 1; }
+  .tree .row { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 0; }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .issue { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sev { width: 88px; }
+  .timeline { gap: 3px; }
+  .tl-cell { font-size: 10.5px; }
+  header.hero h1 { font-size: 24px; }
+}
+
+.er { width:100%; height:auto; display:block; }
+.er .ent { fill: var(--surface); stroke: var(--border); stroke-width:1.5; }
+.er .ent-h.c-green { fill: var(--green-soft); }
+.er .ent-h.c-purple { fill: var(--purple-soft); }
+.er .ent-h.c-orange { fill: var(--orange-soft); }
+.er .ent-t { fill: var(--text); font-weight:700; font-size:14px; }
+.er .ent-k { fill: var(--orange); font-size:11px; font-weight:700; }
+.er .ent-c { fill: var(--text); font-size:13px; font-family: "SF Mono", Menlo, monospace; }
+.er .rel { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel.dashed { stroke-dasharray: 5 4; }
+.er .rel-m { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel-a { fill: var(--muted); }
+.er .rel-t { fill: var(--muted); font-size:12px; }
+.pill { display:inline-block; font-size:11px; font-weight:700; border-radius:4px; padding:0 6px; margin:1px 2px 1px 0; white-space:nowrap; }
+.pill.pk { background: var(--orange-soft); color: var(--orange); }
+.pill.fk { background: var(--accent-soft); color: var(--accent); }
+.pill.nn { background: var(--surface-2); color: var(--muted); }
+.pill.ck { background: var(--purple-soft); color: var(--purple); }
+td.good { color: var(--green); font-weight:700; }
+td.bad { color: var(--red); font-weight:700; }
+table.result td { font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; }
+tr.hl td { background: var(--orange-soft); }
+tr.drop td { color: var(--red); text-decoration: line-through; }
+tr.drop td:last-child { text-decoration: none; }
+.steps { counter-reset: st; display:grid; gap:10px; margin:12px 0; }
+.steps .card { position:relative; padding-left:58px; }
+.steps .card::before { counter-increment: st; content: counter(st); position:absolute; left:18px; top:18px; width:28px; height:28px; border-radius:50%; background: var(--accent); color: var(--surface); font-weight:700; display:flex; align-items:center; justify-content:center; }
+.steps .card h4 { margin:0 0 4px; font-size:15px; }
+.steps .card p { margin:0; font-size:14px; color: var(--muted); }
+.null { color: var(--muted); font-style: italic; }
+pre.sql { border-left: 4px solid var(--accent); }
+.tcard { margin-bottom: 18px; }
+.tcard h3 { margin-top:0; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.tcard h3 .role { font-size:12.5px; font-weight:400; color:var(--muted); }
+.tcard .new { font-size:11px; font-weight:700; background: var(--accent); color: var(--surface); border-radius:4px; padding:0 6px; }
+.grid2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+.grid2 .card h4 { margin:0 0 6px; font-size:15px; }
+.grid2 .card p { margin:0; font-size:14px; color:var(--muted); }
+.verdict { display:inline-block; font-size:12px; font-weight:700; border-radius:6px; padding:1px 8px; }
+.verdict.ok { background: var(--green-soft); color: var(--green); }
+.verdict.ng { background: var(--red-soft); color: var(--red); }
+.verdict.mid { background: var(--orange-soft); color: var(--orange); }
+.formula-big { text-align:center; font-size:17px; font-weight:700; padding:16px; border-radius:10px; background: var(--accent-soft); border:1px solid var(--accent); margin:14px 0; line-height:1.9; }
+.formula-big small { display:block; font-size:12.5px; font-weight:400; color: var(--muted); }
+.kpis-db { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis-db .v { font-size:18px; font-weight:700; }
+.kpis-db .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis-db { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.status { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+.status .card .v { font-weight:700; font-size:15px; }
+.status .card .k { color:var(--muted); font-size:13px; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--accent); }
+@media (max-width:900px) { .grid2, .status { grid-template-columns: minmax(0,1fr); } }
+
+.er .ent-h.c-blue { fill: var(--accent-soft); }
+a { color: var(--accent); }
+.doclink { display:flex; gap:12px; align-items:center; background: var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin: 0 0 28px; font-size:14px; }
+.doclink b { white-space:nowrap; }
+td.num { text-align:right; font-family: "SF Mono", Menlo, monospace; }
+.muted { color: var(--muted); font-size: 12.5px; }
+.diff td:first-child { font-weight:700; white-space:nowrap; }
+.impact { display:inline-block; font-size:11.5px; font-weight:700; border-radius:5px; padding:0 7px; white-space:nowrap; }
+.impact.s { background: var(--surface-2); color: var(--muted); }
+.impact.m { background: var(--orange-soft); color: var(--orange); }
+.impact.l { background: var(--red-soft); color: var(--red); }
+.quote { border:1px dashed var(--border); border-radius:10px; padding:12px 16px; margin:10px 0; background: var(--surface); font-size:14.5px; }
+.quote .t { font-size:12px; font-weight:700; color: var(--accent); margin-bottom:4px; }
+.figure { background:#fff; border-radius:10px; padding:8px; border:1px solid var(--border); }
+.figure img { width:100%; height:auto; display:block; }
+.kpis5 { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis5 .v { font-size:22px; font-weight:700; line-height:1.25; }
+.kpis5 .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis5 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+.pipe { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:14px; margin:14px 0; }
+.pipe .card { position:relative; border-top:4px solid var(--border); }
+.pipe .card.done { border-top-color: var(--green); }
+.pipe .card.next { border-top-color: var(--accent); }
+.pipe .card.later { border-top-color: var(--purple); }
+.pipe .card h4 { margin:6px 0 6px; font-size:16px; }
+.pipe .card p { margin:0; font-size:14px; color: var(--muted); }
+.pipe .card:not(:last-child)::after { content:"→"; position:absolute; right:-13px; top:42%; color: var(--muted); font-weight:700; }
+.st { display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 10px; }
+.st.done { background: var(--green-soft); color: var(--green); }
+.st.next { background: var(--accent-soft); color: var(--accent); }
+.st.later { background: var(--purple-soft); color: var(--purple); }
+.st.idea { background: var(--orange-soft); color: var(--orange); }
+@media (max-width:900px) { .pipe { grid-template-columns: 1fr; } .pipe .card:not(:last-child)::after { content:"↓"; right:auto; left:50%; top:auto; bottom:-17px; } }
+td.num{text-align:right;font-family:"SF Mono",Menlo,monospace;white-space:nowrap}
+.sev{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.sev.l{background:var(--red-soft);color:var(--red)} .sev.m{background:var(--orange-soft);color:var(--orange)} .sev.s{background:var(--green-soft);color:var(--green)}
+.prob{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:14px 0;box-shadow:var(--shadow)}
+.prob h3{margin:0 0 4px;font-size:18px} .prob .one{font-size:15.5px;font-weight:600;margin:6px 0 12px}
+.prob h4{margin:14px 0 6px;font-size:13px;color:var(--muted)}
+</style></head><body>
+<div class="layout">
+<nav class="toc"><div class="label">目次</div><a href="#summary">1. 要点</a><a href="#scope">2. 確認した範囲</a><a href="#list">3. 問題点の一覧</a><a href="#p1">4. Black-Litterman が働いていない</a><a href="#p2">5. 予想が先月の値動きの写し</a><a href="#p3">6. ばらつきは信頼度ではない</a><a href="#p4">7. 最適化が途中で止まる</a><a href="#p5">8. 均衡リターンの単位</a><a href="#p6">9. 共分散のデータ不足</a><a href="#p7">10. 先読みと銘柄の選び方</a><a href="#p8">11. リターンの計算と売買コスト</a><a href="#p9">12. 細かい取りこぼし</a><a href="#read">13. 元論文の結果をどう読むか</a><a href="#ok">14. 問題ではなかった点</a></nav>
+<main>
+<header class="hero"><div class="eyebrow">LLM-BLM 元論文の検証</div><h1>元論文の計算の問題点</h1><p>元論文のコードの計算をそのまま再現し、30か月分のデータで確かめた問題点をまとめます。それぞれについて、何が起きているか、根拠の数字、結果への影響を示します。</p></header>
+
+<div class="doclink"><b>関連資料</b><span>グラフは <code>LLM-BLM_データ確認.ipynb</code>（元論文の計算と、元の S&amp;P500 の比較）、元のコードは <code>LLM-BLM_元コード/</code> にあります。</span></div>
+
+<section id="summary"><h2><span class="num">1</span>要点</h2>
+<div class="callout"><b>元論文の計算は、名前は「LLM の予想 + Black-Litterman」ですが、実際には「先月よく上がった銘柄を十数個選ぶ」計算に近いものになっています。</b>成績は良く見えますが、LLM と Black-Litterman の効果だとは言えません。</div>
+<div class="kpis5">
+<div class="card"><div class="v">99.9%</div><div class="k">Black-Litterman が、均衡から LLM の予想へ動かす割合（中央値）。ほぼ予想そのまま</div></div>
+<div class="card"><div class="v">相関 0.89</div><div class="k">LLM の予想と、渡した月の平均リターン。予想は先月の値動きの写し</div></div>
+<div class="card"><div class="v">9.9 → 4.2 銘柄</div><div class="k">元の最適化の結果 → 同じ式を最後まで解いた結果（実質的な銘柄数）</div></div>
+<div class="card"><div class="v">-1.4% / 日</div><div class="k">計算に使われている「市場の均衡リターン」の平均。あり得ない値</div></div>
+</div>
+<p style="margin-top:14px">問題点は、大きく3種類あります。</p>
+<ul>
+<li><b>結果の意味を変えるもの（4〜7章）：</b>Black-Litterman がほとんど働いていない。LLM の予想は先月の値動きの写し。回答のばらつきは信頼度ではない。最適化が途中で止まっている。</li>
+<li><b>計算の誤り（8〜9章）：</b>均衡リターンの単位、共分散のデータ不足。ただし、上の問題のせいで結果への影響は小さい。</li>
+<li><b>実験の設計（10〜12章）：</b>未来の情報を使っている箇所がある。売買コストが入っていない。</li>
+</ul>
+</section>
+
+<section id="scope"><h2><span class="num">2</span>確認した範囲</h2>
+<p>元論文のコード（<code>evaluate_multiple.py</code>、<code>baselines.py</code>、<code>run.py</code>）を読み、計算をそのまま再現して確かめました。</p>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>内容</th></tr>
+<tr><td>再現した計算</td><td>Black-Litterman（<code>evaluate_multiple.py</code>）と、平均分散の比較相手（<code>baselines.py</code>）。式、係数（τ = 0.025、リターンの重み 0.1、金利 0.02）、最適化の方法と設定は元のコードと同じ</td></tr>
+<tr><td>使ったデータ</td><td>判断日 2024-03-28 〜 2026-08-31 の 30か月、月あたり 479〜497 銘柄。LLM は gpt-4o-mini（約44万個の回答）</td></tr>
+<tr><td>数字の出どころ</td><td>とくに断りがなければ、30か月すべてで計算した値（中央値、平均、または最小〜最大）</td></tr>
+</table></div>
+<div class="callout info"><b>注意：</b>ここで確かめたのは「元論文のコードの計算」であり、元論文の数字そのものではありません。モデル（元論文は Llama、Gemma、Qwen、GPT）と期間（元論文は2024年6月〜2025年2月）が違います。また、構成銘柄・時価総額・プロンプトの単位は、こちらで直したものを使っています（10章、12章）。元論文のモデルで同じことが起きているかは、元論文のデータで確かめる必要があります。</div>
+</section>
+
+<section id="list"><h2><span class="num">3</span>問題点の一覧</h2>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>問題</th><th>一言で</th><th>結果への影響</th><th>確かめ方</th></tr>
+<tr><td>①</td><td><a href="#p1">Black-Litterman が働いていない</a></td><td>均衡と予想を「混ぜる」はずが、予想を 99.9% 採用している</td><td><span class="sev l">影響 大</span></td><td>計算して確認</td></tr>
+<tr><td>②</td><td><a href="#p2">予想が先月の値動きの写し</a></td><td>LLM の予想は、渡した月の平均リターンにほぼ比例する</td><td><span class="sev l">影響 大</span></td><td>計算して確認</td></tr>
+<tr><td>③</td><td><a href="#p3">ばらつきは信頼度ではない</a></td><td>回答がそろっていても、当たるとは限らない</td><td><span class="sev l">影響 大</span></td><td>計算して確認</td></tr>
+<tr><td>④</td><td><a href="#p4">最適化が途中で止まる</a></td><td>報告される比率は、式の最適な答えではない</td><td><span class="sev l">影響 大</span></td><td>計算して確認</td></tr>
+<tr><td>⑤</td><td><a href="#p5">均衡リターンの単位</a></td><td>日次のリターンから、年率の金利を引いている</td><td><span class="sev s">影響 小</span>（①のため）</td><td>計算して確認</td></tr>
+<tr><td>⑥</td><td><a href="#p6">共分散のデータ不足</a></td><td>約490銘柄の連動を、約20日分で計算している</td><td><span class="sev m">影響 中</span></td><td>計算して確認</td></tr>
+<tr><td>⑦</td><td><a href="#p7">先読みと銘柄の選び方</a></td><td>構成銘柄と時価総額が、後の時点のもので固定</td><td><span class="sev m">影響 中</span></td><td>コードを読んで確認</td></tr>
+<tr><td>⑧</td><td><a href="#p8">リターンの計算と売買コスト</a></td><td>毎月ほぼ全部を入れ替えるのに、コストがゼロ</td><td><span class="sev m">影響 中</span></td><td>計算して確認</td></tr>
+<tr><td>⑨</td><td><a href="#p9">細かい取りこぼし</a></td><td>単位の食い違い、月末日の欠落、ティッカーの書き方など</td><td><span class="sev s">影響 小</span></td><td>コードを読んで確認</td></tr>
+</table></div>
+</section>
+
+<section id="p1"><h2><span class="num">4</span>Black-Litterman が働いていない</h2>
+<div class="prob"><h3>① 均衡と予想を「混ぜて」いない <span class="sev l">影響 大</span></h3>
+<p class="one">Black-Litterman は、市場の均衡リターンと自分の予想を、自信の度合いに応じて混ぜる方法です。ところが元の計算では、混ぜた後の期待リターンが、LLM の予想とほとんど同じになっています。</p>
+<h4>根拠</h4>
+<div class="table-wrap"><table>
+<tr><th>確かめたこと</th><th>結果（30か月）</th></tr>
+<tr><td>混ぜた後の値は、均衡から予想へ何%動いたか</td><td>中央値で <b>99.87%</b>（最小 99.75%）。予想をほぼそのまま採用</td></tr>
+<tr><td>混ぜた後の値と、LLM の予想の相関</td><td>中央値 0.997</td></tr>
+<tr><td>均衡リターンを全部 0 に変えたら、比率は変わるか</td><td>ほとんど変わらない。元の比率と平均 <b>92%</b> が重なる</td></tr>
+<tr><td>Black-Litterman を使わず、LLM の予想をそのまま最適化に入れたら</td><td>ほぼ同じ比率になる。平均 <b>89%</b> が重なる</td></tr>
+</table></div>
+<p class="muted">比率の重なりは、2つの比率が共通して持っている部分の合計です（100% なら同じ比率）。式の違いだけを見るため、どれも同じ目的関数を最後まで解いて比べています。</p>
+<h4>なぜ起きるか</h4>
+<p>主な原因は、予想の不確かさ（Ω）に、30個の回答の分散を使っていることです。この分散は小さく、均衡の不確かさ（τ × 共分散）に対して「予想の方がはるかに確か」という設定になります。共分散を過去1年分・補正ありのものに替えても、予想の採用は中央値で 98%（96〜99%）でした。約20日分のデータで作った共分散（⑥）は、これを 99.9% まで強めています。データが足りない方向では、均衡の情報がゼロとして扱われるためです。</p>
+<h4>意味すること</h4>
+<p><b>この計算は、実質的には「LLM の予想を期待リターンにした、平均分散の最適化」です。</b>Black-Litterman の「市場の比率を出発点にして、少し動かす」という性質は残っていません。実際、できた比率は元の S&amp;P500 と平均 3.6% しか重なりません。均衡リターンの計算が誤っていても（⑤）結果が変わらないのは、このためです。</p>
+</div>
+</section>
+
+<section id="p2"><h2><span class="num">5</span>予想が先月の値動きの写し</h2>
+<div class="prob"><h3>② LLM の予想は、渡した月の値動きの写し <span class="sev l">影響 大</span></h3>
+<p class="one">LLM に渡しているのは、その月の日次リターンと、社名・業種だけです。LLM の予想は、渡した月の平均リターンにほぼ比例しています。</p>
+<h4>根拠</h4>
+<div class="table-wrap"><table>
+<tr><th>確かめたこと</th><th>結果（30か月）</th></tr>
+<tr><td>LLM の予想と、渡した月の平均リターンの相関（銘柄間）</td><td>平均 <b>0.89</b>（最小 0.80、最大 0.95）</td></tr>
+<tr><td>傾き</td><td>平均 0.77。先月の平均が1日 +1% なら、予想は約 +0.77%</td></tr>
+<tr><td>回答のばらつきと、渡した月の値動きの大きさの順位相関</td><td>平均 0.73</td></tr>
+<tr><td>BL の比率と、平均分散（先月の平均で最適化）の比率の重なり</td><td>平均 <b>61%</b></td></tr>
+<tr><td>BL と平均分散の、月次リターンの相関</td><td><b>0.94</b></td></tr>
+<tr><td>BL と平均分散の、月次リターンの差</td><td>平均 +0.34%／月、標準偏差 2.43%。差があるとは言えない（t 値 0.76）</td></tr>
+</table></div>
+<h4>意味すること</h4>
+<p><b>「LLM に聞く」ことと「先月の平均リターンを計算する」ことが、ほぼ同じ情報になっています。</b>先月上がった銘柄は来月も上がる、下がった銘柄は来月も下がる、という答えです。元論文の比較相手である平均分散は、まさに先月の平均リターンで最適化するものなので、BL と平均分散は似た銘柄を持ち、似た成績になります。LLM が足している情報は、成績からは確認できません。</p>
+<p>予想には、もう1つ偏りがあります。全銘柄の予想の平均は1日 +0.18% で、実際（+0.02%）の約8倍です。プラスの予想が 76% を占めます。</p>
+</div>
+</section>
+
+<section id="p3"><h2><span class="num">6</span>ばらつきは信頼度ではない</h2>
+<div class="prob"><h3>③ 回答のばらつきは、予想の信頼度ではない <span class="sev l">影響 大</span></h3>
+<p class="one">元論文は、30個の回答がそろっていれば「自信がある」、ばらばらなら「自信がない」とみなします。しかし、ばらつきが示すのは「同じ質問への答えのぶれ」で、「予想が当たる度合い」ではありません。</p>
+<h4>根拠</h4>
+<div class="table-wrap"><table>
+<tr><th>確かめたこと</th><th>結果</th></tr>
+<tr><td>予想と、翌月の実際のリターンの順位相関</td><td>30か月の平均で <b>+0.05</b>。プラスの月は 14 / 30。ほとんど当たっていない</td></tr>
+<tr><td>回答の分散 ÷ 実際の予測誤差の目安（銘柄の日次の分散 ÷ 21日）</td><td>中央値で 0.05〜0.15。<b>実際の10〜20倍の自信</b>を持っていることになる</td></tr>
+<tr><td>回答のばらつきが何で決まっているか</td><td>渡した月の値動きの大きさ（順位相関 0.73）。値動きの大きい銘柄ほど、回答がばらつく</td></tr>
+</table></div>
+<h4>意味すること</h4>
+<p>ほとんど当たらない予想を、非常に強く信じる設定になっています。①で予想が 99.9% 採用されるのは、このためです。ばらつきは temperature（回答の乱数の強さ）を変えれば変わるので、モデルの設定しだいで「自信」が変わってしまう、という問題もあります。</p>
+</div>
+</section>
+
+<section id="p4"><h2><span class="num">7</span>最適化が途中で止まる</h2>
+<div class="prob"><h3>④ 最適化が、最適な答えに届く前に止まる <span class="sev l">影響 大</span></h3>
+<p class="one">比率を決める最適化（scipy の標準設定）が、まだ良くできる余地を残して止まっています。報告される比率は、式の最適な答えではありません。</p>
+<h4>根拠</h4>
+<p>元の最適化の結果と、同じ目的関数を二次計画用の解法で最後まで解いた結果を、30か月すべてで比べました。</p>
+<div class="table-wrap"><table>
+<tr><th></th><th>元の最適化</th><th>最後まで解いた結果</th></tr>
+<tr><td>実質的な銘柄数（平均）</td><td class="num">9.9</td><td class="num">4.2</td></tr>
+<tr><td>実質的な銘柄数（最小〜最大）</td><td class="num">5.4〜19.8</td><td class="num">2.6〜6.6</td></tr>
+<tr><td>比率が 0.1% を超える銘柄数（平均）</td><td class="num">16.5</td><td class="num">6.4</td></tr>
+</table></div>
+<ul>
+<li><b>2つの比率の重なりは、平均 62%</b>（最小 37%）です。残りは別の銘柄を持っています。</li>
+<li><b>目的関数の値で見ると、元の最適化は改善できる幅の 95% まで進んで止まっています。</b>残りの数%の間に、比率は「十数銘柄」から「4銘柄前後」へ大きく変わります。</li>
+<li><b>平均分散の比較相手（<code>baselines.py</code>）でも同じです。</b>元の最適化は実質 9.4 銘柄、最後まで解くと 4.5 銘柄です。</li>
+</ul>
+<h4>意味すること</h4>
+<p><b>元の計算の比率が十数銘柄に分かれているのは、最適化が途中で止まったためです。</b>出発点が「全銘柄に同じ比率」なので、途中で止まると、その名残で多くの銘柄に分かれます。結果は、解法の種類、止める基準、出発点に左右されます。これらは論文の方法の一部として書かれていないので、同じ式を別の方法で解いた人は、違う結果を得ます。</p>
+</div>
+</section>
+
+<section id="p5"><h2><span class="num">8</span>均衡リターンの単位</h2>
+<div class="prob"><h3>⑤ 均衡リターンの計算で、単位が合っていない <span class="sev s">影響 小</span></h3>
+<p class="one">市場の均衡リターンを計算するとき、日次のリターンから、年率の無リスク金利（0.02）をそのまま引いています。</p>
+<pre><code>risk_free_rate = 0.02
+market_risk_premium = (market_return_weighted - risk_free_rate).mean()   # 日次リターン − 年率 2%
+market_equilibrium_return = market_beta * market_risk_premium</code></pre>
+<h4>根拠</h4>
+<div class="table-wrap"><table>
+<tr><th>値</th><th>30か月の範囲</th></tr>
+<tr><td>市場のリスクプレミアム（1日あたり）</td><td>-2.25% 〜 -1.45%。本来は +0.02〜0.05% 程度</td></tr>
+<tr><td>均衡リターンの銘柄平均（1日あたり）</td><td>-1.94% 〜 -0.57%</td></tr>
+</table></div>
+<p>「市場全体が、毎日 1〜2% ずつ下がる」という出発点になっています。年率に直すと、ほぼ全額を失う水準です。日次に直すなら、0.02 ÷ 252 を引く必要があります。</p>
+<h4>意味すること</h4>
+<p>誤りですが、<b>結果にはほとんど影響しません。</b>①のとおり、均衡リターンは 0.1% しか使われていないからです。この誤りに気づきにくかったのも、同じ理由だと考えられます。裏を返すと、「均衡が何であっても結果が変わらない」こと自体が、Black-Litterman が働いていない証拠です。</p>
+</div>
+</section>
+
+<section id="p6"><h2><span class="num">9</span>共分散のデータ不足</h2>
+<div class="prob"><h3>⑥ 共分散を、約20日分のデータで計算している <span class="sev m">影響 中</span></h3>
+<p class="one">約 488 銘柄の値動きの連動（共分散）を、判断月の 19〜23 日分の日次リターンだけで計算しています。</p>
+<h4>根拠</h4>
+<div class="table-wrap"><table>
+<tr><th>確かめたこと</th><th>結果（30か月）</th></tr>
+<tr><td>共分散行列が持っている情報の次元（ランク）</td><td><b>18〜22</b>。488 銘柄分の行列なのに、中身は約20次元</td></tr>
+<tr><td>逆行列</td><td>存在しない。コードは疑似逆行列（<code>pinv</code>）で代用している</td></tr>
+<tr><td>計算上のリスクと、実際のリスク（BL の比率）</td><td>判断月のデータでは年率 19%、翌月以降の実績では年率 23%</td></tr>
+</table></div>
+<h4>意味すること</h4>
+<p>銘柄の数よりデータの数が少ないと、共分散は正しく推定できません。統計的には明らかな問題です。ただし、<b>この計算では影響は中くらいにとどまります。</b>目的関数の中でリターンの項が支配的で、リスクの項は比率をあまり左右していないためです。計算上のリスクが実際より小さく出る傾向はありますが、極端ではありませんでした。</p>
+<p class="muted">影響が大きく出るのは、予想の大きさを現実的な水準に直した場合です。そのときは、リスクの項が比率を決めるようになり、共分散の質がそのまま結果に効きます。</p>
+</div>
+</section>
+
+<section id="p7"><h2><span class="num">10</span>先読みと銘柄の選び方</h2>
+<div class="prob"><h3>⑦ 未来の情報と、銘柄の選び方 <span class="sev m">影響 中</span></h3>
+<p class="one">過去の時点の判断に、その時点では分からなかった情報が使われています。コードを読んで確認した点です。</p>
+<div class="table-wrap"><table>
+<tr><th>箇所</th><th>元のコード</th><th>問題</th></tr>
+<tr><td>構成銘柄</td><td>実行した時点の Wikipedia の一覧を、全期間に使う</td><td>後から指数に入った銘柄を、過去にさかのぼって持つ。指数に採用されるのは、株価が上がって大きくなった会社が多いので、成績が良く見える方向に働く</td></tr>
+<tr><td>時価総額</td><td>1つの時点の値（<code>market_caps.json</code>）を、全期間に使う</td><td>過去の判断に、後の時点の時価総額を使う。後で大きくなった会社ほど、比率が大きくなる</td></tr>
+<tr><td>対象の絞り込み</td><td>全部のモデルで回答が得られた銘柄だけ（<code>common_stocks.json</code>）。さらに2銘柄（J、TSCO）をコードの中で直接除外</td><td>絞り込みの基準が、結果を見た後で決まっている。除外の理由が書かれていない</td></tr>
+<tr><td>モデルの知識</td><td>―</td><td>使ったモデルが、評価期間の相場を学習で知っている可能性。プロンプトに日付は入っていないが、社名とティッカーは入っている</td></tr>
+</table></div>
+<p class="muted">こちらの再現では、構成銘柄と時価総額は各判断日のものを使っています。この問題の影響の大きさは、まだ測っていません。</p>
+</div>
+</section>
+
+<section id="p8"><h2><span class="num">11</span>リターンの計算と売買コスト</h2>
+<div class="prob"><h3>⑧ リターンの計算と、売買のコスト <span class="sev m">影響 中</span></h3>
+<p class="one">毎月、比率のほぼ全部が入れ替わります。売買のコストは、成績に入っていません。</p>
+<h4>根拠</h4>
+<div class="table-wrap"><table>
+<tr><th>戦略</th><th>年率リターン</th><th>年率リスク</th><th>シャープレシオ</th><th>最大下落率</th><th>毎月入れ替わる割合</th></tr><tr><td>時価総額加重（元の S&amp;P500）</td><td class='num'>+17.7%</td><td class='num'>12.2%</td><td class='num'>1.06</td><td class='num'>-7.7%</td><td class='num'>3%</td></tr><tr><td>等金額</td><td class='num'>+10.1%</td><td class='num'>11.7%</td><td class='num'>0.52</td><td class='num'>-8.9%</td><td class='num'>0%</td></tr><tr><td>平均分散（元論文の計算）</td><td class='num'>+29.4%</td><td class='num'>24.8%</td><td class='num'>0.99</td><td class='num'>-14.0%</td><td class='num'>96%</td></tr><tr><td>BL（元論文の計算）</td><td class='num'>+35.0%</td><td class='num'>23.5%</td><td class='num'>1.22</td><td class='num'>-10.2%</td><td class='num'>96%</td></tr>
+</table></div>
+<ul>
+<li><b>BL は、毎月 96% を入れ替えます。</b>売りと買いを合わせると、毎月、資産の約 1.9 倍の売買です。</li>
+<li><b>コストの目安：</b>片道 0.1% のコストを仮定すると、年率で約 2.3% の負担です。成績の差の一部が消えます。</li>
+<li><b>リターンの計算方法：</b>元のコードは、翌月の日次リターンに月初の比率を毎日掛けています。これは、毎日比率を元に戻す（毎日売買する）計算です。その分のコストも入っていません。</li>
+<li><b>比べる相手：</b>等金額と平均分散です。平均分散は、②のとおり BL とほぼ同じ銘柄を持ちます。</li>
+</ul>
+<h4>成績は良く見えるが</h4>
+<p>30か月で、BL は元の S&amp;P500 を年率 +15.8% 上回りました。ただし、月ごとの差のばらつきが大きく（標準偏差 6.2%／月）、偶然と区別できません（t 値 1.16。目安は 2 以上）。リスクは元の S&amp;P500 の約2倍です。期間全体で指数が大きく上がっており、値動きの大きい銘柄を十数個持てば、良く見えやすい局面でした。</p>
+</div>
+</section>
+
+<section id="p9"><h2><span class="num">12</span>細かい取りこぼし</h2>
+<div class="table-wrap"><table>
+<tr><th>箇所</th><th>内容</th><th>影響</th></tr>
+<tr><td>プロンプトの単位</td><td>「percentage change」と書きながら、小数（0.0016）を渡している。パーセント（0.16）で答えた回答が混ざると、平均と分散が大きく狂う</td><td>モデルによる。gpt-4o-mini で単位を明記した場合、約44万個の回答に桁の取り違えは見当たらなかった。元のプロンプトのままでは未確認</td></tr>
+<tr><td>月末日の欠落</td><td>株価の取得で、終了日が含まれない（yfinance の仕様）。毎月、最後の1日が抜ける</td><td>小さい。入力が1日分少ない</td></tr>
+<tr><td>月の最初の日</td><td>月内の株価だけでリターンを計算するので、最初の日のリターンがない</td><td>小さい</td></tr>
+<tr><td>ティッカーの書き方</td><td>Wikipedia の <code>BRK.B</code> のままでは、yfinance で株価が取れない</td><td>小さい。Berkshire Hathaway など、一部の大型株が抜ける</td></tr>
+<tr><td>読み取れない回答</td><td>黙って飛ばす。30個のうち何個で計算したかが残らない</td><td>小さい</td></tr>
+<tr><td>評価期間</td><td>元論文は約9か月</td><td>成績の優劣を言うには短い</td></tr>
+</table></div>
+</section>
+
+<section id="read"><h2><span class="num">13</span>元論文の結果をどう読むか</h2>
+<div class="steps">
+<div class="card"><h4>LLM に渡した月の値動きが、そのまま予想になる（②）</h4><p>予想と先月の平均リターンの相関は 0.89。</p></div>
+<div class="card"><h4>Black-Litterman は、その予想をほぼそのまま通す（①、③）</h4><p>回答のばらつきが小さいので、予想が 99.9% 採用される。均衡リターンは、誤っていても関係がない（⑤）。</p></div>
+<div class="card"><h4>最適化が、予想の高い銘柄に集中させる</h4><p>式を最後まで解けば4銘柄前後。途中で止まるので、十数銘柄に見える（④）。</p></div>
+<div class="card"><h4>結果は「先月よく上がった銘柄を、十数個持つ」比率になる</h4><p>平均分散の比較相手と 61% 重なり、月次リターンの相関は 0.94。</p></div>
+</div>
+<div class="callout"><b>結論：</b>元の計算の成績は、「LLM の予想を Black-Litterman で市場の比率に反映した効果」とは読めません。読めるのは、「直近1か月の値動きが大きかった銘柄に集中した場合の成績」です。LLM と Black-Litterman のどちらを外しても、ほぼ同じ比率になります。</div>
+<p>元論文が示している「モデルによって比率の集中度や成績が違う」という結果も、この流れで説明できる可能性があります。モデルごとに回答のばらつきや楽観の度合いが違えば、最適化が止まる位置や、選ばれる銘柄の数が変わるためです。ただし、これは元論文のデータで確かめたものではありません。</p>
+</section>
+
+<section id="ok"><h2><span class="num">14</span>問題ではなかった点</h2>
+<div class="table-wrap"><table>
+<tr><th>点</th><th>確認したこと</th></tr>
+<tr><td>Black-Litterman の式そのもの</td><td>コードの式は、標準的な式と数学的に同じです（疑似逆行列を使っている点を除く）。問題は式ではなく、入れている値（Ω と共分散）です</td></tr>
+<tr><td>「最適化が等金額から動かない」</td><td>5銘柄の小さなテストではそうなりましたが、全銘柄では動いていました。正確には「最適な答えに届く前に止まる」です（④）</td></tr>
+<tr><td>共分散のデータ不足の影響</td><td>統計的には問題ですが、この計算での影響は、当初考えていたより小さいものでした（⑥）</td></tr>
+<tr><td>30回聞くこと</td><td>1回のリクエストで30個の回答を受け取っても、回答は独立に生成されます。方法として問題はありません</td></tr>
+</table></div>
+</section>
+
+<footer>2026-10-11 作成。数字は portfolio_id 1・2・5・6（LLM の実行は RUN_ID 1）のものです。</footer>
+</main></div></body></html>

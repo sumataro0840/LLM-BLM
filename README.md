@@ -19,7 +19,8 @@
 │   ├── db/         テーブル定義と読み書き
 │   ├── build_db.py             株価・銘柄・発行済株式数・セクターETF を DB に入れる
 │   ├── build_fundamentals.py   財務諸表を DB に入れる
-│   └── build_sector_metrics.py セクターごとの指標（モメンタムなど）を計算する
+│   ├── build_sector_metrics.py セクターごとの指標（モメンタムなど）を計算する
+│   └── build_stock_metrics.py  銘柄ごとの指標（値動き、ファンダ）を計算する
 ├── llm/            LLM に渡す情報、プロンプト、API 呼び出し
 ├── blm/            共分散、均衡リターン、Black-Litterman、最適化
 ├── run_reports.py  月次レポートを LLM に読ませ、見通しの数値と要約を取り出す
@@ -46,6 +47,7 @@ cp .env.example .env    # OPENAI_API_KEY を入れる
 python marketdb/build_db.py             # DB を作る（取得済みのテーブルはスキップ）
 python marketdb/build_fundamentals.py   # 財務諸表を追加する
 python marketdb/build_sector_metrics.py # セクターごとの指標を計算する
+python marketdb/build_stock_metrics.py  # 銘柄ごとの指標を計算する
 python run_llm.py                       # LLM に聞く（回答は DB に保存）
 python run_blm.py                       # 比率を計算する（結果は DB に保存）
 python run_reports.py                   # 月次レポートを読ませる（結果は DB に保存）

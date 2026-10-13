@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-BLM DB定義書</title>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --border: #dedad0;
+  --accent: #2f6fb3;
+  --accent-soft: #e4eef9;
+  --green: #2e7d4f;
+  --green-soft: #e3f3e9;
+  --orange: #b4621a;
+  --orange-soft: #fbeedf;
+  --purple: #6a4bb0;
+  --purple-soft: #eee8fa;
+  --red: #b23a3a;
+  --red-soft: #fbe6e6;
+  --code-bg: #f3f1ea;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #24282d;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #33383f;
+    --accent: #7cb2ec;
+    --accent-soft: #1f3248;
+    --green: #74c79a;
+    --green-soft: #1d3428;
+    --orange: #e9a462;
+    --orange-soft: #3a2a1a;
+    --purple: #b39cf0;
+    --purple-soft: #2c2440;
+    --red: #ec8a8a;
+    --red-soft: #3c2222;
+    --code-bg: #24282d;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --surface-2: #24282d; --text: #e6e8eb;
+  --muted: #9aa1ab; --border: #33383f; --accent: #7cb2ec; --accent-soft: #1f3248;
+  --green: #74c79a; --green-soft: #1d3428; --orange: #e9a462; --orange-soft: #3a2a1a;
+  --purple: #b39cf0; --purple-soft: #2c2440; --red: #ec8a8a; --red-soft: #3c2222;
+  --code-bg: #24282d; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15.5px;
+}
+code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+pre {
+  background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.55; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+nav.toc .label { font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .08em; margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--border); }
+nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+header.hero { margin-bottom: 36px; }
+header.hero .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; }
+header.hero h1 { font-size: 30px; line-height: 1.35; margin: 6px 0 12px; }
+header.hero p { color: var(--muted); margin: 0; max-width: 760px; }
+
+section { margin-bottom: 56px; scroll-margin-top: 20px; }
+h2 { font-size: 22px; margin: 0 0 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: var(--surface); border-radius: 6px; font-size: 14px; padding: 1px 9px; }
+h3 { font-size: 17px; margin: 26px 0 10px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { position: relative; padding-top: 44px; }
+.idea .badge { position: absolute; top: 16px; left: 22px; font-weight: 700; font-size: 13px; color: var(--accent); }
+.idea h4 { margin: 0 0 6px; font-size: 16px; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+
+/* directory tree */
+.tree { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.9; }
+.tree .row { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 12px; border-bottom: 1px dashed var(--border); }
+.tree .row:last-child { border-bottom: none; }
+.tree .name { white-space: pre; overflow-x: auto; }
+.tree .desc { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; font-family: "Hiragino Sans", sans-serif; }
+.t-script { background: var(--accent-soft); color: var(--accent); }
+.t-data { background: var(--green-soft); color: var(--green); }
+.t-out { background: var(--orange-soft); color: var(--orange); }
+.t-nb { background: var(--purple-soft); color: var(--purple); }
+
+/* flow */
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.stage { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.stage .step-label { text-align: right; padding-top: 16px; font-weight: 700; color: var(--muted); font-size: 13px; }
+.lane { display: flex; gap: 12px; flex-wrap: wrap; }
+.node { flex: 1 1 200px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid; background: var(--surface); }
+.node .title { font-weight: 700; font-size: 14.5px; }
+.node .sub { font-size: 12.5px; color: var(--muted); }
+.node.script { border-color: var(--accent); background: var(--accent-soft); }
+.node.data { border-color: var(--green); background: var(--green-soft); }
+.node.out { border-color: var(--orange); background: var(--orange-soft); }
+.node.nb { border-color: var(--purple); background: var(--purple-soft); }
+.node.ext { border-style: dashed; border-color: var(--muted); }
+.arrow { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+.arrow span { grid-column: 2; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.6; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid; }
+
+/* timeline */
+.timeline { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0 6px; }
+.tl-head { font-size: 12.5px; text-align: center; color: var(--muted); font-weight: 700; }
+.tl-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.tl-train { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.tl-test { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange); }
+.tl-empty { background: transparent; }
+
+/* step details */
+.step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.step .circle { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.step .card h3 { margin-top: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step .card h3 code { font-size: 14px; }
+.io { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 6px 0 12px; }
+.io .in, .io .outp { border-radius: 6px; padding: 2px 10px; }
+.io .in { background: var(--green-soft); color: var(--green); }
+.io .outp { background: var(--orange-soft); color: var(--orange); }
+.step ul, .step ol { padding-left: 1.3em; margin: 8px 0; }
+.step li { margin: 3px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.formula { background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 10px; padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+.formula .cm { color: var(--muted); font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+
+.callout { border-left: 4px solid var(--orange); background: var(--orange-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14.5px; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-soft); }
+
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sev { font-size: 12px; font-weight: 700; text-align: center; border-radius: 6px; padding: 3px 0; }
+.sev.high { background: var(--red-soft); color: var(--red); }
+.sev.mid { background: var(--orange-soft); color: var(--orange); }
+.sev.low { background: var(--surface-2); color: var(--muted); }
+.issue p { margin: 0; }
+.issue .where { font-size: 12.5px; color: var(--muted); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 20px 16px 60px; }
+  nav.toc { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .stage, .arrow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .stage .step-label { text-align: left; padding-top: 0; }
+  .arrow span { grid-column: 1; }
+  .tree .row { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 0; }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .issue { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sev { width: 88px; }
+  .timeline { gap: 3px; }
+  .tl-cell { font-size: 10.5px; }
+  header.hero h1 { font-size: 24px; }
+}
+
+.er { width:100%; height:auto; display:block; }
+.er .ent { fill: var(--surface); stroke: var(--border); stroke-width:1.5; }
+.er .ent-h.c-green { fill: var(--green-soft); }
+.er .ent-h.c-purple { fill: var(--purple-soft); }
+.er .ent-h.c-orange { fill: var(--orange-soft); }
+.er .ent-t { fill: var(--text); font-weight:700; font-size:14px; }
+.er .ent-k { fill: var(--orange); font-size:11px; font-weight:700; }
+.er .ent-c { fill: var(--text); font-size:13px; font-family: "SF Mono", Menlo, monospace; }
+.er .rel { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel.dashed { stroke-dasharray: 5 4; }
+.er .rel-m { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel-a { fill: var(--muted); }
+.er .rel-t { fill: var(--muted); font-size:12px; }
+.pill { display:inline-block; font-size:11px; font-weight:700; border-radius:4px; padding:0 6px; margin:1px 2px 1px 0; white-space:nowrap; }
+.pill.pk { background: var(--orange-soft); color: var(--orange); }
+.pill.fk { background: var(--accent-soft); color: var(--accent); }
+.pill.nn { background: var(--surface-2); color: var(--muted); }
+.pill.ck { background: var(--purple-soft); color: var(--purple); }
+td.good { color: var(--green); font-weight:700; }
+td.bad { color: var(--red); font-weight:700; }
+table.result td { font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; }
+tr.hl td { background: var(--orange-soft); }
+tr.drop td { color: var(--red); text-decoration: line-through; }
+tr.drop td:last-child { text-decoration: none; }
+.steps { counter-reset: st; display:grid; gap:10px; margin:12px 0; }
+.steps .card { position:relative; padding-left:58px; }
+.steps .card::before { counter-increment: st; content: counter(st); position:absolute; left:18px; top:18px; width:28px; height:28px; border-radius:50%; background: var(--accent); color: var(--surface); font-weight:700; display:flex; align-items:center; justify-content:center; }
+.steps .card h4 { margin:0 0 4px; font-size:15px; }
+.steps .card p { margin:0; font-size:14px; color: var(--muted); }
+.null { color: var(--muted); font-style: italic; }
+pre.sql { border-left: 4px solid var(--accent); }
+.tcard { margin-bottom: 18px; }
+.tcard h3 { margin-top:0; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.tcard h3 .role { font-size:12.5px; font-weight:400; color:var(--muted); }
+.tcard .new { font-size:11px; font-weight:700; background: var(--accent); color: var(--surface); border-radius:4px; padding:0 6px; }
+.grid2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+.grid2 .card h4 { margin:0 0 6px; font-size:15px; }
+.grid2 .card p { margin:0; font-size:14px; color:var(--muted); }
+.verdict { display:inline-block; font-size:12px; font-weight:700; border-radius:6px; padding:1px 8px; }
+.verdict.ok { background: var(--green-soft); color: var(--green); }
+.verdict.ng { background: var(--red-soft); color: var(--red); }
+.verdict.mid { background: var(--orange-soft); color: var(--orange); }
+.formula-big { text-align:center; font-size:17px; font-weight:700; padding:16px; border-radius:10px; background: var(--accent-soft); border:1px solid var(--accent); margin:14px 0; line-height:1.9; }
+.formula-big small { display:block; font-size:12.5px; font-weight:400; color: var(--muted); }
+.kpis-db { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis-db .v { font-size:18px; font-weight:700; }
+.kpis-db .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis-db { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.status { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+.status .card .v { font-weight:700; font-size:15px; }
+.status .card .k { color:var(--muted); font-size:13px; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--accent); }
+@media (max-width:900px) { .grid2, .status { grid-template-columns: minmax(0,1fr); } }
+
+.er .ent-h.c-blue { fill: var(--accent-soft); }
+.er .ent-h.c-red { fill: var(--red-soft); }
+a { color: var(--accent); }
+.doclink { display:flex; gap:12px; align-items:center; background: var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin: 0 0 28px; font-size:14px; }
+.doclink b { white-space:nowrap; }
+td.num { text-align:right; font-family: "SF Mono", Menlo, monospace; }
+.muted { color: var(--muted); font-size: 12.5px; }
+.diff td:first-child { font-weight:700; white-space:nowrap; }
+.impact { display:inline-block; font-size:11.5px; font-weight:700; border-radius:5px; padding:0 7px; white-space:nowrap; }
+.impact.s { background: var(--surface-2); color: var(--muted); }
+.impact.m { background: var(--orange-soft); color: var(--orange); }
+.impact.l { background: var(--red-soft); color: var(--red); }
+.quote { border:1px dashed var(--border); border-radius:10px; padding:12px 16px; margin:10px 0; background: var(--surface); font-size:14.5px; }
+.quote .t { font-size:12px; font-weight:700; color: var(--accent); margin-bottom:4px; }
+.figure { background:#fff; border-radius:10px; padding:8px; border:1px solid var(--border); }
+.figure img { width:100%; height:auto; display:block; }
+.kpis5 { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis5 .v { font-size:22px; font-weight:700; line-height:1.25; }
+.kpis5 .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis5 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+</style></head><body>
+<div class="layout">
+<nav class="toc"><div class="label">目次</div><a href="#overview">1. 全体像</a><a href="#tables">2. テーブル定義</a><a href="#views">3. ビュー定義</a><a href="#indexes">4. インデックス</a><a href="#rules">5. 共通の決まり</a><a href="#constraints">6. 制約のテスト</a><a href="#queries">7. クエリ例</a><a href="#code">8. ファイルと接続方法</a></nav>
+<main>
+<header class="hero"><div class="eyebrow">LLM-BLM DB 定義書</div><h1>テーブルとビューの定義</h1><p>SQLite データベース <code>blm.sqlite</code> の、16のテーブルと7つのビューの定義です。</p></header>
+
+<div class="doclink"><b>関連資料</b><span>データの取得元・加工方法・除外した銘柄・実際の S&amp;P500 との違いは <a href="LLM-BLM_データの扱い方.html">LLM-BLM_データの扱い方.html</a> にまとめています。この資料は DB の定義だけを扱います。</span></div>
+
+<section id="overview"><h2><span class="num">1</span>全体像</h2>
+<div class="legend">
+<span><i style="border-color:var(--green);background:var(--green-soft)"></i>市場データ</span>
+<span><i style="border-color:var(--orange);background:var(--orange-soft)"></i>S&amp;P500 の構成</span>
+<span><i style="border-color:var(--accent);background:var(--accent-soft)"></i>財務諸表</span>
+<span><i style="border-color:var(--purple);background:var(--purple-soft)"></i>LLM の回答と比率</span>
+<span><i style="border-color:var(--red);background:var(--red-soft)"></i>月次レポート</span>
+<span>線の端：<b>|</b> が「1」、<b>&lt;</b> が「多」</span></div>
+<div class="card"><svg viewBox="0 0 880 1000" class="er" role="img" aria-label="16のテーブルの関係図">
+<defs><marker id="crow" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M0,6 L11,6 M11,0 L0,6 L11,12" class="rel-m"/></marker>
+<marker id="one" viewBox="0 0 12 12" refX="1" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M1,0 L1,12 M5,0 L5,12" class="rel-m"/></marker>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="rel-a"/></marker></defs>
+<path d="M330,230.0 C280,230.0 290,79.0 240,79.0" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M330,230.0 C280,230.0 290,228.5 240,228.5" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M330,230.0 C280,230.0 290,410.5 240,410.5" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M540,230.0 C590,230.0 580,274.0 630,274.0" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M540,230.0 C590,230.0 580,459.5 630,459.5" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M540,429.5 C580,429.5 590,499 630,499" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M330,589.5 C280,589.5 290,461 240,461" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M745.0,159 L745.0,215" class="rel dashed" marker-end="url(#arrow)"/><text x="753.0" y="191.0" class="rel-t">ここから作る</text><g><rect x="330" y="150" width="210" height="160" rx="8" class="ent"/><rect x="330" y="150" width="210" height="30" rx="8" class="ent-h c-green"/><rect x="330" y="172" width="210" height="8" class="ent-h c-green"/><text x="342" y="170" class="ent-t">tickers</text><text x="342" y="199" class="ent-k">PK</text><text x="370" y="199" class="ent-c">symbol</text><text x="342" y="220" class="ent-k"></text><text x="370" y="220" class="ent-c">security</text><text x="342" y="241" class="ent-k"></text><text x="370" y="241" class="ent-c">gics_sector</text><text x="342" y="262" class="ent-k"></text><text x="370" y="262" class="ent-c">gics_sub_industry</text><text x="342" y="283" class="ent-k"></text><text x="370" y="283" class="ent-c">excluded_reason</text><text x="342" y="304" class="ent-k"></text><text x="370" y="304" class="ent-c">cik</text></g><g><rect x="20" y="20" width="220" height="118" rx="8" class="ent"/><rect x="20" y="20" width="220" height="30" rx="8" class="ent-h c-green"/><rect x="20" y="42" width="220" height="8" class="ent-h c-green"/><text x="32" y="40" class="ent-t">prices</text><text x="32" y="69" class="ent-k">PK</text><text x="60" y="69" class="ent-c">symbol</text><text x="32" y="90" class="ent-k">PK</text><text x="60" y="90" class="ent-c">date</text><text x="32" y="111" class="ent-k"></text><text x="60" y="111" class="ent-c">close</text><text x="32" y="132" class="ent-k"></text><text x="60" y="132" class="ent-c">adj_close</text></g><g><rect x="20" y="180" width="220" height="97" rx="8" class="ent"/><rect x="20" y="180" width="220" height="30" rx="8" class="ent-h c-green"/><rect x="20" y="202" width="220" height="8" class="ent-h c-green"/><text x="32" y="200" class="ent-t">shares_outstanding</text><text x="32" y="229" class="ent-k">PK</text><text x="60" y="229" class="ent-c">symbol</text><text x="32" y="250" class="ent-k">PK</text><text x="60" y="250" class="ent-c">date</text><text x="32" y="271" class="ent-k"></text><text x="60" y="271" class="ent-c">shares</text></g><g><rect x="20" y="320" width="220" height="181" rx="8" class="ent"/><rect x="20" y="320" width="220" height="30" rx="8" class="ent-h c-blue"/><rect x="20" y="342" width="220" height="8" class="ent-h c-blue"/><text x="32" y="340" class="ent-t">financial_facts</text><text x="32" y="369" class="ent-k">PK</text><text x="60" y="369" class="ent-c">item_id</text><text x="32" y="390" class="ent-k">PK</text><text x="60" y="390" class="ent-c">symbol</text><text x="32" y="411" class="ent-k">PK</text><text x="60" y="411" class="ent-c">period_start</text><text x="32" y="432" class="ent-k">PK</text><text x="60" y="432" class="ent-c">period_end</text><text x="32" y="453" class="ent-k"></text><text x="60" y="453" class="ent-c">value</text><text x="32" y="474" class="ent-k"></text><text x="60" y="474" class="ent-c">form</text><text x="32" y="495" class="ent-k"></text><text x="60" y="495" class="ent-c">filed_date</text></g><g><rect x="330" y="520" width="210" height="139" rx="8" class="ent"/><rect x="330" y="520" width="210" height="30" rx="8" class="ent-h c-blue"/><rect x="330" y="542" width="210" height="8" class="ent-h c-blue"/><text x="342" y="540" class="ent-t">financial_items</text><text x="342" y="569" class="ent-k">PK</text><text x="370" y="569" class="ent-c">item_id</text><text x="342" y="590" class="ent-k"></text><text x="370" y="590" class="ent-c">taxonomy</text><text x="342" y="611" class="ent-k"></text><text x="370" y="611" class="ent-c">tag</text><text x="342" y="632" class="ent-k"></text><text x="370" y="632" class="ent-c">unit</text><text x="342" y="653" class="ent-k"></text><text x="370" y="653" class="ent-c">label</text></g><g><rect x="630" y="20" width="230" height="139" rx="8" class="ent"/><rect x="630" y="20" width="230" height="30" rx="8" class="ent-h c-orange"/><rect x="630" y="42" width="230" height="8" class="ent-h c-orange"/><text x="642" y="40" class="ent-t">index_changes</text><text x="642" y="69" class="ent-k">PK</text><text x="670" y="69" class="ent-c">change_id</text><text x="642" y="90" class="ent-k"></text><text x="670" y="90" class="ent-c">date</text><text x="642" y="111" class="ent-k"></text><text x="670" y="111" class="ent-c">added_symbol</text><text x="642" y="132" class="ent-k"></text><text x="670" y="132" class="ent-c">removed_symbol</text><text x="642" y="153" class="ent-k"></text><text x="670" y="153" class="ent-c">reason</text></g><g><rect x="630" y="215" width="230" height="118" rx="8" class="ent"/><rect x="630" y="215" width="230" height="30" rx="8" class="ent-h c-orange"/><rect x="630" y="237" width="230" height="8" class="ent-h c-orange"/><text x="642" y="235" class="ent-t">index_membership</text><text x="642" y="264" class="ent-k">PK</text><text x="670" y="264" class="ent-c">membership_id</text><text x="642" y="285" class="ent-k">FK</text><text x="670" y="285" class="ent-c">symbol</text><text x="642" y="306" class="ent-k"></text><text x="670" y="306" class="ent-c">start_date</text><text x="642" y="327" class="ent-k"></text><text x="670" y="327" class="ent-c">end_date</text></g><g><rect x="330" y="360" width="210" height="139" rx="8" class="ent"/><rect x="330" y="360" width="210" height="30" rx="8" class="ent-h c-purple"/><rect x="330" y="382" width="210" height="8" class="ent-h c-purple"/><text x="342" y="380" class="ent-t">llm_runs</text><text x="342" y="409" class="ent-k">PK</text><text x="370" y="409" class="ent-c">run_id</text><text x="342" y="430" class="ent-k"></text><text x="370" y="430" class="ent-c">model</text><text x="342" y="451" class="ent-k"></text><text x="370" y="451" class="ent-c">system_prompt</text><text x="342" y="472" class="ent-k"></text><text x="370" y="472" class="ent-c">n_samples</text><text x="342" y="493" class="ent-k"></text><text x="370" y="493" class="ent-c">input_months</text></g><g><rect x="630" y="390" width="230" height="139" rx="8" class="ent"/><rect x="630" y="390" width="230" height="30" rx="8" class="ent-h c-purple"/><rect x="630" y="412" width="230" height="8" class="ent-h c-purple"/><text x="642" y="410" class="ent-t">llm_views</text><text x="642" y="439" class="ent-k">PK</text><text x="670" y="439" class="ent-c">run_id</text><text x="642" y="460" class="ent-k">PK</text><text x="670" y="460" class="ent-c">as_of_date</text><text x="642" y="481" class="ent-k">PK</text><text x="670" y="481" class="ent-c">symbol</text><text x="642" y="502" class="ent-k">PK</text><text x="670" y="502" class="ent-c">sample_no</text><text x="642" y="523" class="ent-k"></text><text x="670" y="523" class="ent-c">expected_return</text></g><path d="M540,470 C590,470 580,632 630,632" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M745,678 L745,720" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M540,230 C590,230 580,811 630,811" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M240,610 C290,610 280,790 330,790" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><path d="M240,769 C285,769 285,769 330,769" class="rel" marker-start="url(#one)" marker-end="url(#crow)"/><g><rect x="630" y="560" width="230" height="118" rx="8" class="ent"/><rect x="630" y="560" width="230" height="30" rx="8" class="ent-h c-purple"/><rect x="630" y="582" width="230" height="8" class="ent-h c-purple"/><text x="642" y="580" class="ent-t">portfolio_runs</text><text x="642" y="609" class="ent-k">PK</text><text x="670" y="609" class="ent-c">portfolio_id</text><text x="642" y="630" class="ent-k"></text><text x="670" y="630" class="ent-c">strategy</text><text x="642" y="651" class="ent-k">FK</text><text x="670" y="651" class="ent-c">llm_run_id</text><text x="642" y="672" class="ent-k"></text><text x="670" y="672" class="ent-c">params</text></g><g><rect x="630" y="720" width="230" height="118" rx="8" class="ent"/><rect x="630" y="720" width="230" height="30" rx="8" class="ent-h c-purple"/><rect x="630" y="742" width="230" height="8" class="ent-h c-purple"/><text x="642" y="740" class="ent-t">portfolio_weights</text><text x="642" y="769" class="ent-k">PK</text><text x="670" y="769" class="ent-c">portfolio_id</text><text x="642" y="790" class="ent-k">PK</text><text x="670" y="790" class="ent-c">as_of_date</text><text x="642" y="811" class="ent-k">PK</text><text x="670" y="811" class="ent-c">symbol</text><text x="642" y="832" class="ent-k"></text><text x="670" y="832" class="ent-c">weight</text></g><g><rect x="20" y="540" width="220" height="139" rx="8" class="ent"/><rect x="20" y="540" width="220" height="30" rx="8" class="ent-h c-red"/><rect x="20" y="562" width="220" height="8" class="ent-h c-red"/><text x="32" y="560" class="ent-t">reports</text><text x="32" y="589" class="ent-k">PK</text><text x="60" y="589" class="ent-c">report_id</text><text x="32" y="610" class="ent-k"></text><text x="60" y="610" class="ent-c">source</text><text x="32" y="631" class="ent-k"></text><text x="60" y="631" class="ent-c">report_month</text><text x="32" y="652" class="ent-k"></text><text x="60" y="652" class="ent-c">published_date</text><text x="32" y="673" class="ent-k"></text><text x="60" y="673" class="ent-c">file_name</text></g><g><rect x="20" y="720" width="220" height="118" rx="8" class="ent"/><rect x="20" y="720" width="220" height="30" rx="8" class="ent-h c-red"/><rect x="20" y="742" width="220" height="8" class="ent-h c-red"/><text x="32" y="740" class="ent-t">report_runs</text><text x="32" y="769" class="ent-k">PK</text><text x="60" y="769" class="ent-c">report_run_id</text><text x="32" y="790" class="ent-k"></text><text x="60" y="790" class="ent-c">model</text><text x="32" y="811" class="ent-k"></text><text x="60" y="811" class="ent-c">system_prompt</text><text x="32" y="832" class="ent-k"></text><text x="60" y="832" class="ent-c">items</text></g><g><rect x="330" y="720" width="210" height="139" rx="8" class="ent"/><rect x="330" y="720" width="210" height="30" rx="8" class="ent-h c-red"/><rect x="330" y="742" width="210" height="8" class="ent-h c-red"/><text x="342" y="740" class="ent-t">report_values</text><text x="342" y="769" class="ent-k">PK</text><text x="370" y="769" class="ent-c">report_run_id</text><text x="342" y="790" class="ent-k">PK</text><text x="370" y="790" class="ent-c">report_id</text><text x="342" y="811" class="ent-k">PK</text><text x="370" y="811" class="ent-c">item</text><text x="342" y="832" class="ent-k"></text><text x="370" y="832" class="ent-c">value_num</text><text x="342" y="853" class="ent-k"></text><text x="370" y="853" class="ent-c">value_text</text></g><g><rect x="630" y="870" width="230" height="118" rx="8" class="ent"/><rect x="630" y="870" width="230" height="30" rx="8" class="ent-h c-green"/><rect x="630" y="892" width="230" height="8" class="ent-h c-green"/><text x="642" y="890" class="ent-t">sector_metrics</text><text x="642" y="919" class="ent-k">PK</text><text x="670" y="919" class="ent-c">as_of_date</text><text x="642" y="940" class="ent-k">PK</text><text x="670" y="940" class="ent-c">gics_sector</text><text x="642" y="961" class="ent-k">PK</text><text x="670" y="961" class="ent-c">metric</text><text x="642" y="982" class="ent-k"></text><text x="670" y="982" class="ent-c">value</text></g><g><rect x="330" y="870" width="210" height="118" rx="8" class="ent"/><rect x="330" y="870" width="210" height="30" rx="8" class="ent-h c-green"/><rect x="330" y="892" width="210" height="8" class="ent-h c-green"/><text x="342" y="890" class="ent-t">stock_metrics</text><text x="342" y="919" class="ent-k">PK</text><text x="370" y="919" class="ent-c">as_of_date</text><text x="342" y="940" class="ent-k">PK</text><text x="370" y="940" class="ent-c">symbol</text><text x="342" y="961" class="ent-k">PK</text><text x="370" y="961" class="ent-c">metric</text><text x="342" y="982" class="ent-k"></text><text x="370" y="982" class="ent-c">value</text></g></svg></div>
+<div class="table-wrap" style="margin-top:14px"><table>
+<tr><th>種類</th><th>名前</th><th>内容</th><th>主キー</th></tr>
+<tr><td rowspan="16">テーブル</td><td><code>tickers</code></td><td>銘柄・指数・セクターETFの一覧</td><td>symbol</td></tr>
+<tr><td><code>prices</code></td><td>日次の株価</td><td>(symbol, date)</td></tr>
+<tr><td><code>shares_outstanding</code></td><td>発行済み株式数の履歴</td><td>(symbol, date)</td></tr>
+<tr><td><code>index_changes</code></td><td>S&amp;P500 の銘柄入れ替えイベント</td><td>change_id</td></tr>
+<tr><td><code>index_membership</code></td><td>銘柄ごとの在籍期間</td><td>membership_id</td></tr>
+<tr><td><code>financial_items</code></td><td>財務諸表の項目</td><td>item_id</td></tr>
+<tr><td><code>financial_facts</code></td><td>財務諸表の値</td><td>(item_id, symbol, period_start, period_end)</td></tr>
+<tr><td><code>llm_runs</code></td><td>LLM の1回の実行</td><td>run_id</td></tr>
+<tr><td><code>llm_views</code></td><td>LLM の回答</td><td>(run_id, as_of_date, symbol, sample_no)</td></tr>
+<tr><td><code>portfolio_runs</code></td><td>比率の計算1回</td><td>portfolio_id</td></tr>
+<tr><td><code>portfolio_weights</code></td><td>比率</td><td>(portfolio_id, as_of_date, symbol)</td></tr>
+<tr><td><code>sector_metrics</code></td><td>セクターごとの指標</td><td>(as_of_date, gics_sector, metric)</td></tr>
+<tr><td><code>stock_metrics</code></td><td>銘柄ごとの指標</td><td>(as_of_date, symbol, metric)</td></tr>
+<tr><td><code>reports</code></td><td>月次レポートのファイル</td><td>report_id</td></tr>
+<tr><td><code>report_runs</code></td><td>レポートの分析1回</td><td>report_run_id</td></tr>
+<tr><td><code>report_values</code></td><td>レポートから読み取った値</td><td>(report_run_id, report_id, item)</td></tr>
+<tr><td rowspan="7">ビュー</td><td><code>market_caps</code></td><td>取引日ごとの時価総額</td><td>―</td></tr>
+<tr><td><code>index_weights</code></td><td>日次の S&amp;P500 構成比率</td><td>―</td></tr>
+<tr><td><code>fundamentals_quarterly</code></td><td>四半期ごとの主な財務項目</td><td>―</td></tr>
+<tr><td><code>llm_view_stats</code></td><td>LLM の回答の平均と分散（Black-Litterman の入力）</td><td>―</td></tr>
+<tr><td><code>portfolio_returns</code></td><td>比率を1か月持ち続けた場合のリターン</td><td>―</td></tr>
+<tr><td><code>sector_metric_scores</code></td><td>セクターの指標と、セクター間での偏差（z スコア）</td><td>―</td></tr>
+<tr><td><code>stock_metric_scores</code></td><td>銘柄の指標と、セクター内での順位（百分位）</td><td>―</td></tr>
+</table></div>
+<p class="muted">DB は SQLite の1ファイル（<code>LLM-BLM/data/blm.sqlite</code>）です。ビューはデータを保存せず、読むたびにテーブルから計算します。図にはテーブルだけを載せ、列は主なものだけを書いています。月次レポートの3つのテーブルと <code>sector_metrics</code> は、ほかのテーブルと外部キーでつながっていません。<code>stock_metrics</code> は <code>tickers</code> につながります（線は省いています）（<code>sector_metrics</code> のセクター名は <code>tickers.gics_sector</code> と同じ名前です）。</p>
+</section>
+
+<section id="tables"><h2><span class="num">2</span>テーブル定義</h2>
+<div class="card tcard"><h3>tickers <span class="role">銘柄・指数・セクターETFの一覧（584 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>symbol</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>ティッカー（最新の yfinance の表記。例：AAPL、BRK-B、^GSPC）</td></tr><tr><td><code>security</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>会社名・指数名</td></tr><tr><td><code>gics_sector</code></td><td>TEXT</td><td></td><td>GICS セクター（指数は NULL。セクターETFは、連動するセクター）</td></tr><tr><td><code>gics_sub_industry</code></td><td>TEXT</td><td></td><td>GICS サブ業種（同上）</td></tr><tr><td><code>excluded_reason</code></td><td>TEXT</td><td></td><td>分析から外した理由（NULL ＝ 使う）</td></tr><tr><td><code>fetched_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>取得日時（UTC）</td></tr><tr><td><code>cik</code></td><td>INTEGER</td><td></td><td>SEC EDGAR の会社番号（NULL ＝ 見つからない）</td></tr><tr><td><code>fundamentals_fetched_at</code></td><td>TEXT</td><td></td><td>財務諸表を EDGAR から取得した日時（NULL ＝ 未取得）</td></tr></table></div></div><div class="card tcard"><h3>prices <span class="role">日次の株価（495,953 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>symbol</code></td><td>TEXT</td><td><span class="pill pk">PK</span><span class="pill fk">FK → tickers</span></td><td>ティッカー</td></tr><tr><td><code>date</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>取引日</td></tr><tr><td><code>close</code></td><td>REAL</td><td><span class="pill nn">NOT NULL</span></td><td>終値（株式分割のみ調整。取得日の分割基準）</td></tr><tr><td><code>adj_close</code></td><td>REAL</td><td><span class="pill nn">NOT NULL</span></td><td>調整後終値（株式分割と配当を調整）</td></tr><tr><td><code>fetched_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>取得日時（UTC）</td></tr></table></div><p class="muted">主キーは (symbol, date)。<code>WITHOUT ROWID</code>。インデックス <code>idx_prices_date</code>（date）。</p></div><div class="card tcard"><h3>shares_outstanding <span class="role">発行済み株式数の履歴（175,617 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>symbol</code></td><td>TEXT</td><td><span class="pill pk">PK</span><span class="pill fk">FK → tickers</span></td><td>ティッカー</td></tr><tr><td><code>date</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>報告日</td></tr><tr><td><code>shares</code></td><td>INTEGER</td><td><span class="pill nn">NOT NULL</span><span class="pill ck">CHECK shares &gt; 0</span></td><td>発行済み株式数（取得日の分割基準に変換済み）</td></tr><tr><td><code>fetched_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>取得日時（UTC）＝ 分割基準の日</td></tr></table></div><p class="muted">主キーは (symbol, date)。<code>WITHOUT ROWID</code>。値があるのは報告日だけ（日次ではない）。</p></div><div class="card tcard"><h3>index_changes <span class="role">S&P500 の銘柄入れ替えイベント（412 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>change_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span></td><td>連番</td></tr><tr><td><code>date</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>入れ替えの発効日</td></tr><tr><td><code>added_symbol</code></td><td>TEXT</td><td></td><td>追加された銘柄（除外だけなら NULL）</td></tr><tr><td><code>added_name</code></td><td>TEXT</td><td></td><td>追加された銘柄の社名</td></tr><tr><td><code>removed_symbol</code></td><td>TEXT</td><td></td><td>除外された銘柄（追加だけなら NULL）</td></tr><tr><td><code>removed_name</code></td><td>TEXT</td><td></td><td>除外された銘柄の社名</td></tr><tr><td><code>reason</code></td><td>TEXT</td><td></td><td>理由</td></tr><tr><td><code>fetched_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>取得日時（UTC）</td></tr></table></div><p class="muted"><code>UNIQUE (date, added_symbol, removed_symbol)</code>。</p></div><div class="card tcard"><h3>index_membership <span class="role">銘柄ごとの S&P500 在籍期間（569 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>membership_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span></td><td>連番</td></tr><tr><td><code>symbol</code></td><td>TEXT</td><td><span class="pill fk">FK → tickers</span><span class="pill nn">NOT NULL</span></td><td>ティッカー</td></tr><tr><td><code>start_date</code></td><td>TEXT</td><td></td><td>在籍の開始日（NULL ＝ DB の期間より前から在籍）</td></tr><tr><td><code>end_date</code></td><td>TEXT</td><td></td><td>在籍の終了日（NULL ＝ 在籍中）。この日は在籍に含まない</td></tr></table></div><p class="muted">在籍の条件は <code>start_date ≤ 日付 &lt; end_date</code>。<code>UNIQUE (symbol, start_date)</code>、<code>CHECK (start_date &lt; end_date)</code>。インデックス <code>idx_membership_symbol</code>（symbol）。</p></div><div class="card tcard"><h3>financial_items <span class="role">財務諸表の項目（XBRL のタグと単位）（6,579 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>item_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span></td><td>連番</td></tr><tr><td><code>taxonomy</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>項目の体系（us-gaap ＝ 米国会計基準、dei ＝ 表紙の情報 など）</td></tr><tr><td><code>tag</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>XBRL のタグ名（例：NetIncomeLoss）</td></tr><tr><td><code>unit</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>単位（USD、shares、USD/shares など）</td></tr><tr><td><code>label</code></td><td>TEXT</td><td></td><td>EDGAR が付けている項目の名前</td></tr></table></div><p class="muted"><code>UNIQUE (taxonomy, tag, unit)</code>。</p></div><div class="card tcard"><h3>financial_facts <span class="role">財務諸表の値（最初に提出された値）（2,306,891 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>symbol</code></td><td>TEXT</td><td><span class="pill pk">PK</span><span class="pill fk">FK → tickers</span></td><td>ティッカー</td></tr><tr><td><code>item_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span><span class="pill fk">FK → financial_items</span></td><td>項目</td></tr><tr><td><code>period_start</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>対象期間の開始日（貸借対照表の項目は period_end と同じ日）</td></tr><tr><td><code>period_end</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>対象期間の終了日</td></tr><tr><td><code>value</code></td><td>REAL</td><td><span class="pill nn">NOT NULL</span></td><td>値</td></tr><tr><td><code>form</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>提出書類の種類（10-Q ＝ 四半期報告書、10-K ＝ 年次報告書 など）</td></tr><tr><td><code>filed_date</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>提出日（その値が公表された日）</td></tr></table></div><p class="muted">主キーは (item_id, symbol, period_start, period_end)。<code>WITHOUT ROWID</code>。ビューが項目で値を探すため、主キーは item_id から始めています。損益やキャッシュフローの項目は、3・6・9・12か月の期間の値が混ざっています。</p></div><div class="card tcard"><h3>llm_runs <span class="role">LLM の1回の実行（1 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>run_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span></td><td>実行番号（自動採番）</td></tr><tr><td><code>model</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>指定したモデル名</td></tr><tr><td><code>model_version</code></td><td>TEXT</td><td></td><td>実際に回答したモデルの版（最初の回答を保存したときに入る）</td></tr><tr><td><code>system_prompt</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>使ったシステムプロンプトの全文</td></tr><tr><td><code>temperature</code></td><td>REAL</td><td><span class="pill nn">NOT NULL</span></td><td>回答のばらつきの大きさ（API の temperature）</td></tr><tr><td><code>n_samples</code></td><td>INTEGER</td><td><span class="pill nn">NOT NULL</span><span class="pill ck">CHECK n_samples &gt; 0</span></td><td>1銘柄あたりの回答の数</td></tr><tr><td><code>input_months</code></td><td>INTEGER</td><td><span class="pill nn">NOT NULL</span></td><td>LLM に渡した日次リターンの長さ（1 ＝ 1か月、3 ＝ 四半期）</td></tr><tr><td><code>target_months</code></td><td>INTEGER</td><td><span class="pill nn">NOT NULL</span></td><td>LLM が予想する期間の長さ（同上）</td></tr><tr><td><code>note</code></td><td>TEXT</td><td></td><td>メモ</td></tr><tr><td><code>created_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>実行を始めた日時（UTC）</td></tr></table></div><p class="muted">月次の予想と四半期の予想は、別の実行（別の run_id）として記録します。<code>run.py</code> は、設定が違う実行の続きには書き込みません。</p></div><div class="card tcard"><h3>llm_views <span class="role">LLM の回答（1回答1行）（440,640 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>run_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span><span class="pill fk">FK → llm_runs</span></td><td>どの実行の回答か</td></tr><tr><td><code>as_of_date</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>入力に使った最後の取引日。これより後の情報は渡していない。予想の対象はこの日の後の target_months</td></tr><tr><td><code>symbol</code></td><td>TEXT</td><td><span class="pill pk">PK</span><span class="pill fk">FK → tickers</span></td><td>ティッカー</td></tr><tr><td><code>sample_no</code></td><td>INTEGER</td><td><span class="pill pk">PK</span></td><td>何個目の回答か（1 〜 n_samples）</td></tr><tr><td><code>expected_return</code></td><td>REAL</td><td></td><td>予想した平均日次リターン（小数。0.001 ＝ 1日 +0.1%）。読み取り失敗は NULL</td></tr></table></div><p class="muted">主キーは (run_id, as_of_date, symbol, sample_no)。<code>WITHOUT ROWID</code>。1銘柄の回答はまとめて保存するので、(run_id, as_of_date, symbol) の行があれば、その銘柄は回答済みです。</p></div><div class="card tcard"><h3>portfolio_runs <span class="role">比率の計算1回（戦略ごとに1行）（5 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>portfolio_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span></td><td>番号（自動採番）</td></tr><tr><td><code>strategy</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>戦略の名前（market_cap、equal_weight、mean_variance、black_litterman など。blm/strategies.py）</td></tr><tr><td><code>llm_run_id</code></td><td>INTEGER</td><td><span class="pill fk">FK → llm_runs</span></td><td>予想として使った LLM の実行（NULL ＝ 予想を使わない戦略）</td></tr><tr><td><code>params</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>使った係数（JSON。例：{"tau": 0.025, "risk_aversion": 2.5}）</td></tr><tr><td><code>note</code></td><td>TEXT</td><td></td><td>メモ</td></tr><tr><td><code>created_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>計算した日時（UTC）</td></tr></table></div><p class="muted"><code>run_blm.py</code> を実行するたびに、戦略ごとに新しい行ができます。係数は <code>json_extract(params, '$.tau')</code> のように取り出せます。</p></div><div class="card tcard"><h3>portfolio_weights <span class="role">比率（条件・判断日・銘柄ごとに1行）（87,924 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>portfolio_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span><span class="pill fk">FK → portfolio_runs</span></td><td>どの計算の比率か</td></tr><tr><td><code>as_of_date</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>判断日。これより後の情報は使っていない。翌月の最後の取引日まで持ち続ける</td></tr><tr><td><code>symbol</code></td><td>TEXT</td><td><span class="pill pk">PK</span><span class="pill fk">FK → tickers</span></td><td>ティッカー</td></tr><tr><td><code>weight</code></td><td>REAL</td><td><span class="pill nn">NOT NULL</span><span class="pill ck">CHECK weight &gt;= 0</span></td><td>比率（0〜1）。対象の全銘柄に行があり、持たない銘柄は 0。判断日ごとの合計は 1</td></tr></table></div><p class="muted">主キーは (portfolio_id, as_of_date, symbol)。<code>WITHOUT ROWID</code>。同じ LLM の実行を使う戦略は、判断日ごとに同じ銘柄を対象にしています。</p></div>
+<div class="card tcard"><h3>sector_metrics <span class="role">セクターごとの指標（判断日・セクター・指標ごとに1行）（3,586 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>as_of_date</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>判断日（各月の最後の取引日）。これより後の情報は使っていない</td></tr><tr><td><code>gics_sector</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>GICS セクター（tickers.gics_sector と同じ名前）</td></tr><tr><td><code>metric</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>指標の名前（下の表）</td></tr><tr><td><code>value</code></td><td>REAL</td><td><span class="pill nn">NOT NULL</span></td><td>指標の値。リターンとボラティリティは小数（0.05 ＝ 5%）</td></tr><tr><td><code>computed_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>計算した日時（UTC）</td></tr></table></div><div class="table-wrap"><table><tr><th>metric</th><th>意味</th><th>元のデータ</th></tr><tr><td><code>momentum_3m</code>、<code>momentum_6m</code>、<code>momentum_12m</code></td><td>3・6・12か月のリターン。直近の1か月は除く（1か月前までの値動き）</td><td>セクターETFの株価</td></tr><tr><td><code>volatility_30d</code></td><td>過去30取引日の日次リターンの標準偏差を年率にした値。直近5日の平均</td><td>セクターETFの株価</td></tr><tr><td><code>pe_trailing</code></td><td>セクターの銘柄の時価総額の合計 ÷ 直近4四半期の純利益の合計</td><td>財務諸表、時価総額</td></tr><tr><td><code>pb</code></td><td>時価総額の合計 ÷ 直近の四半期の純資産の合計</td><td>財務諸表、時価総額</td></tr><tr><td><code>ps</code></td><td>時価総額の合計 ÷ 直近4四半期の売上高の合計</td><td>財務諸表、時価総額</td></tr><tr><td><code>valuation_coverage</code></td><td>セクターの時価総額のうち、pe_trailing の計算に使えた銘柄の割合</td><td>―</td></tr></table></div><p class="muted">主キーは (as_of_date, gics_sector, metric)。<code>WITHOUT ROWID</code>。財務諸表は、判断日までに提出された四半期だけを使います。株価の履歴が足りない月は、その指標の行がありません（12か月のモメンタムは 2024-02-29 から）。</p></div><div class="card tcard"><h3>stock_metrics <span class="role">銘柄ごとの指標（判断日・銘柄・指標ごとに1行）（256,037 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>as_of_date</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>判断日（各月の最後の取引日）。これより後の情報は使っていない</td></tr><tr><td><code>symbol</code></td><td>TEXT</td><td><span class="pill pk">PK</span><span class="pill fk">FK → tickers</span></td><td>ティッカー（その日の指数の構成銘柄）</td></tr><tr><td><code>metric</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>指標の名前（下の表）</td></tr><tr><td><code>value</code></td><td>REAL</td><td><span class="pill nn">NOT NULL</span></td><td>指標の値。リターン・成長率・利益率は小数（0.05 ＝ 5%）</td></tr><tr><td><code>computed_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>計算した日時（UTC）</td></tr></table></div><div class="table-wrap"><table><tr><th>metric</th><th>意味</th><th>元のデータ</th></tr><tr><td><code>momentum_12m</code></td><td>252取引日前から21取引日前までのリターン（直近1か月は除く）</td><td>株価</td></tr><tr><td><code>return_1m</code></td><td>直近21取引日のリターン</td><td>株価</td></tr><tr><td><code>relative_momentum_12m</code></td><td>momentum_12m − セクターETFの同じ期間のリターン</td><td>株価</td></tr><tr><td><code>volatility_30d</code></td><td>過去30取引日の日次リターンの標準偏差を年率にした値。直近5日の平均</td><td>株価</td></tr><tr><td><code>beta_1y</code></td><td>過去252取引日の日次リターンを S&amp;P500 に回帰した傾き（半年分に満たなければ作らない）</td><td>株価</td></tr><tr><td><code>pe_trailing</code></td><td>時価総額 ÷ 直近4四半期の純利益（赤字なら作らない）</td><td>財務諸表、時価総額</td></tr><tr><td><code>pb</code></td><td>時価総額 ÷ 純資産</td><td>財務諸表、時価総額</td></tr><tr><td><code>revenue_growth_yoy</code>、<code>net_income_growth_yoy</code></td><td>直近の四半期 ÷ 1年前の同じ四半期 − 1（1年前が 0 以下なら作らない）</td><td>財務諸表</td></tr><tr><td><code>net_margin</code></td><td>直近4四半期の純利益 ÷ 売上高</td><td>財務諸表</td></tr><tr><td><code>roe</code></td><td>直近4四半期の純利益 ÷ 純資産</td><td>財務諸表</td></tr><tr><td><code>debt_to_equity</code></td><td>長期負債 ÷ 純資産</td><td>財務諸表</td></tr><tr><td><code>fundamentals_age_days</code></td><td>使った四半期の期末から判断日までの日数</td><td>財務諸表</td></tr><tr><td><code>filing_age_days</code></td><td>その決算の提出日から判断日までの日数</td><td>財務諸表</td></tr></table></div><div class="table-wrap"><table><tr><th>業種（GICS サブ業種）</th><th>作らない指標</th><th>理由</th></tr><tr><td>銀行、消費者金融、証券、資産運用・カストディ銀行</td><td><code>net_margin</code>、<code>debt_to_equity</code></td><td>借り入れ（預金）が商売の材料で、売上高も利息を差し引いた形で報告される</td></tr><tr><td>複合持株会社（バークシャー・ハサウェイ）</td><td><code>pe_trailing</code>、<code>net_income_growth_yoy</code>、<code>net_margin</code>、<code>roe</code></td><td>保有株の含み損益が純利益に入り、純利益が事業の稼ぎを表さない</td></tr><tr><td>不動産投資信託（REIT、12業種）</td><td><code>pe_trailing</code>、<code>net_income_growth_yoy</code>、<code>net_margin</code>、<code>roe</code></td><td>建物の減価償却と物件の売却益で、純利益が稼ぎを表さない（業界は FFO を使うが、DB にない）</td></tr></table></div><p class="muted">上の表は、業種の性質のせいで誤解を招く指標です。その業種では行を作りません。定義は <code>marketdb/transform/stock.py</code> の <code>INDUSTRY_EXCLUSIONS</code> にあります。同じセクターでも、決済会社・取引所・保険・不動産サービスはすべての指標を作ります。</p><p class="muted">主キーは (as_of_date, symbol, metric)。<code>WITHOUT ROWID</code>。計算できない指標は行を作りません。財務諸表は、判断日までに提出された最新の四半期を使います。その四半期の期末から 150 日（<code>.env</code> の <code>FUNDAMENTALS_MAX_AGE_DAYS</code>）を超えている銘柄は、財務の指標をすべて作りません。</p></div><div class="card tcard"><h3>reports <span class="role">月次レポートのファイル（1ファイルで1行）（39 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>report_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span></td><td>連番</td></tr><tr><td><code>source</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>発行元（例：daiwa-am）</td></tr><tr><td><code>report_month</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>表紙に書かれた月（YYYY-MM）</td></tr><tr><td><code>published_date</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>PDF の作成日。この日以降の判断にだけ使える</td></tr><tr><td><code>file_name</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>ファイル名（例：daiwa-am_2024-04.pdf）</td></tr><tr><td><code>file_sha256</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>ファイルのハッシュ値。差し替えに気づくためのもの</td></tr><tr><td><code>n_pages</code></td><td>INTEGER</td><td><span class="pill nn">NOT NULL</span><span class="pill ck">CHECK n_pages &gt; 0</span></td><td>ページ数</td></tr><tr><td><code>registered_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>登録した日時（UTC）</td></tr></table></div><p class="muted">(source, report_month) は UNIQUE。ファイルそのものは DB に入れず、<code>LLM-BLM/data/reports/</code> に置きます。</p></div><div class="card tcard"><h3>report_runs <span class="role">レポートの分析1回（2 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>report_run_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span></td><td>連番</td></tr><tr><td><code>model</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>指定したモデル（例：gpt-4o-mini）</td></tr><tr><td><code>model_version</code></td><td>TEXT</td><td></td><td>実際に答えたモデル</td></tr><tr><td><code>system_prompt</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>使ったシステムプロンプト</td></tr><tr><td><code>items</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>聞いた項目の一覧（JSON）。項目ごとに name、type、description</td></tr><tr><td><code>temperature</code></td><td>REAL</td><td><span class="pill nn">NOT NULL</span></td><td>回答のばらつきの大きさ</td></tr><tr><td><code>note</code></td><td>TEXT</td><td></td><td>メモ（何を変えた実行か）</td></tr><tr><td><code>created_at</code></td><td>TEXT</td><td><span class="pill nn">NOT NULL</span></td><td>作成日時（UTC）</td></tr></table></div><p class="muted">項目やプロンプトを変えたら、新しい行（新しい report_run_id）になります。</p></div><div class="card tcard"><h3>report_values <span class="role">レポートから読み取った値（分析・レポート・項目ごとに1行）（984 行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>制約</th><th>意味</th></tr><tr><td><code>report_run_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span><span class="pill fk">FK → report_runs</span></td><td>どの分析の値か</td></tr><tr><td><code>report_id</code></td><td>INTEGER</td><td><span class="pill pk">PK</span><span class="pill fk">FK → reports</span></td><td>どのレポートの値か</td></tr><tr><td><code>item</code></td><td>TEXT</td><td><span class="pill pk">PK</span></td><td>項目名（report_runs.items にある name）</td></tr><tr><td><code>value_num</code></td><td>REAL</td><td><span class="pill ck">CHECK value_num IS NULL OR value_text IS NULL</span></td><td>数値・点数の項目の値</td></tr><tr><td><code>value_text</code></td><td>TEXT</td><td></td><td>文章の項目の値</td></tr></table></div><p class="muted">主キーは (report_run_id, report_id, item)。<code>WITHOUT ROWID</code>。value_num と value_text が両方 NULL の行は、レポートがその項目に触れていないことを表します。</p></div>
+</section>
+
+<section id="views"><h2><span class="num">3</span>ビュー定義</h2>
+<div class="card tcard"><h3>market_caps <span class="role">取引日ごとの時価総額</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>意味</th></tr><tr><td><code>symbol</code></td><td>TEXT</td><td>ティッカー</td></tr><tr><td><code>date</code></td><td>TEXT</td><td>取引日（prices の行ごと）</td></tr><tr><td><code>close</code></td><td>REAL</td><td>終値（分割のみ調整）</td></tr><tr><td><code>shares</code></td><td>INTEGER</td><td>その日に有効な株式数（その日以前で最新の報告値）</td></tr><tr><td><code>shares_reported_on</code></td><td>TEXT</td><td>その株式数の報告日</td></tr><tr><td><code>market_cap</code></td><td>（計算値）</td><td>時価総額 ＝ close × shares</td></tr></table></div><p class="muted">株式数の報告が一度もない日は行が出ません。</p><details><summary>定義（SQL）</summary><pre class="sql"><code>CREATE VIEW IF NOT EXISTS market_caps AS
+SELECT p.symbol,
+       p.date,
+       p.close,
+       s.shares,
+       s.date            AS shares_reported_on,
+       p.close * s.shares AS market_cap
+FROM prices p
+JOIN shares_outstanding s
+  ON s.symbol = p.symbol
+ AND s.date = (SELECT MAX(date) FROM shares_outstanding
+               WHERE symbol = p.symbol AND date &lt;= p.date);</code></pre></details></div><div class="card tcard"><h3>index_weights <span class="role">日次の S&P500 構成比率</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>意味</th></tr><tr><td><code>date</code></td><td>TEXT</td><td>取引日</td></tr><tr><td><code>symbol</code></td><td>TEXT</td><td>ティッカー</td></tr><tr><td><code>market_cap</code></td><td>（計算値）</td><td>時価総額（market_caps と同じ値）</td></tr><tr><td><code>weight</code></td><td>（計算値）</td><td>構成比率 ＝ 時価総額 ÷ その日の在籍銘柄の時価総額の合計（0〜1）</td></tr></table></div><p class="muted">対象は、その日に在籍していて、除外されておらず（<code>excluded_reason IS NULL</code>）、時価総額がある銘柄です。1日分の合計は 1 になります。</p><details><summary>定義（SQL）</summary><pre class="sql"><code>CREATE VIEW IF NOT EXISTS index_weights AS
+SELECT mc.date,
+       mc.symbol,
+       mc.market_cap,
+       mc.market_cap / SUM(mc.market_cap) OVER (PARTITION BY mc.date) AS weight
+FROM market_caps mc
+JOIN tickers t
+  ON t.symbol = mc.symbol AND t.excluded_reason IS NULL
+JOIN index_membership m
+  ON m.symbol = mc.symbol
+ AND (m.start_date IS NULL OR m.start_date &lt;= mc.date)
+ AND (m.end_date IS NULL OR m.end_date &gt; mc.date);</code></pre></details></div><div class="card tcard"><h3>fundamentals_quarterly <span class="role">四半期ごとの主な財務項目（1社・1四半期で1行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>意味</th></tr><tr><td><code>symbol</code></td><td>TEXT</td><td>ティッカー</td></tr><tr><td><code>period_end</code></td><td>TEXT</td><td>四半期の末日</td></tr><tr><td><code>filed_date</code></td><td>（計算値）</td><td>売上・純利益が最初に公表された日</td></tr><tr><td><code>revenue</code></td><td>（計算値）</td><td>売上高</td></tr><tr><td><code>cost_of_revenue</code></td><td>（計算値）</td><td>売上原価</td></tr><tr><td><code>gross_profit</code></td><td>（計算値）</td><td>売上総利益</td></tr><tr><td><code>rd_expense</code></td><td>（計算値）</td><td>研究開発費</td></tr><tr><td><code>operating_income</code></td><td>（計算値）</td><td>営業利益</td></tr><tr><td><code>pretax_income</code></td><td>（計算値）</td><td>税引前利益</td></tr><tr><td><code>net_income</code></td><td>（計算値）</td><td>純利益</td></tr><tr><td><code>eps_basic</code></td><td>（計算値）</td><td>1株利益（基本）</td></tr><tr><td><code>eps_diluted</code></td><td>（計算値）</td><td>1株利益（希薄化後）</td></tr><tr><td><code>dividend_per_share</code></td><td>（計算値）</td><td>1株あたり配当（宣言額）</td></tr><tr><td><code>shares_diluted_avg</code></td><td>（計算値）</td><td>希薄化後の期中平均株式数（3か月の報告値がある期だけ）</td></tr><tr><td><code>operating_cf</code></td><td>（計算値）</td><td>営業キャッシュフロー</td></tr><tr><td><code>capex</code></td><td>（計算値）</td><td>設備投資（有形固定資産の取得）</td></tr><tr><td><code>dividends_paid</code></td><td>（計算値）</td><td>配当の支払額</td></tr><tr><td><code>buybacks</code></td><td>（計算値）</td><td>自社株買いの支払額</td></tr><tr><td><code>total_assets</code></td><td>（計算値）</td><td>総資産</td></tr><tr><td><code>current_assets</code></td><td>（計算値）</td><td>流動資産</td></tr><tr><td><code>cash</code></td><td>（計算値）</td><td>現金および現金同等物</td></tr><tr><td><code>total_liabilities</code></td><td>（計算値）</td><td>負債合計</td></tr><tr><td><code>current_liabilities</code></td><td>（計算値）</td><td>流動負債</td></tr><tr><td><code>long_term_debt</code></td><td>（計算値）</td><td>長期債務</td></tr><tr><td><code>total_equity</code></td><td>（計算値）</td><td>株主資本</td></tr></table></div><p class="muted">損益とキャッシュフローの項目は3か月分の値です。3か月の報告値があればそれを使い、なければ「期初からの累計 − 1つ前の累計」で求めます（第4四半期 ＝ 通期 − 9か月累計）。80〜120日の期間を1四半期とみなします。会社によって使うタグが違うので、項目ごとに候補のタグを優先順位で選んでいます。該当するタグがない項目は NULL です。</p><details><summary>定義（SQL）</summary><pre class="sql"><code>CREATE VIEW IF NOT EXISTS fundamentals_quarterly AS
+WITH concept(concept, kind, tag, priority) AS (VALUES
+    -- kind: &#x27;flow&#x27; (additive over time), &#x27;average&#x27; (per-quarter only, not additive), &#x27;stock&#x27; (balance sheet)
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;Revenues&#x27;, 1),
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;RevenuesNetOfInterestExpense&#x27;, 2),
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;RevenueFromContractWithCustomerExcludingAssessedTax&#x27;, 3),
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;RevenueFromContractWithCustomerIncludingAssessedTax&#x27;, 4),
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;SalesRevenueNet&#x27;, 5),
+    (&#x27;cost_of_revenue&#x27;,   &#x27;flow&#x27;,    &#x27;CostOfGoodsAndServicesSold&#x27;, 1),
+    (&#x27;cost_of_revenue&#x27;,   &#x27;flow&#x27;,    &#x27;CostOfRevenue&#x27;, 2),
+    (&#x27;gross_profit&#x27;,      &#x27;flow&#x27;,    &#x27;GrossProfit&#x27;, 1),
+    (&#x27;rd_expense&#x27;,        &#x27;flow&#x27;,    &#x27;ResearchAndDevelopmentExpense&#x27;, 1),
+    (&#x27;operating_income&#x27;,  &#x27;flow&#x27;,    &#x27;OperatingIncomeLoss&#x27;, 1),
+    (&#x27;pretax_income&#x27;,     &#x27;flow&#x27;,    &#x27;IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest&#x27;, 1),
+    (&#x27;pretax_income&#x27;,     &#x27;flow&#x27;,    &#x27;IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments&#x27;, 2),
+    (&#x27;net_income&#x27;,        &#x27;flow&#x27;,    &#x27;NetIncomeLoss&#x27;, 1),
+    (&#x27;net_income&#x27;,        &#x27;flow&#x27;,    &#x27;ProfitLoss&#x27;, 2),
+    (&#x27;eps_basic&#x27;,         &#x27;flow&#x27;,    &#x27;EarningsPerShareBasic&#x27;, 1),
+    (&#x27;eps_diluted&#x27;,       &#x27;flow&#x27;,    &#x27;EarningsPerShareDiluted&#x27;, 1),
+    (&#x27;dividend_per_share&#x27;,&#x27;flow&#x27;,    &#x27;CommonStockDividendsPerShareDeclared&#x27;, 1),
+    (&#x27;shares_diluted_avg&#x27;,&#x27;average&#x27;, &#x27;WeightedAverageNumberOfDilutedSharesOutstanding&#x27;, 1),
+    (&#x27;operating_cf&#x27;,      &#x27;flow&#x27;,    &#x27;NetCashProvidedByUsedInOperatingActivities&#x27;, 1),
+    (&#x27;capex&#x27;,             &#x27;flow&#x27;,    &#x27;PaymentsToAcquirePropertyPlantAndEquipment&#x27;, 1),
+    (&#x27;dividends_paid&#x27;,    &#x27;flow&#x27;,    &#x27;PaymentsOfDividends&#x27;, 1),
+    (&#x27;dividends_paid&#x27;,    &#x27;flow&#x27;,    &#x27;PaymentsOfDividendsCommonStock&#x27;, 2),
+    (&#x27;buybacks&#x27;,          &#x27;flow&#x27;,    &#x27;PaymentsForRepurchaseOfCommonStock&#x27;, 1),
+    (&#x27;total_assets&#x27;,      &#x27;stock&#x27;,   &#x27;Assets&#x27;, 1),
+    (&#x27;current_assets&#x27;,    &#x27;stock&#x27;,   &#x27;AssetsCurrent&#x27;, 1),
+    (&#x27;cash&#x27;,              &#x27;stock&#x27;,   &#x27;CashAndCashEquivalentsAtCarryingValue&#x27;, 1),
+    (&#x27;cash&#x27;,              &#x27;stock&#x27;,   &#x27;CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents&#x27;, 2),
+    (&#x27;total_liabilities&#x27;, &#x27;stock&#x27;,   &#x27;Liabilities&#x27;, 1),
+    (&#x27;current_liabilities&#x27;,&#x27;stock&#x27;,  &#x27;LiabilitiesCurrent&#x27;, 1),
+    (&#x27;long_term_debt&#x27;,    &#x27;stock&#x27;,   &#x27;LongTermDebtNoncurrent&#x27;, 1),
+    (&#x27;long_term_debt&#x27;,    &#x27;stock&#x27;,   &#x27;LongTermDebt&#x27;, 2),
+    (&#x27;total_equity&#x27;,      &#x27;stock&#x27;,   &#x27;StockholdersEquity&#x27;, 1),
+    (&#x27;total_equity&#x27;,      &#x27;stock&#x27;,   &#x27;StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest&#x27;, 2)
+),
+picked AS (
+    SELECT f.symbol, f.item_id, c.concept, c.kind, c.priority, f.period_start, f.period_end, f.value, f.filed_date,
+           julianday(f.period_end) - julianday(f.period_start) AS days
+    FROM concept c
+    JOIN financial_items i ON i.tag = c.tag AND i.taxonomy = &#x27;us-gaap&#x27;
+    JOIN financial_facts f ON f.item_id = i.item_id
+),
+quarter_values AS (
+    -- reported for 3 months
+    SELECT symbol, concept, priority, 0 AS derived, period_end, value, filed_date
+    FROM picked WHERE kind IN (&#x27;flow&#x27;, &#x27;average&#x27;) AND days BETWEEN 80 AND 120
+    UNION ALL
+    -- year-to-date value minus the previous year-to-date value of the same fiscal year
+    SELECT a.symbol, a.concept, a.priority, 1, a.period_end, a.value - b.value, a.filed_date
+    FROM picked a
+    JOIN financial_facts b ON b.item_id = a.item_id AND b.symbol = a.symbol AND b.period_start = a.period_start
+                          AND b.period_end BETWEEN date(a.period_end, &#x27;-120 days&#x27;) AND date(a.period_end, &#x27;-80 days&#x27;)
+    WHERE a.kind = &#x27;flow&#x27; AND a.days &gt; 120
+    UNION ALL
+    -- balance sheet values at the quarter end
+    SELECT symbol, concept, priority, 0, period_end, value, filed_date
+    FROM picked WHERE kind = &#x27;stock&#x27;
+),
+best AS (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY symbol, concept, period_end ORDER BY filed_date, derived, priority) AS choice
+    FROM quarter_values
+)
+SELECT symbol,
+       period_end,
+       MIN(CASE WHEN concept IN (&#x27;revenue&#x27;, &#x27;net_income&#x27;) THEN filed_date END) AS filed_date,
+       MAX(CASE WHEN concept = &#x27;revenue&#x27;             THEN value END) AS revenue,
+       MAX(CASE WHEN concept = &#x27;cost_of_revenue&#x27;     THEN value END) AS cost_of_revenue,
+       MAX(CASE WHEN concept = &#x27;gross_profit&#x27;        THEN value END) AS gross_profit,
+       MAX(CASE WHEN concept = &#x27;rd_expense&#x27;          THEN value END) AS rd_expense,
+       MAX(CASE WHEN concept = &#x27;operating_income&#x27;    THEN value END) AS operating_income,
+       MAX(CASE WHEN concept = &#x27;pretax_income&#x27;       THEN value END) AS pretax_income,
+       MAX(CASE WHEN concept = &#x27;net_income&#x27;          THEN value END) AS net_income,
+       MAX(CASE WHEN concept = &#x27;eps_basic&#x27;           THEN value END) AS eps_basic,
+       MAX(CASE WHEN concept = &#x27;eps_diluted&#x27;         THEN value END) AS eps_diluted,
+       MAX(CASE WHEN concept = &#x27;dividend_per_share&#x27;  THEN value END) AS dividend_per_share,
+       MAX(CASE WHEN concept = &#x27;shares_diluted_avg&#x27;  THEN value END) AS shares_diluted_avg,
+       MAX(CASE WHEN concept = &#x27;operating_cf&#x27;        THEN value END) AS operating_cf,
+       MAX(CASE WHEN concept = &#x27;capex&#x27;               THEN value END) AS capex,
+       MAX(CASE WHEN concept = &#x27;dividends_paid&#x27;      THEN value END) AS dividends_paid,
+       MAX(CASE WHEN concept = &#x27;buybacks&#x27;            THEN value END) AS buybacks,
+       MAX(CASE WHEN concept = &#x27;total_assets&#x27;        THEN value END) AS total_assets,
+       MAX(CASE WHEN concept = &#x27;current_assets&#x27;      THEN value END) AS current_assets,
+       MAX(CASE WHEN concept = &#x27;cash&#x27;                THEN value END) AS cash,
+       MAX(CASE WHEN concept = &#x27;total_liabilities&#x27;   THEN value END) AS total_liabilities,
+       MAX(CASE WHEN concept = &#x27;current_liabilities&#x27; THEN value END) AS current_liabilities,
+       MAX(CASE WHEN concept = &#x27;long_term_debt&#x27;      THEN value END) AS long_term_debt,
+       MAX(CASE WHEN concept = &#x27;total_equity&#x27;        THEN value END) AS total_equity
+FROM best
+WHERE choice = 1
+GROUP BY symbol, period_end
+HAVING filed_date IS NOT NULL;</code></pre></details></div><div class="card tcard"><h3>llm_view_stats <span class="role">LLM の回答の平均と分散（実行・日付・銘柄ごとに1行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>意味</th></tr><tr><td><code>run_id</code></td><td>INTEGER</td><td>実行番号</td></tr><tr><td><code>as_of_date</code></td><td>TEXT</td><td>入力に使った最後の取引日</td></tr><tr><td><code>symbol</code></td><td>TEXT</td><td>ティッカー</td></tr><tr><td><code>n_answers</code></td><td>（計算値）</td><td>読み取れた回答の数（失敗がなければ n_samples と同じ）</td></tr><tr><td><code>mean_return</code></td><td>（計算値）</td><td>回答の平均。Black-Litterman のビュー（Q）</td></tr><tr><td><code>variance</code></td><td>（計算値）</td><td>回答の分散。ビューの不確かさ（Ω）</td></tr></table></div><p class="muted">分散は、個数で割る母分散です（<code>numpy.var</code> の標準と同じ）。NULL の回答は計算に入りません。</p><details><summary>定義（SQL）</summary><pre class="sql"><code>CREATE VIEW IF NOT EXISTS llm_view_stats AS
+SELECT run_id,
+       as_of_date,
+       symbol,
+       COUNT(expected_return) AS n_answers,     -- parsed answers (n_samples when nothing failed)
+       AVG(expected_return)   AS mean_return,
+       AVG(expected_return * expected_return) - AVG(expected_return) * AVG(expected_return) AS variance  -- population variance (same as numpy.var)
+FROM llm_views
+GROUP BY run_id, as_of_date, symbol;</code></pre></details></div><div class="card tcard"><h3>portfolio_returns <span class="role">比率を1か月持ち続けた場合のリターン（計算・判断日ごとに1行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>意味</th></tr><tr><td><code>portfolio_id</code></td><td>INTEGER</td><td>どの計算の比率か</td></tr><tr><td><code>as_of_date</code></td><td>TEXT</td><td>判断日（この日の終値で買う）</td></tr><tr><td><code>end_date</code></td><td>（計算値）</td><td>保有の終わり（判断日の翌月の、最後の取引日）</td></tr><tr><td><code>n_holdings</code></td><td>（計算値）</td><td>比率が 0 より大きい銘柄の数</td></tr><tr><td><code>period_return</code></td><td>（計算値）</td><td>期間のリターン ＝ Σ 比率 ×（終わりの調整後終値 ÷ 判断日の調整後終値 − 1）</td></tr></table></div><p class="muted">途中で比率を戻さず、持ち続けた場合のリターンです。配当込み、売買コストなし。終わりの日に株価がない銘柄は、それ以前で最後の株価を使います。</p><details><summary>定義（SQL）</summary><pre class="sql"><code>CREATE VIEW IF NOT EXISTS portfolio_returns AS
+WITH period AS (
+    SELECT DISTINCT as_of_date,
+           (SELECT MAX(date) FROM prices
+             WHERE symbol = &#x27;^GSPC&#x27; AND date &lt;= date(as_of_date, &#x27;start of month&#x27;, &#x27;+2 months&#x27;, &#x27;-1 day&#x27;)) AS end_date
+    FROM portfolio_weights
+)
+SELECT w.portfolio_id,
+       w.as_of_date,
+       p.end_date,
+       SUM(w.weight &gt; 0) AS n_holdings,
+       SUM(w.weight * ((SELECT adj_close FROM prices WHERE symbol = w.symbol AND date &lt;= p.end_date ORDER BY date DESC LIMIT 1)
+                       / (SELECT adj_close FROM prices WHERE symbol = w.symbol AND date = w.as_of_date) - 1)) AS period_return
+FROM portfolio_weights w
+JOIN period p ON p.as_of_date = w.as_of_date
+GROUP BY w.portfolio_id, w.as_of_date;</code></pre></details></div>
+<div class="card tcard"><h3>sector_metric_scores <span class="role">セクターの指標と z スコア（判断日・セクター・指標ごとに1行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>意味</th></tr><tr><td><code>as_of_date</code></td><td>TEXT</td><td>判断日</td></tr><tr><td><code>gics_sector</code></td><td>TEXT</td><td>GICS セクター</td></tr><tr><td><code>metric</code></td><td>TEXT</td><td>指標の名前</td></tr><tr><td><code>value</code></td><td>REAL</td><td>指標の値（sector_metrics と同じ）</td></tr><tr><td><code>z_score</code></td><td>（計算値）</td><td>同じ判断日・同じ指標の中で、セクターの平均から標準偏差の何倍離れているか</td></tr></table></div><p class="muted">判断日・指標ごとに、z スコアの平均は 0、標準偏差は 1 になります。標準偏差は、個数で割る母標準偏差です。</p><details><summary>定義（SQL）</summary><pre class="sql"><code>CREATE VIEW IF NOT EXISTS sector_metric_scores AS
+SELECT as_of_date,
+       gics_sector,
+       metric,
+       value,
+       (value - AVG(value) OVER w)
+         / NULLIF(sqrt(AVG(value * value) OVER w - AVG(value) OVER w * AVG(value) OVER w), 0) AS z_score
+FROM sector_metrics
+WINDOW w AS (PARTITION BY as_of_date, metric);</code></pre></details></div>
+<div class="card tcard"><h3>stock_metric_scores <span class="role">銘柄の指標とセクター内の順位（判断日・銘柄・指標ごとに1行）</span></h3><div class="table-wrap"><table><tr><th>カラム</th><th>型</th><th>意味</th></tr><tr><td><code>as_of_date</code></td><td>TEXT</td><td>判断日</td></tr><tr><td><code>symbol</code></td><td>TEXT</td><td>ティッカー</td></tr><tr><td><code>gics_sector</code></td><td>TEXT</td><td>GICS セクター</td></tr><tr><td><code>metric</code></td><td>TEXT</td><td>指標の名前</td></tr><tr><td><code>value</code></td><td>REAL</td><td>指標の値（stock_metrics と同じ）</td></tr><tr><td><code>sector_percentile</code></td><td>（計算値）</td><td>同じ判断日・同じ指標・同じセクターの銘柄の中での位置。0 が最も小さい値、100 が最も大きい値。その指標を持つ銘柄がセクターに5つ未満なら NULL</td></tr></table></div><p class="muted">順位は、その指標の行がある銘柄だけで付けます。</p><details><summary>定義（SQL）</summary><pre class="sql"><code>CREATE VIEW IF NOT EXISTS stock_metric_scores AS
+SELECT m.as_of_date,
+       m.symbol,
+       t.gics_sector,
+       m.metric,
+       m.value,
+       CASE WHEN COUNT(*) OVER w &gt;= 5 THEN 100.0 * PERCENT_RANK() OVER (w ORDER BY m.value) END AS sector_percentile
+FROM stock_metrics m
+JOIN tickers t ON t.symbol = m.symbol
+WINDOW w AS (PARTITION BY m.as_of_date, m.metric, t.gics_sector);</code></pre></details></div>
+</section>
+
+<section id="indexes"><h2><span class="num">4</span>インデックス</h2>
+<div class="table-wrap"><table><tr><th>名前</th><th>テーブル</th><th>対象の列</th></tr><tr><td><code>idx_membership_symbol</code></td><td><code>index_membership</code></td><td><code>symbol</code></td></tr><tr><td><code>idx_prices_date</code></td><td><code>prices</code></td><td><code>date</code></td></tr></table></div>
+<p class="muted">このほか、主キーと UNIQUE 制約のインデックスが自動で作られます。</p>
+</section>
+
+<section id="rules"><h2><span class="num">5</span>共通の決まり</h2>
+<div class="grid2">
+<div class="card"><h4>ティッカーは yfinance の書き方</h4><p>Wikipedia は <code>BRK.B</code>、yfinance は <code>BRK-B</code> と書きます。<code>BRK.B</code> では株価が取れません（元論文のデータからも Berkshire が抜けていたはずです）。DB では yfinance の書き方に統一します。</p></div>
+<div class="card"><h4>日付は文字列（ISO 8601）</h4><p>SQLite には日付型がありません。<code>'2024-07-01'</code> の形なら、文字列の大小比較がそのまま日付の前後比較になり、<code>BETWEEN</code> や <code>MAX</code> が正しく動きます。</p></div>
+<div class="card"><h4>取得日時を残す</h4><p>Wikipedia の一覧も yfinance の値も、取得した時期によって変わります。どの行にも <code>fetched_at</code> を持たせ、いつ時点のデータかを後から示せるようにしました。</p></div>
+<div class="card"><h4>外部キーは接続のたびに有効にする</h4><p>SQLite は <code>PRAGMA foreign_keys = ON</code> を実行しないと <code>REFERENCES</code> をチェックしません。<code>connect()</code> の中で必ず有効にしています。</p></div>
+<div class="card"><h4>NULL を含む重複チェックの穴</h4><p>SQLite の <code>UNIQUE</code> は NULL 同士を「別の値」とみなします。追加だけ・除外だけの入れ替えイベントは二重登録を防げないので、取得処理の側で防ぎます。</p></div>
+<div class="card"><h4>SQLite の型は「目安」</h4><p><code>REAL</code> の列に文字列を入れてもエラーにならないことがあります。データを入れるコードの側で型を揃えています（<code>float()</code> で変換してから保存）。</p></div>
+</div>
+</section>
+<section id="constraints"><h2><span class="num">6</span>制約のテスト：DB が弾いてくれる不正なデータ</h2>
+<p>テスト用の DB に、わざと不正なデータを入れて確かめた結果です。<b>すべて DB が受け付けずに弾きました。</b></p>
+<div class="card"><div class="table-wrap"><table>
+<tr><th>試したこと</th><th>SQLite のエラー</th></tr>
+<tr><td>重複した (symbol, date) を追加</td><td><code>UNIQUE constraint failed: prices.symbol, prices.date</code></td></tr><tr><td>tickers にない銘柄の株価を追加</td><td><code>FOREIGN KEY constraint failed</code></td></tr><tr><td>n_samples = 0 の実行を追加</td><td><code>CHECK constraint failed: n_samples &gt; 0</code></td></tr><tr><td>存在しない run_id の回答を追加</td><td><code>FOREIGN KEY constraint failed</code></td></tr><tr><td>株式数 0 を追加</td><td><code>CHECK constraint failed: shares &gt; 0</code></td></tr><tr><td>在籍期間の開始日が終了日以降</td><td><code>CHECK constraint failed: start_date IS NULL OR end_date IS NULL OR start_date &lt; end_date</code></td></tr><tr><td>tickers にない銘柄の在籍期間を追加</td><td><code>FOREIGN KEY constraint failed</code></td></tr><tr><td>同じ発行元・同じ月のレポートを2回追加</td><td><code>UNIQUE constraint failed: reports.source, reports.report_month</code></td></tr><tr><td>ページ数 0 のレポートを追加</td><td><code>CHECK constraint failed: n_pages &gt; 0</code></td></tr><tr><td>同じ分析・レポート・項目の値を2回追加</td><td><code>UNIQUE constraint failed: report_values.report_run_id, report_values.report_id, report_values.item</code></td></tr><tr><td>1つの値に数値と文章を両方入れる</td><td><code>CHECK constraint failed: value_num IS NULL OR value_text IS NULL</code></td></tr><tr><td>登録していないレポートの値を追加</td><td><code>FOREIGN KEY constraint failed</code></td></tr><tr><td>存在しない report_run_id の値を追加</td><td><code>FOREIGN KEY constraint failed</code></td></tr><tr><td>同じ判断日・セクター・指標の値を2回追加</td><td><code>UNIQUE constraint failed: sector_metrics.as_of_date, sector_metrics.gics_sector, sector_metrics.metric</code></td></tr><tr><td>同じ入れ替えイベントを2回追加</td><td><code>UNIQUE constraint failed: index_changes.date, index_changes.added_symbol, index_changes.removed_symbol</code></td></tr>
+</table></div></div>
+</section>
+
+<section id="queries"><h2><span class="num">7</span>クエリ例</h2>
+<h3>① 銘柄ごとの期間と日数</h3><pre class="sql"><code>SELECT symbol, MIN(date) AS first_date, MAX(date) AS last_date, COUNT(*) AS days
+FROM prices WHERE symbol IN (&#x27;AAPL&#x27;, &#x27;NVDA&#x27;, &#x27;^GSPC&#x27;) GROUP BY symbol</code></pre><div class="table-wrap"><table class="result"><tr><th>symbol</th><th>first_date</th><th>last_date</th><th>days</th></tr><tr><td>AAPL</td><td>2023-03-01</td><td>2026-09-30</td><td>900</td></tr><tr><td>NVDA</td><td>2023-03-01</td><td>2026-09-30</td><td>900</td></tr><tr><td>^GSPC</td><td>2023-03-01</td><td>2026-09-30</td><td>900</td></tr></table></div>
+<h3>② 日次リターン（ウィンドウ関数 LAG）</h3><pre class="sql"><code>SELECT symbol, date, adj_close,
+       adj_close / LAG(adj_close) OVER (PARTITION BY symbol ORDER BY date) - 1 AS daily_return
+FROM prices WHERE symbol = &#x27;AAPL&#x27; ORDER BY date LIMIT 4</code></pre><div class="table-wrap"><table class="result"><tr><th>symbol</th><th>date</th><th>adj_close</th><th>daily_return</th></tr><tr><td>AAPL</td><td>2023-03-01</td><td>142.9798</td><td></td></tr><tr><td>AAPL</td><td>2023-03-02</td><td>143.5702</td><td>+0.004129</td></tr><tr><td>AAPL</td><td>2023-03-03</td><td>148.6081</td><td>+0.035090</td></tr><tr><td>AAPL</td><td>2023-03-06</td><td>151.3632</td><td>+0.018539</td></tr></table></div>
+<h3>③ ある日の S&amp;P500 の在籍銘柄数</h3><pre class="sql"><code>SELECT COUNT(*) AS members FROM index_membership
+WHERE (start_date IS NULL OR start_date &lt;= &#x27;2024-06-03&#x27;)
+  AND (end_date   IS NULL OR end_date   &gt;  &#x27;2024-06-03&#x27;)</code></pre><div class="table-wrap"><table class="result"><tr><th>members</th></tr><tr><td>503</td></tr></table></div>
+<h3>④ ある日の時価総額（ビュー market_caps）</h3><pre class="sql"><code>SELECT symbol, date, close, shares, shares_reported_on, market_cap
+FROM market_caps WHERE date = &#x27;2025-12-31&#x27; ORDER BY market_cap DESC LIMIT 3</code></pre><div class="table-wrap"><table class="result"><tr><th>symbol</th><th>date</th><th>close</th><th>shares</th><th>shares_reported_on</th><th>market_cap</th></tr><tr><td>NVDA</td><td>2025-12-31</td><td>186.50</td><td>24,347,000,000</td><td>2025-12-03</td><td>4,540,715,500,000</td></tr><tr><td>AAPL</td><td>2025-12-31</td><td>271.86</td><td>14,840,390,000</td><td>2025-11-17</td><td>4,034,508,208,011</td></tr><tr><td>MSFT</td><td>2025-12-31</td><td>483.62</td><td>7,433,166,379</td><td>2025-11-17</td><td>3,594,827,887,917</td></tr></table></div>
+<h3>⑤ ある日の構成比率（ビュー index_weights）</h3><pre class="sql"><code>SELECT symbol, weight FROM index_weights
+WHERE date = &#x27;2025-12-31&#x27; ORDER BY weight DESC LIMIT 5</code></pre><div class="table-wrap"><table class="result"><tr><th>symbol</th><th>weight</th></tr><tr><td>NVDA</td><td>0.0733</td></tr><tr><td>AAPL</td><td>0.0651</td></tr><tr><td>MSFT</td><td>0.0580</td></tr><tr><td>AMZN</td><td>0.0398</td></tr><tr><td>GOOGL</td><td>0.0315</td></tr></table></div>
+<h3>⑥ 1銘柄の構成比率の推移</h3><pre class="sql"><code>SELECT date, weight FROM index_weights
+WHERE symbol = &#x27;NVDA&#x27; AND date IN (&#x27;2023-06-30&#x27;, &#x27;2024-06-28&#x27;, &#x27;2025-06-30&#x27;, &#x27;2026-06-30&#x27;)</code></pre><div class="table-wrap"><table class="result"><tr><th>date</th><th>weight</th></tr><tr><td>2023-06-30</td><td>0.0269</td></tr><tr><td>2024-06-28</td><td>0.0634</td></tr><tr><td>2025-06-30</td><td>0.0697</td></tr><tr><td>2026-06-30</td><td>0.0712</td></tr></table></div>
+<h3>⑦ 四半期の財務項目（ビュー fundamentals_quarterly）</h3><pre class="sql"><code>SELECT period_end, filed_date, revenue, net_income, eps_diluted, operating_cf, total_equity
+FROM fundamentals_quarterly WHERE symbol = &#x27;AAPL&#x27; ORDER BY period_end DESC LIMIT 4</code></pre><div class="table-wrap"><table class="result"><tr><th>period_end</th><th>filed_date</th><th>revenue</th><th>net_income</th><th>eps_diluted</th><th>operating_cf</th><th>total_equity</th></tr><tr><td>2026-06-27</td><td>2026-07-31</td><td>109,417,000,000</td><td>29,789,000,000</td><td>2.02</td><td>34,369,000,000</td><td>107,520,000,000</td></tr><tr><td>2026-03-28</td><td>2026-05-01</td><td>111,184,000,000</td><td>29,578,000,000</td><td>2.01</td><td>28,702,000,000</td><td>106,491,000,000</td></tr><tr><td>2025-12-27</td><td>2026-01-30</td><td>143,756,000,000</td><td>42,097,000,000</td><td>2.84</td><td>53,925,000,000</td><td>88,190,000,000</td></tr><tr><td>2025-09-27</td><td>2025-10-31</td><td>102,466,000,000</td><td>27,466,000,000</td><td>1.84</td><td>29,728,000,000</td><td>73,733,000,000</td></tr></table></div>
+<h3>⑧ 財務諸表の値をそのまま見る（financial_facts）</h3><pre class="sql"><code>SELECT f.period_start, f.period_end, f.value, f.form, f.filed_date
+FROM financial_facts f JOIN financial_items i USING (item_id)
+WHERE f.symbol = &#x27;AAPL&#x27; AND i.tag = &#x27;NetIncomeLoss&#x27; AND f.period_end &gt;= &#x27;2026-01-01&#x27;
+ORDER BY f.period_end, f.period_start</code></pre><div class="table-wrap"><table class="result"><tr><th>period_start</th><th>period_end</th><th>value</th><th>form</th><th>filed_date</th></tr><tr><td>2025-09-28</td><td>2026-03-28</td><td>71,675,000,000</td><td>10-Q</td><td>2026-05-01</td></tr><tr><td>2025-12-28</td><td>2026-03-28</td><td>29,578,000,000</td><td>10-Q</td><td>2026-05-01</td></tr><tr><td>2025-09-28</td><td>2026-06-27</td><td>101,464,000,000</td><td>10-Q</td><td>2026-07-31</td></tr><tr><td>2026-03-29</td><td>2026-06-27</td><td>29,789,000,000</td><td>10-Q</td><td>2026-07-31</td></tr></table></div>
+<p class="muted">同じ期末日に、3か月分の値と期初からの累計が並びます。ビュー ⑦ は、ここから3か月分の値を取り出したものです。</p>
+<h3>⑨ LLM の実行の一覧（llm_runs）</h3><pre class="sql"><code>SELECT run_id, model_version, temperature, n_samples, input_months, target_months, created_at FROM llm_runs</code></pre><div class="table-wrap"><table class="result"><tr><th>run_id</th><th>model_version</th><th>temperature</th><th>n_samples</th><th>input_months</th><th>target_months</th><th>created_at</th></tr><tr><td>1</td><td>gpt-4o-mini-2024-07-18</td><td>1.0</td><td>30</td><td>1</td><td>1</td><td>2026-10-10T09:41:32+00:00</td></tr></table></div>
+<h3>⑩ Black-Litterman の入力（ビュー llm_view_stats）</h3><pre class="sql"><code>SELECT as_of_date, symbol, n_answers, mean_return, variance FROM llm_view_stats
+WHERE run_id = 1 AND as_of_date = &#x27;2024-06-28&#x27; AND symbol IN (&#x27;AAPL&#x27;, &#x27;JNJ&#x27;, &#x27;NVDA&#x27;, &#x27;TSLA&#x27;)</code></pre><div class="table-wrap"><table class="result"><tr><th>as_of_date</th><th>symbol</th><th>n_answers</th><th>mean_return</th><th>variance</th></tr><tr><td>2024-06-28</td><td>AAPL</td><td>30</td><td>+0.004056</td><td>3.972e-06</td></tr><tr><td>2024-06-28</td><td>JNJ</td><td>30</td><td>+0.001309</td><td>1.059e-07</td></tr><tr><td>2024-06-28</td><td>NVDA</td><td>30</td><td>+0.008321</td><td>5.301e-06</td></tr><tr><td>2024-06-28</td><td>TSLA</td><td>30</td><td>+0.005897</td><td>6.016e-06</td></tr></table></div>
+<h3>⑪ 1銘柄の回答をそのまま見る（llm_views）</h3><pre class="sql"><code>SELECT as_of_date, symbol, sample_no, expected_return FROM llm_views
+WHERE run_id = 1 AND as_of_date = &#x27;2024-06-28&#x27; AND symbol = &#x27;AAPL&#x27; AND sample_no &lt;= 3</code></pre><div class="table-wrap"><table class="result"><tr><th>as_of_date</th><th>symbol</th><th>sample_no</th><th>expected_return</th></tr><tr><td>2024-06-28</td><td>AAPL</td><td>1</td><td>+0.003846</td></tr><tr><td>2024-06-28</td><td>AAPL</td><td>2</td><td>+0.003736</td></tr><tr><td>2024-06-28</td><td>AAPL</td><td>3</td><td>+0.003150</td></tr></table></div>
+<h3>⑫ 比率の計算の一覧（portfolio_runs）</h3><pre class="sql"><code>SELECT r.portfolio_id, r.strategy, r.llm_run_id, r.params FROM portfolio_runs r WHERE r.portfolio_id &lt;= 5</code></pre><div class="table-wrap"><table class="result"><tr><th>portfolio_id</th><th>strategy</th><th>llm_run_id</th><th>params</th></tr><tr><td>1</td><td>market_cap</td><td>nan</td><td>{&quot;cov_window_days&quot;: 252, &quot;min_history_ratio&quot;: 0.5}</td></tr><tr><td>2</td><td>equal_weight</td><td>nan</td><td>{&quot;cov_window_days&quot;: 252, &quot;min_history_ratio&quot;: 0.5}</td></tr><tr><td>3</td><td>mean_variance</td><td>nan</td><td>{&quot;cov_window_days&quot;: 252, &quot;covariance&quot;: &quot;ledoit_wolf&quot;, &quot;min_history_ratio&quot;: 0.5, &quot;risk_aversion&quot;: 2.5}</td></tr><tr><td>4</td><td>black_litterman</td><td>1.0</td><td>{&quot;cov_window_days&quot;: 252, &quot;covariance&quot;: &quot;ledoit_wolf&quot;, &quot;min_history_ratio&quot;: 0.5, &quot;risk_aversion&quot;: 2.5, &quot;tau&quot;: 0.025}</td></tr><tr><td>5</td><td>black_litterman_original</td><td>1.0</td><td>{&quot;cov_window_days&quot;: 252, &quot;covariance&quot;: &quot;sample (decision month)&quot;, &quot;min_history_ratio&quot;: 0.5, &quot;return_weight&quot;: 0.1, &quot;risk_free_rate&quot;: 0.02, &quot;tau&quot;: 0.025}</td></tr></table></div>
+<h3>⑬ 戦略ごとの翌月のリターン（ビュー portfolio_returns）</h3><pre class="sql"><code>SELECT r.strategy, p.as_of_date, p.end_date, p.n_holdings, p.period_return
+FROM portfolio_returns p JOIN portfolio_runs r USING (portfolio_id)
+WHERE p.as_of_date = &#x27;2024-06-28&#x27; AND r.portfolio_id &lt;= 5 ORDER BY r.portfolio_id</code></pre><div class="table-wrap"><table class="result"><tr><th>strategy</th><th>as_of_date</th><th>end_date</th><th>n_holdings</th><th>period_return</th></tr><tr><td>market_cap</td><td>2024-06-28</td><td>2024-07-31</td><td>481</td><td>+0.0119</td></tr><tr><td>equal_weight</td><td>2024-06-28</td><td>2024-07-31</td><td>481</td><td>+0.0444</td></tr><tr><td>mean_variance</td><td>2024-06-28</td><td>2024-07-31</td><td>481</td><td>-0.0960</td></tr><tr><td>black_litterman</td><td>2024-06-28</td><td>2024-07-31</td><td>481</td><td>+0.0002</td></tr><tr><td>black_litterman_original</td><td>2024-06-28</td><td>2024-07-31</td><td>295</td><td>-0.0183</td></tr></table></div><h3>⑭ レポートの一覧（reports）</h3><pre class="sql"><code>SELECT report_id, source, report_month, published_date, n_pages FROM reports
+WHERE report_month BETWEEN &#x27;2024-03&#x27; AND &#x27;2024-05&#x27; ORDER BY report_month</code></pre><div class="table-wrap"><table class="result"><tr><th>report_id</th><th>source</th><th>report_month</th><th>published_date</th><th>n_pages</th></tr><tr><td>9</td><td>daiwa-am</td><td>2024-03</td><td>2024-02-26</td><td>40</td></tr><tr><td>10</td><td>daiwa-am</td><td>2024-04</td><td>2024-03-27</td><td>40</td></tr><tr><td>11</td><td>daiwa-am</td><td>2024-05</td><td>2024-04-19</td><td>40</td></tr></table></div>
+<h3>⑮ 判断日までに公表されていた最新のレポート</h3><pre class="sql"><code>SELECT report_id, report_month, published_date FROM reports
+WHERE published_date &lt;= &#x27;2024-03-28&#x27; ORDER BY published_date DESC LIMIT 1</code></pre><div class="table-wrap"><table class="result"><tr><th>report_id</th><th>report_month</th><th>published_date</th></tr><tr><td>10</td><td>2024-04</td><td>2024-03-27</td></tr></table></div>
+<h3>⑯ ある判断日のモメンタムが強いセクター（ビュー sector_metric_scores）</h3><pre class="sql"><code>SELECT gics_sector, value, z_score FROM sector_metric_scores
+WHERE as_of_date = &#x27;2026-05-29&#x27; AND metric = &#x27;momentum_12m&#x27; ORDER BY z_score DESC LIMIT 3</code></pre><div class="table-wrap"><table class="result"><tr><th>gics_sector</th><th>value</th><th>z_score</th></tr><tr><td>Energy</td><td>0.5296</td><td>1.7966</td></tr><tr><td>Information Technology</td><td>0.5279</td><td>1.7865</td></tr><tr><td>Industrials</td><td>0.3484</td><td>0.6729</td></tr></table></div>
+<h3>⑰ 1つのセクターの指標の一覧（sector_metrics）</h3><pre class="sql"><code>SELECT metric, value FROM sector_metrics
+WHERE as_of_date = &#x27;2026-05-29&#x27; AND gics_sector = &#x27;Energy&#x27; ORDER BY metric</code></pre><div class="table-wrap"><table class="result"><tr><th>metric</th><th>value</th></tr><tr><td>momentum_12m</td><td>0.5296</td></tr><tr><td>momentum_3m</td><td>0.1761</td></tr><tr><td>momentum_6m</td><td>0.3741</td></tr><tr><td>pb</td><td>2.3969</td></tr><tr><td>pe_trailing</td><td>21.3911</td></tr><tr><td>ps</td><td>1.6684</td></tr><tr><td>valuation_coverage</td><td>1.0000</td></tr><tr><td>volatility_30d</td><td>0.2657</td></tr></table></div>
+<h3>⑱ セクターETFと、市場全体のボラティリティ指数（tickers）</h3><pre class="sql"><code>SELECT symbol, security, gics_sector FROM tickers
+WHERE symbol IN (&#x27;XLE&#x27;, &#x27;XLK&#x27;, &#x27;^VIX&#x27;, &#x27;^SKEW&#x27;) ORDER BY symbol</code></pre><div class="table-wrap"><table class="result"><tr><th>symbol</th><th>security</th><th>gics_sector</th></tr><tr><td>XLE</td><td>Select Sector SPDR ETF (Energy)</td><td>Energy</td></tr><tr><td>XLK</td><td>Select Sector SPDR ETF (Information Technology)</td><td>Information Technology</td></tr><tr><td>^SKEW</td><td>CBOE SKEW Index (price of protection against a large fall of the S&amp;P 500)</td><td>None</td></tr><tr><td>^VIX</td><td>CBOE Volatility Index (implied volatility of the S&amp;P 500 over 30 days, percent per year)</td><td>None</td></tr></table></div>
+<h3>⑲ 1銘柄の指標とセクター内の順位（ビュー stock_metric_scores）</h3><pre class="sql"><code>SELECT metric, value, sector_percentile FROM stock_metric_scores
+WHERE as_of_date = &#x27;2026-05-29&#x27; AND symbol = &#x27;NVDA&#x27; AND metric IN (&#x27;momentum_12m&#x27;, &#x27;pe_trailing&#x27;, &#x27;roe&#x27;)</code></pre><div class="table-wrap"><table class="result"><tr><th>metric</th><th>value</th><th>sector_percentile</th></tr><tr><td>momentum_12m</td><td>0.5037</td><td>62.8571</td></tr><tr><td>pe_trailing</td><td>32.0401</td><td>41.7910</td></tr><tr><td>roe</td><td>0.8165</td><td>89.3939</td></tr></table></div>
+</section>
+
+<section id="code"><h2><span class="num">8</span>ファイルと接続方法</h2>
+<div class="card tree">
+<div class="row"><div class="name">LLM-BLM/marketdb/db/schema.sql</div><div class="desc">テーブル・インデックス・ビューの定義（<code>IF NOT EXISTS</code> なので何度実行しても安全）</div></div>
+<div class="row"><div class="name">LLM-BLM/marketdb/db/connection.py</div><div class="desc"><code>connect()</code>：接続して外部キーを有効にする ／ <code>init_db()</code>：schema.sql を実行する</div></div>
+<div class="row"><div class="name">LLM-BLM/marketdb/db/market.py、index.py、fundamentals.py、llm.py、portfolio.py、reports.py、sector.py、stock.py</div><div class="desc">保存と読み込みの関数</div></div>
+<div class="row"><div class="name">LLM-BLM/data/blm.sqlite</div><div class="desc">DB ファイル（<code>.env</code> の <code>DB_PATH</code>。Git の管理対象外）</div></div>
+</div>
+<h3>DBeaver での接続</h3>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>値</th></tr>
+<tr><td>種類</td><td>SQLite</td></tr>
+<tr><td>Path</td><td><code>/Users/kazuki/develop/工房/LLM-BLM/data/blm.sqlite</code></td></tr>
+<tr><td>ユーザー名・パスワード</td><td>なし</td></tr>
+<tr><td>おすすめ設定</td><td>「General」タブで <b>Read-only connection</b> にチェック</td></tr>
+</table></div>
+<details><summary>schema.sql の全文</summary><pre><code>-- LLM-BLM database schema (SQLite)
+-- Dates are stored as ISO 8601 text: date = &#x27;YYYY-MM-DD&#x27;, *_at = &#x27;YYYY-MM-DDTHH:MM:SS+00:00&#x27; (UTC)
+-- Symbols use the yfinance format (&#x27;BRK-B&#x27;, not Wikipedia&#x27;s &#x27;BRK.B&#x27;)
+-- Returns and market caps are computed from these tables, not stored
+-- Split basis: everything is on the split basis of the fetch date (yfinance prices already are;
+-- shares are converted by marketdb/build_db.py), so market cap = close x shares
+
+-- ============================================================
+-- Market data
+-- ============================================================
+
+-- Every stock that was in the S&amp;P500 at any time in the study period, plus indices such as ^GSPC
+-- and one ETF per sector (stocks are the symbols that have a row in index_membership)
+CREATE TABLE IF NOT EXISTS tickers (
+    symbol            TEXT PRIMARY KEY,         -- e.g. &#x27;AAPL&#x27;, &#x27;BRK-B&#x27;, &#x27;^GSPC&#x27;
+    security          TEXT NOT NULL,            -- company / index name
+    gics_sector       TEXT,                     -- NULL for indices; for a sector ETF, the sector it tracks
+    gics_sub_industry TEXT,
+    excluded_reason   TEXT,                     -- NULL = used; otherwise why it is left out (e.g. no price data)
+    cik               INTEGER,                  -- SEC EDGAR company id (NULL = not found)
+    fundamentals_fetched_at TEXT,               -- when financial_facts were fetched from EDGAR
+    fetched_at        TEXT NOT NULL
+);
+
+-- Daily prices from yfinance (auto_adjust=False)
+CREATE TABLE IF NOT EXISTS prices (
+    symbol     TEXT NOT NULL REFERENCES tickers(symbol),
+    date       TEXT NOT NULL,                   -- trading day
+    close      REAL NOT NULL,                   -- split-adjusted only (for market cap)
+    adj_close  REAL NOT NULL,                   -- split- and dividend-adjusted (for returns)
+    fetched_at TEXT NOT NULL,
+    PRIMARY KEY (symbol, date)
+) WITHOUT ROWID;
+
+CREATE INDEX IF NOT EXISTS idx_prices_date ON prices(date);
+
+-- Shares outstanding converted to the split basis of the fetch date (market cap = close x shares)
+-- yfinance reports raw shares, sometimes several per day; build_db.py adjusts them for later splits,
+-- drops outliers and keeps the daily median
+CREATE TABLE IF NOT EXISTS shares_outstanding (
+    symbol     TEXT NOT NULL REFERENCES tickers(symbol),
+    date       TEXT NOT NULL,                   -- report date
+    shares     INTEGER NOT NULL CHECK (shares &gt; 0),
+    fetched_at TEXT NOT NULL,                   -- = the split basis date
+    PRIMARY KEY (symbol, date)
+) WITHOUT ROWID;
+
+-- ============================================================
+-- S&amp;P500 membership
+-- ============================================================
+
+-- Constituent changes as listed on Wikipedia (&quot;Historical components of the S&amp;P 500&quot;)
+CREATE TABLE IF NOT EXISTS index_changes (
+    change_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    date            TEXT NOT NULL,              -- effective date
+    added_symbol    TEXT,                       -- NULL when only a removal
+    added_name      TEXT,
+    removed_symbol  TEXT,                       -- NULL when only an addition
+    removed_name    TEXT,
+    reason          TEXT,
+    fetched_at      TEXT NOT NULL,
+    UNIQUE (date, added_symbol, removed_symbol)
+);
+
+-- Membership periods built from index_changes and the current constituents
+-- A stock is a member on day D when start_date &lt;= D &lt; end_date (NULL = open-ended)
+CREATE TABLE IF NOT EXISTS index_membership (
+    membership_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    symbol        TEXT NOT NULL REFERENCES tickers(symbol),
+    start_date    TEXT,                         -- NULL: joined before the oldest recorded change
+    end_date      TEXT,                         -- NULL: still a member
+    UNIQUE (symbol, start_date),
+    CHECK (start_date IS NULL OR end_date IS NULL OR start_date &lt; end_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_membership_symbol ON index_membership(symbol);
+
+-- ============================================================
+-- Financial statements (SEC EDGAR XBRL &quot;company facts&quot;)
+-- ============================================================
+
+-- Reported items: one row per XBRL tag and unit (e.g. us-gaap / NetIncomeLoss / USD)
+CREATE TABLE IF NOT EXISTS financial_items (
+    item_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    taxonomy TEXT NOT NULL,                     -- &#x27;us-gaap&#x27;, &#x27;dei&#x27;, ...
+    tag      TEXT NOT NULL,                     -- XBRL tag
+    unit     TEXT NOT NULL,                     -- &#x27;USD&#x27;, &#x27;shares&#x27;, &#x27;USD/shares&#x27;, ...
+    label    TEXT,                              -- human-readable name from EDGAR
+    UNIQUE (taxonomy, tag, unit)
+);
+
+-- Reported values as first filed (later restatements of the same period are not kept)
+-- Flow items cover period_start .. period_end (3, 6, 9 or 12 months); balance sheet items have period_start = period_end
+CREATE TABLE IF NOT EXISTS financial_facts (
+    symbol       TEXT NOT NULL REFERENCES tickers(symbol),
+    item_id      INTEGER NOT NULL REFERENCES financial_items(item_id),
+    period_start TEXT NOT NULL,
+    period_end   TEXT NOT NULL,
+    value        REAL NOT NULL,
+    form         TEXT NOT NULL,                 -- &#x27;10-Q&#x27;, &#x27;10-K&#x27;, ...
+    filed_date   TEXT NOT NULL,                 -- when the value became public
+    PRIMARY KEY (item_id, symbol, period_start, period_end)   -- item first: the views look values up by item
+) WITHOUT ROWID;
+
+-- Quarterly figures of the main items, one row per company and fiscal quarter
+-- (3-month values: reported directly, or the difference of two year-to-date values; Q4 = full year - 9 months;
+--  a quarter is 80 to 120 days long, which covers 12-, 13- and 16-week fiscal quarters)
+CREATE VIEW IF NOT EXISTS fundamentals_quarterly AS
+WITH concept(concept, kind, tag, priority) AS (VALUES
+    -- kind: &#x27;flow&#x27; (additive over time), &#x27;average&#x27; (per-quarter only, not additive), &#x27;stock&#x27; (balance sheet)
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;Revenues&#x27;, 1),
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;RevenuesNetOfInterestExpense&#x27;, 2),
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;RevenueFromContractWithCustomerExcludingAssessedTax&#x27;, 3),
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;RevenueFromContractWithCustomerIncludingAssessedTax&#x27;, 4),
+    (&#x27;revenue&#x27;,           &#x27;flow&#x27;,    &#x27;SalesRevenueNet&#x27;, 5),
+    (&#x27;cost_of_revenue&#x27;,   &#x27;flow&#x27;,    &#x27;CostOfGoodsAndServicesSold&#x27;, 1),
+    (&#x27;cost_of_revenue&#x27;,   &#x27;flow&#x27;,    &#x27;CostOfRevenue&#x27;, 2),
+    (&#x27;gross_profit&#x27;,      &#x27;flow&#x27;,    &#x27;GrossProfit&#x27;, 1),
+    (&#x27;rd_expense&#x27;,        &#x27;flow&#x27;,    &#x27;ResearchAndDevelopmentExpense&#x27;, 1),
+    (&#x27;operating_income&#x27;,  &#x27;flow&#x27;,    &#x27;OperatingIncomeLoss&#x27;, 1),
+    (&#x27;pretax_income&#x27;,     &#x27;flow&#x27;,    &#x27;IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest&#x27;, 1),
+    (&#x27;pretax_income&#x27;,     &#x27;flow&#x27;,    &#x27;IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments&#x27;, 2),
+    (&#x27;net_income&#x27;,        &#x27;flow&#x27;,    &#x27;NetIncomeLoss&#x27;, 1),
+    (&#x27;net_income&#x27;,        &#x27;flow&#x27;,    &#x27;ProfitLoss&#x27;, 2),
+    (&#x27;eps_basic&#x27;,         &#x27;flow&#x27;,    &#x27;EarningsPerShareBasic&#x27;, 1),
+    (&#x27;eps_diluted&#x27;,       &#x27;flow&#x27;,    &#x27;EarningsPerShareDiluted&#x27;, 1),
+    (&#x27;dividend_per_share&#x27;,&#x27;flow&#x27;,    &#x27;CommonStockDividendsPerShareDeclared&#x27;, 1),
+    (&#x27;shares_diluted_avg&#x27;,&#x27;average&#x27;, &#x27;WeightedAverageNumberOfDilutedSharesOutstanding&#x27;, 1),
+    (&#x27;operating_cf&#x27;,      &#x27;flow&#x27;,    &#x27;NetCashProvidedByUsedInOperatingActivities&#x27;, 1),
+    (&#x27;capex&#x27;,             &#x27;flow&#x27;,    &#x27;PaymentsToAcquirePropertyPlantAndEquipment&#x27;, 1),
+    (&#x27;dividends_paid&#x27;,    &#x27;flow&#x27;,    &#x27;PaymentsOfDividends&#x27;, 1),
+    (&#x27;dividends_paid&#x27;,    &#x27;flow&#x27;,    &#x27;PaymentsOfDividendsCommonStock&#x27;, 2),
+    (&#x27;buybacks&#x27;,          &#x27;flow&#x27;,    &#x27;PaymentsForRepurchaseOfCommonStock&#x27;, 1),
+    (&#x27;total_assets&#x27;,      &#x27;stock&#x27;,   &#x27;Assets&#x27;, 1),
+    (&#x27;current_assets&#x27;,    &#x27;stock&#x27;,   &#x27;AssetsCurrent&#x27;, 1),
+    (&#x27;cash&#x27;,              &#x27;stock&#x27;,   &#x27;CashAndCashEquivalentsAtCarryingValue&#x27;, 1),
+    (&#x27;cash&#x27;,              &#x27;stock&#x27;,   &#x27;CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents&#x27;, 2),
+    (&#x27;total_liabilities&#x27;, &#x27;stock&#x27;,   &#x27;Liabilities&#x27;, 1),
+    (&#x27;current_liabilities&#x27;,&#x27;stock&#x27;,  &#x27;LiabilitiesCurrent&#x27;, 1),
+    (&#x27;long_term_debt&#x27;,    &#x27;stock&#x27;,   &#x27;LongTermDebtNoncurrent&#x27;, 1),
+    (&#x27;long_term_debt&#x27;,    &#x27;stock&#x27;,   &#x27;LongTermDebt&#x27;, 2),
+    (&#x27;total_equity&#x27;,      &#x27;stock&#x27;,   &#x27;StockholdersEquity&#x27;, 1),
+    (&#x27;total_equity&#x27;,      &#x27;stock&#x27;,   &#x27;StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest&#x27;, 2)
+),
+picked AS (
+    SELECT f.symbol, f.item_id, c.concept, c.kind, c.priority, f.period_start, f.period_end, f.value, f.filed_date,
+           julianday(f.period_end) - julianday(f.period_start) AS days
+    FROM concept c
+    JOIN financial_items i ON i.tag = c.tag AND i.taxonomy = &#x27;us-gaap&#x27;
+    JOIN financial_facts f ON f.item_id = i.item_id
+),
+quarter_values AS (
+    -- reported for 3 months
+    SELECT symbol, concept, priority, 0 AS derived, period_end, value, filed_date
+    FROM picked WHERE kind IN (&#x27;flow&#x27;, &#x27;average&#x27;) AND days BETWEEN 80 AND 120
+    UNION ALL
+    -- year-to-date value minus the previous year-to-date value of the same fiscal year
+    SELECT a.symbol, a.concept, a.priority, 1, a.period_end, a.value - b.value, a.filed_date
+    FROM picked a
+    JOIN financial_facts b ON b.item_id = a.item_id AND b.symbol = a.symbol AND b.period_start = a.period_start
+                          AND b.period_end BETWEEN date(a.period_end, &#x27;-120 days&#x27;) AND date(a.period_end, &#x27;-80 days&#x27;)
+    WHERE a.kind = &#x27;flow&#x27; AND a.days &gt; 120
+    UNION ALL
+    -- balance sheet values at the quarter end
+    SELECT symbol, concept, priority, 0, period_end, value, filed_date
+    FROM picked WHERE kind = &#x27;stock&#x27;
+),
+best AS (
+    -- the value filed first wins: a tag that appears only in a later filing (as a comparative figure)
+    -- must not replace what was known when the quarter was reported
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY symbol, concept, period_end ORDER BY filed_date, derived, priority) AS choice
+    FROM quarter_values
+)
+SELECT symbol,
+       period_end,
+       MIN(CASE WHEN concept IN (&#x27;revenue&#x27;, &#x27;net_income&#x27;) THEN filed_date END) AS filed_date,
+       MAX(CASE WHEN concept = &#x27;revenue&#x27;             THEN value END) AS revenue,
+       MAX(CASE WHEN concept = &#x27;cost_of_revenue&#x27;     THEN value END) AS cost_of_revenue,
+       MAX(CASE WHEN concept = &#x27;gross_profit&#x27;        THEN value END) AS gross_profit,
+       MAX(CASE WHEN concept = &#x27;rd_expense&#x27;          THEN value END) AS rd_expense,
+       MAX(CASE WHEN concept = &#x27;operating_income&#x27;    THEN value END) AS operating_income,
+       MAX(CASE WHEN concept = &#x27;pretax_income&#x27;       THEN value END) AS pretax_income,
+       MAX(CASE WHEN concept = &#x27;net_income&#x27;          THEN value END) AS net_income,
+       MAX(CASE WHEN concept = &#x27;eps_basic&#x27;           THEN value END) AS eps_basic,
+       MAX(CASE WHEN concept = &#x27;eps_diluted&#x27;         THEN value END) AS eps_diluted,
+       MAX(CASE WHEN concept = &#x27;dividend_per_share&#x27;  THEN value END) AS dividend_per_share,
+       MAX(CASE WHEN concept = &#x27;shares_diluted_avg&#x27;  THEN value END) AS shares_diluted_avg,
+       MAX(CASE WHEN concept = &#x27;operating_cf&#x27;        THEN value END) AS operating_cf,
+       MAX(CASE WHEN concept = &#x27;capex&#x27;               THEN value END) AS capex,
+       MAX(CASE WHEN concept = &#x27;dividends_paid&#x27;      THEN value END) AS dividends_paid,
+       MAX(CASE WHEN concept = &#x27;buybacks&#x27;            THEN value END) AS buybacks,
+       MAX(CASE WHEN concept = &#x27;total_assets&#x27;        THEN value END) AS total_assets,
+       MAX(CASE WHEN concept = &#x27;current_assets&#x27;      THEN value END) AS current_assets,
+       MAX(CASE WHEN concept = &#x27;cash&#x27;                THEN value END) AS cash,
+       MAX(CASE WHEN concept = &#x27;total_liabilities&#x27;   THEN value END) AS total_liabilities,
+       MAX(CASE WHEN concept = &#x27;current_liabilities&#x27; THEN value END) AS current_liabilities,
+       MAX(CASE WHEN concept = &#x27;long_term_debt&#x27;      THEN value END) AS long_term_debt,
+       MAX(CASE WHEN concept = &#x27;total_equity&#x27;        THEN value END) AS total_equity
+FROM best
+WHERE choice = 1
+GROUP BY symbol, period_end
+HAVING filed_date IS NOT NULL;
+
+-- ============================================================
+-- LLM results
+-- ============================================================
+
+-- One execution of run.py (everything that defines the question is kept for reproducibility)
+CREATE TABLE IF NOT EXISTS llm_runs (
+    run_id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    model         TEXT NOT NULL,                -- requested model, e.g. &#x27;gpt-4o-mini&#x27;
+    model_version TEXT,                         -- model that actually answered, e.g. &#x27;gpt-4o-mini-2024-07-18&#x27;
+    system_prompt TEXT NOT NULL,
+    temperature   REAL NOT NULL,
+    n_samples     INTEGER NOT NULL CHECK (n_samples &gt; 0),
+    input_months  INTEGER NOT NULL,             -- length of the daily returns given to the LLM (1 = one month, 3 = a quarter)
+    target_months INTEGER NOT NULL,             -- length of the period the LLM predicts
+    note          TEXT,                         -- free memo (what was changed in this run)
+    created_at    TEXT NOT NULL
+);
+
+-- Each LLM answer: the view on the target_months that follow as_of_date
+CREATE TABLE IF NOT EXISTS llm_views (
+    run_id          INTEGER NOT NULL REFERENCES llm_runs(run_id),
+    as_of_date      TEXT NOT NULL,              -- last trading day of the input returns (nothing after it was shown)
+    symbol          TEXT NOT NULL REFERENCES tickers(symbol),
+    sample_no       INTEGER NOT NULL,           -- 1 .. n_samples
+    expected_return REAL,                       -- average daily return as a decimal fraction; NULL = answer not parsed
+    PRIMARY KEY (run_id, as_of_date, symbol, sample_no)
+) WITHOUT ROWID;
+
+-- ============================================================
+-- Portfolios
+-- ============================================================
+
+-- One strategy computed by run_blm.py (the coefficients used are kept for reproducibility)
+CREATE TABLE IF NOT EXISTS portfolio_runs (
+    portfolio_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    strategy     TEXT NOT NULL,                 -- &#x27;market_cap&#x27;, &#x27;equal_weight&#x27;, &#x27;mean_variance&#x27;, &#x27;black_litterman&#x27;, ...
+    llm_run_id   INTEGER REFERENCES llm_runs(run_id),  -- LLM answers used as views (NULL = none)
+    params       TEXT NOT NULL,                 -- JSON of the coefficients, e.g. {&quot;tau&quot;: 0.025, &quot;risk_aversion&quot;: 2.5}
+    note         TEXT,
+    created_at   TEXT NOT NULL
+);
+
+-- Weights decided on as_of_date and held until the last trading day of the following month
+CREATE TABLE IF NOT EXISTS portfolio_weights (
+    portfolio_id INTEGER NOT NULL REFERENCES portfolio_runs(portfolio_id),
+    as_of_date   TEXT NOT NULL,                 -- decision date (nothing after it was used)
+    symbol       TEXT NOT NULL REFERENCES tickers(symbol),
+    weight       REAL NOT NULL CHECK (weight &gt;= 0),  -- every stock of the universe has a row (0 = not held); sums to 1
+    PRIMARY KEY (portfolio_id, as_of_date, symbol)
+) WITHOUT ROWID;
+
+-- ============================================================
+-- Sectors
+-- ============================================================
+
+-- Indicators of each GICS sector on a decision date, computed by marketdb/build_sector_metrics.py
+-- from data known on that date (ETF prices up to it, financial statements filed by it)
+CREATE TABLE IF NOT EXISTS sector_metrics (
+    as_of_date  TEXT NOT NULL,                  -- last trading day of a month (nothing after it was used)
+    gics_sector TEXT NOT NULL,                  -- same names as tickers.gics_sector
+    metric      TEXT NOT NULL,                  -- &#x27;momentum_3m&#x27; / &#x27;momentum_6m&#x27; / &#x27;momentum_12m&#x27;: ETF return over that many months, the latest month left out
+                                                -- &#x27;volatility_30d&#x27;: yearly volatility of the ETF&#x27;s daily returns over 30 trading days (mean of the last 5 days)
+                                                -- &#x27;pe_trailing&#x27; / &#x27;pb&#x27; / &#x27;ps&#x27;: market cap of the members / their net income, equity, revenue (last 4 quarters)
+                                                -- &#x27;valuation_coverage&#x27;: share of the sector&#x27;s market cap that has the 4 quarters needed for pe_trailing
+    value       REAL NOT NULL,                  -- returns and volatility are decimal fractions (0.05 = 5%)
+    computed_at TEXT NOT NULL,
+    PRIMARY KEY (as_of_date, gics_sector, metric)
+) WITHOUT ROWID;
+
+-- Indicators of each index member on a decision date, computed by marketdb/build_stock_metrics.py
+-- from data known on that date (prices up to it, financial statements filed by it).
+-- A metric that cannot be computed has no row (short price history, loss-making, statements too old, ...),
+-- and neither has one that misleads in the stock&#x27;s industry (INDUSTRY_EXCLUSIONS in marketdb/transform/stock.py)
+CREATE TABLE IF NOT EXISTS stock_metrics (
+    as_of_date  TEXT NOT NULL,                  -- last trading day of a month (nothing after it was used)
+    symbol      TEXT NOT NULL REFERENCES tickers(symbol),
+    metric      TEXT NOT NULL,                  -- price behaviour:
+                                                --   &#x27;momentum_12m&#x27;: return from 252 to 21 trading days ago (the latest month left out)
+                                                --   &#x27;return_1m&#x27;: return over the last 21 trading days
+                                                --   &#x27;relative_momentum_12m&#x27;: momentum_12m minus the same return of the sector ETF
+                                                --   &#x27;volatility_30d&#x27;: yearly volatility of daily returns over 30 trading days (mean of the last 5 days)
+                                                --   &#x27;beta_1y&#x27;: slope of the daily returns on the S&amp;P 500 over 252 trading days
+                                                -- fundamentals (latest quarter filed by the date; T4Q = sum of its last 4 quarters):
+                                                --   &#x27;pe_trailing&#x27;: market cap / T4Q net income      &#x27;pb&#x27;: market cap / equity
+                                                --   &#x27;revenue_growth_yoy&#x27;, &#x27;net_income_growth_yoy&#x27;: quarter / same quarter a year before - 1
+                                                --   &#x27;net_margin&#x27;: T4Q net income / T4Q revenue      &#x27;roe&#x27;: T4Q net income / equity
+                                                --   &#x27;debt_to_equity&#x27;: long-term debt / equity
+                                                --   &#x27;fundamentals_age_days&#x27;: days since the end of that quarter
+                                                --   &#x27;filing_age_days&#x27;: days since it was filed
+    value       REAL NOT NULL,                  -- returns, growth and margins are decimal fractions (0.05 = 5%)
+    computed_at TEXT NOT NULL,
+    PRIMARY KEY (as_of_date, symbol, metric)
+) WITHOUT ROWID;
+
+-- ============================================================
+-- Monthly reports
+-- ============================================================
+
+-- One report file in data/reports (the file itself is not stored in the database)
+CREATE TABLE IF NOT EXISTS reports (
+    report_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    source         TEXT NOT NULL,               -- publisher, e.g. &#x27;daiwa-am&#x27;
+    report_month   TEXT NOT NULL,               -- month on the cover, &#x27;YYYY-MM&#x27;
+    published_date TEXT NOT NULL,               -- creation date of the PDF (the report can be used from this date on)
+    file_name      TEXT NOT NULL,               -- e.g. &#x27;daiwa-am_2024-04.pdf&#x27;
+    file_sha256    TEXT NOT NULL,               -- to notice a replaced file
+    n_pages        INTEGER NOT NULL CHECK (n_pages &gt; 0),
+    registered_at  TEXT NOT NULL,
+    UNIQUE (source, report_month)
+);
+
+-- One analysis of the reports by the LLM; changing the items or the prompt starts a new run
+CREATE TABLE IF NOT EXISTS report_runs (
+    report_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    model         TEXT NOT NULL,                -- requested model, e.g. &#x27;gpt-4o-mini&#x27;
+    model_version TEXT,                         -- model that actually answered
+    system_prompt TEXT NOT NULL,
+    items         TEXT NOT NULL,                -- JSON list of the items asked: [{&quot;name&quot;: ..., &quot;type&quot;: ..., &quot;description&quot;: ...}]
+    temperature   REAL NOT NULL,
+    note          TEXT,                         -- free memo (what was changed in this run)
+    created_at    TEXT NOT NULL
+);
+
+-- What the LLM read from a report: one row per item
+CREATE TABLE IF NOT EXISTS report_values (
+    report_run_id INTEGER NOT NULL REFERENCES report_runs(report_run_id),
+    report_id     INTEGER NOT NULL REFERENCES reports(report_id),
+    item          TEXT NOT NULL,                -- item name listed in report_runs.items, e.g. &#x27;us_equity_stance&#x27;
+    value_num     REAL,                         -- numbers and scores
+    value_text    TEXT,                         -- summaries and other text
+    -- both NULL = the report does not mention the item
+    CHECK (value_num IS NULL OR value_text IS NULL),
+    PRIMARY KEY (report_run_id, report_id, item)
+) WITHOUT ROWID;
+
+-- ============================================================
+-- Views (computed when read; nothing is stored)
+-- ============================================================
+
+-- Market cap for every trading day, using the latest shares report on or before that day
+CREATE VIEW IF NOT EXISTS market_caps AS
+SELECT p.symbol,
+       p.date,
+       p.close,
+       s.shares,
+       s.date            AS shares_reported_on,
+       p.close * s.shares AS market_cap
+FROM prices p
+JOIN shares_outstanding s
+  ON s.symbol = p.symbol
+ AND s.date = (SELECT MAX(date) FROM shares_outstanding
+               WHERE symbol = p.symbol AND date &lt;= p.date);
+
+-- Daily index weights: market cap share among the S&amp;P500 members of that day
+-- (excluded stocks and days without a shares report are left out, so the weights of a day sum to 1)
+CREATE VIEW IF NOT EXISTS index_weights AS
+SELECT mc.date,
+       mc.symbol,
+       mc.market_cap,
+       mc.market_cap / SUM(mc.market_cap) OVER (PARTITION BY mc.date) AS weight
+FROM market_caps mc
+JOIN tickers t
+  ON t.symbol = mc.symbol AND t.excluded_reason IS NULL
+JOIN index_membership m
+  ON m.symbol = mc.symbol
+ AND (m.start_date IS NULL OR m.start_date &lt;= mc.date)
+ AND (m.end_date IS NULL OR m.end_date &gt; mc.date);
+
+-- Black-Litterman inputs from the LLM answers: mean = view (Q), variance = uncertainty of the view (Omega)
+CREATE VIEW IF NOT EXISTS llm_view_stats AS
+SELECT run_id,
+       as_of_date,
+       symbol,
+       COUNT(expected_return) AS n_answers,     -- parsed answers (n_samples when nothing failed)
+       AVG(expected_return)   AS mean_return,
+       AVG(expected_return * expected_return) - AVG(expected_return) * AVG(expected_return) AS variance  -- population variance (same as numpy.var)
+FROM llm_views
+GROUP BY run_id, as_of_date, symbol;
+
+-- Return of each portfolio over the month after the decision date (buy on as_of_date, hold, no rebalancing)
+CREATE VIEW IF NOT EXISTS portfolio_returns AS
+WITH period AS (
+    SELECT DISTINCT as_of_date,
+           (SELECT MAX(date) FROM prices
+             WHERE symbol = &#x27;^GSPC&#x27; AND date &lt;= date(as_of_date, &#x27;start of month&#x27;, &#x27;+2 months&#x27;, &#x27;-1 day&#x27;)) AS end_date
+    FROM portfolio_weights
+)
+SELECT w.portfolio_id,
+       w.as_of_date,
+       p.end_date,
+       SUM(w.weight &gt; 0) AS n_holdings,
+       SUM(w.weight * ((SELECT adj_close FROM prices WHERE symbol = w.symbol AND date &lt;= p.end_date ORDER BY date DESC LIMIT 1)
+                       / (SELECT adj_close FROM prices WHERE symbol = w.symbol AND date = w.as_of_date) - 1)) AS period_return
+FROM portfolio_weights w
+JOIN period p ON p.as_of_date = w.as_of_date
+GROUP BY w.portfolio_id, w.as_of_date;
+
+-- Sector indicators with their z-score among the sectors of the same date
+-- (how far a sector is from the average of the sectors, in standard deviations)
+CREATE VIEW IF NOT EXISTS sector_metric_scores AS
+SELECT as_of_date,
+       gics_sector,
+       metric,
+       value,
+       (value - AVG(value) OVER w)
+         / NULLIF(sqrt(AVG(value * value) OVER w - AVG(value) OVER w * AVG(value) OVER w), 0) AS z_score
+FROM sector_metrics
+WINDOW w AS (PARTITION BY as_of_date, metric);
+
+-- Stock indicators with the position among the stocks of the same sector on the same date
+-- (percentile: 0 = lowest value, 100 = highest; NULL when fewer than 5 stocks of the sector have the metric,
+-- e.g. the price / earnings ratio in Real Estate, where it is not computed for REITs)
+CREATE VIEW IF NOT EXISTS stock_metric_scores AS
+SELECT m.as_of_date,
+       m.symbol,
+       t.gics_sector,
+       m.metric,
+       m.value,
+       CASE WHEN COUNT(*) OVER w &gt;= 5 THEN 100.0 * PERCENT_RANK() OVER (w ORDER BY m.value) END AS sector_percentile
+FROM stock_metrics m
+JOIN tickers t ON t.symbol = m.symbol
+WINDOW w AS (PARTITION BY m.as_of_date, m.metric, t.gics_sector);
+</code></pre></details>
+</section>
+<footer>2026-10-10 更新。行数は現在の DB の値です。</footer>
+</main></div></body></html>

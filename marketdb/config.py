@@ -34,3 +34,5 @@ EDGAR_FACTS_URL = os.environ["EDGAR_FACTS_URL"]              # {cik} = 10-digit 
 EDGAR_SUBMISSIONS_URL = os.environ["EDGAR_SUBMISSIONS_URL"]
 WIKIDATA_SPARQL_URL = os.environ["WIKIDATA_SPARQL_URL"]
 FUNDAMENTALS_START_DATE = os.environ["FUNDAMENTALS_START_DATE"]
+# Stock indicators: statements whose quarter ended more than this many days ago are not used
+FUNDAMENTALS_MAX_AGE_DAYS = int(os.environ["FUNDAMENTALS_MAX_AGE_DAYS"])

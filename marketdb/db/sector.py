@@ -20,9 +20,10 @@ def load_month_ends(conn):
 
 
 def load_member_caps(conn, date):
-    """Market cap and sector of the index members on `date` (indexed by symbol)."""
+    """Market cap, sector and sub-industry of the index members on `date` (indexed by symbol)."""
     return pd.read_sql(
-        "SELECT w.symbol, w.market_cap, t.gics_sector FROM index_weights w JOIN tickers t ON t.symbol = w.symbol "
+        "SELECT w.symbol, w.market_cap, t.gics_sector, t.gics_sub_industry "
+        "FROM index_weights w JOIN tickers t ON t.symbol = w.symbol "
         "WHERE w.date = ?", conn, params=(date,), index_col='symbol')
 
 

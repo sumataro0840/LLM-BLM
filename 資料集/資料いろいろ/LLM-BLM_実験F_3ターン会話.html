@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-BLM 実験 F：3ターンの会話</title>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --border: #dedad0;
+  --accent: #2f6fb3;
+  --accent-soft: #e4eef9;
+  --green: #2e7d4f;
+  --green-soft: #e3f3e9;
+  --orange: #b4621a;
+  --orange-soft: #fbeedf;
+  --purple: #6a4bb0;
+  --purple-soft: #eee8fa;
+  --red: #b23a3a;
+  --red-soft: #fbe6e6;
+  --code-bg: #f3f1ea;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #24282d;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #33383f;
+    --accent: #7cb2ec;
+    --accent-soft: #1f3248;
+    --green: #74c79a;
+    --green-soft: #1d3428;
+    --orange: #e9a462;
+    --orange-soft: #3a2a1a;
+    --purple: #b39cf0;
+    --purple-soft: #2c2440;
+    --red: #ec8a8a;
+    --red-soft: #3c2222;
+    --code-bg: #24282d;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --surface-2: #24282d; --text: #e6e8eb;
+  --muted: #9aa1ab; --border: #33383f; --accent: #7cb2ec; --accent-soft: #1f3248;
+  --green: #74c79a; --green-soft: #1d3428; --orange: #e9a462; --orange-soft: #3a2a1a;
+  --purple: #b39cf0; --purple-soft: #2c2440; --red: #ec8a8a; --red-soft: #3c2222;
+  --code-bg: #24282d; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15.5px;
+}
+code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+pre {
+  background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.55; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+nav.toc .label { font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .08em; margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--border); }
+nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+header.hero { margin-bottom: 36px; }
+header.hero .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; }
+header.hero h1 { font-size: 30px; line-height: 1.35; margin: 6px 0 12px; }
+header.hero p { color: var(--muted); margin: 0; max-width: 760px; }
+
+section { margin-bottom: 56px; scroll-margin-top: 20px; }
+h2 { font-size: 22px; margin: 0 0 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: var(--surface); border-radius: 6px; font-size: 14px; padding: 1px 9px; }
+h3 { font-size: 17px; margin: 26px 0 10px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { position: relative; padding-top: 44px; }
+.idea .badge { position: absolute; top: 16px; left: 22px; font-weight: 700; font-size: 13px; color: var(--accent); }
+.idea h4 { margin: 0 0 6px; font-size: 16px; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+
+/* directory tree */
+.tree { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.9; }
+.tree .row { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 12px; border-bottom: 1px dashed var(--border); }
+.tree .row:last-child { border-bottom: none; }
+.tree .name { white-space: pre; overflow-x: auto; }
+.tree .desc { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; font-family: "Hiragino Sans", sans-serif; }
+.t-script { background: var(--accent-soft); color: var(--accent); }
+.t-data { background: var(--green-soft); color: var(--green); }
+.t-out { background: var(--orange-soft); color: var(--orange); }
+.t-nb { background: var(--purple-soft); color: var(--purple); }
+
+/* flow */
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.stage { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.stage .step-label { text-align: right; padding-top: 16px; font-weight: 700; color: var(--muted); font-size: 13px; }
+.lane { display: flex; gap: 12px; flex-wrap: wrap; }
+.node { flex: 1 1 200px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid; background: var(--surface); }
+.node .title { font-weight: 700; font-size: 14.5px; }
+.node .sub { font-size: 12.5px; color: var(--muted); }
+.node.script { border-color: var(--accent); background: var(--accent-soft); }
+.node.data { border-color: var(--green); background: var(--green-soft); }
+.node.out { border-color: var(--orange); background: var(--orange-soft); }
+.node.nb { border-color: var(--purple); background: var(--purple-soft); }
+.node.ext { border-style: dashed; border-color: var(--muted); }
+.arrow { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+.arrow span { grid-column: 2; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.6; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid; }
+
+/* timeline */
+.timeline { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0 6px; }
+.tl-head { font-size: 12.5px; text-align: center; color: var(--muted); font-weight: 700; }
+.tl-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.tl-train { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.tl-test { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange); }
+.tl-empty { background: transparent; }
+
+/* step details */
+.step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.step .circle { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.step .card h3 { margin-top: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step .card h3 code { font-size: 14px; }
+.io { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 6px 0 12px; }
+.io .in, .io .outp { border-radius: 6px; padding: 2px 10px; }
+.io .in { background: var(--green-soft); color: var(--green); }
+.io .outp { background: var(--orange-soft); color: var(--orange); }
+.step ul, .step ol { padding-left: 1.3em; margin: 8px 0; }
+.step li { margin: 3px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.formula { background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 10px; padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+.formula .cm { color: var(--muted); font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+
+.callout { border-left: 4px solid var(--orange); background: var(--orange-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14.5px; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-soft); }
+
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sev { font-size: 12px; font-weight: 700; text-align: center; border-radius: 6px; padding: 3px 0; }
+.sev.high { background: var(--red-soft); color: var(--red); }
+.sev.mid { background: var(--orange-soft); color: var(--orange); }
+.sev.low { background: var(--surface-2); color: var(--muted); }
+.issue p { margin: 0; }
+.issue .where { font-size: 12.5px; color: var(--muted); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 20px 16px 60px; }
+  nav.toc { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .stage, .arrow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .stage .step-label { text-align: left; padding-top: 0; }
+  .arrow span { grid-column: 1; }
+  .tree .row { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 0; }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .issue { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sev { width: 88px; }
+  .timeline { gap: 3px; }
+  .tl-cell { font-size: 10.5px; }
+  header.hero h1 { font-size: 24px; }
+}
+
+.er { width:100%; height:auto; display:block; }
+.er .ent { fill: var(--surface); stroke: var(--border); stroke-width:1.5; }
+.er .ent-h.c-green { fill: var(--green-soft); }
+.er .ent-h.c-purple { fill: var(--purple-soft); }
+.er .ent-h.c-orange { fill: var(--orange-soft); }
+.er .ent-t { fill: var(--text); font-weight:700; font-size:14px; }
+.er .ent-k { fill: var(--orange); font-size:11px; font-weight:700; }
+.er .ent-c { fill: var(--text); font-size:13px; font-family: "SF Mono", Menlo, monospace; }
+.er .rel { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel.dashed { stroke-dasharray: 5 4; }
+.er .rel-m { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel-a { fill: var(--muted); }
+.er .rel-t { fill: var(--muted); font-size:12px; }
+.pill { display:inline-block; font-size:11px; font-weight:700; border-radius:4px; padding:0 6px; margin:1px 2px 1px 0; white-space:nowrap; }
+.pill.pk { background: var(--orange-soft); color: var(--orange); }
+.pill.fk { background: var(--accent-soft); color: var(--accent); }
+.pill.nn { background: var(--surface-2); color: var(--muted); }
+.pill.ck { background: var(--purple-soft); color: var(--purple); }
+td.good { color: var(--green); font-weight:700; }
+td.bad { color: var(--red); font-weight:700; }
+table.result td { font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; }
+tr.hl td { background: var(--orange-soft); }
+tr.drop td { color: var(--red); text-decoration: line-through; }
+tr.drop td:last-child { text-decoration: none; }
+.steps { counter-reset: st; display:grid; gap:10px; margin:12px 0; }
+.steps .card { position:relative; padding-left:58px; }
+.steps .card::before { counter-increment: st; content: counter(st); position:absolute; left:18px; top:18px; width:28px; height:28px; border-radius:50%; background: var(--accent); color: var(--surface); font-weight:700; display:flex; align-items:center; justify-content:center; }
+.steps .card h4 { margin:0 0 4px; font-size:15px; }
+.steps .card p { margin:0; font-size:14px; color: var(--muted); }
+.null { color: var(--muted); font-style: italic; }
+pre.sql { border-left: 4px solid var(--accent); }
+.tcard { margin-bottom: 18px; }
+.tcard h3 { margin-top:0; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.tcard h3 .role { font-size:12.5px; font-weight:400; color:var(--muted); }
+.tcard .new { font-size:11px; font-weight:700; background: var(--accent); color: var(--surface); border-radius:4px; padding:0 6px; }
+.grid2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+.grid2 .card h4 { margin:0 0 6px; font-size:15px; }
+.grid2 .card p { margin:0; font-size:14px; color:var(--muted); }
+.verdict { display:inline-block; font-size:12px; font-weight:700; border-radius:6px; padding:1px 8px; }
+.verdict.ok { background: var(--green-soft); color: var(--green); }
+.verdict.ng { background: var(--red-soft); color: var(--red); }
+.verdict.mid { background: var(--orange-soft); color: var(--orange); }
+.formula-big { text-align:center; font-size:17px; font-weight:700; padding:16px; border-radius:10px; background: var(--accent-soft); border:1px solid var(--accent); margin:14px 0; line-height:1.9; }
+.formula-big small { display:block; font-size:12.5px; font-weight:400; color: var(--muted); }
+.kpis-db { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis-db .v { font-size:18px; font-weight:700; }
+.kpis-db .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis-db { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.status { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+.status .card .v { font-weight:700; font-size:15px; }
+.status .card .k { color:var(--muted); font-size:13px; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--accent); }
+@media (max-width:900px) { .grid2, .status { grid-template-columns: minmax(0,1fr); } }
+
+.er .ent-h.c-blue { fill: var(--accent-soft); }
+.er .ent-h.c-red { fill: var(--red-soft); }
+a { color: var(--accent); }
+.doclink { display:flex; gap:12px; align-items:center; background: var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin: 0 0 28px; font-size:14px; }
+.doclink b { white-space:nowrap; }
+td.num { text-align:right; font-family: "SF Mono", Menlo, monospace; }
+.muted { color: var(--muted); font-size: 12.5px; }
+.diff td:first-child { font-weight:700; white-space:nowrap; }
+.impact { display:inline-block; font-size:11.5px; font-weight:700; border-radius:5px; padding:0 7px; white-space:nowrap; }
+.impact.s { background: var(--surface-2); color: var(--muted); }
+.impact.m { background: var(--orange-soft); color: var(--orange); }
+.impact.l { background: var(--red-soft); color: var(--red); }
+.quote { border:1px dashed var(--border); border-radius:10px; padding:12px 16px; margin:10px 0; background: var(--surface); font-size:14.5px; }
+.quote .t { font-size:12px; font-weight:700; color: var(--accent); margin-bottom:4px; }
+.figure { background:#fff; border-radius:10px; padding:8px; border:1px solid var(--border); }
+.figure img { width:100%; height:auto; display:block; }
+.kpis5 { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis5 .v { font-size:22px; font-weight:700; line-height:1.25; }
+.kpis5 .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis5 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+.key { border-left: 4px solid var(--accent); }
+.key ol { margin: 6px 0 0; padding-left: 1.3em; } .key li { margin: 7px 0; }
+.verdict { display:inline-block; font-size:12px; font-weight:700; border-radius:5px; padding:1px 8px; white-space:nowrap; }
+.v-ok { background: var(--green-soft); color: var(--green); } .v-ng { background: var(--red-soft); color: var(--red); } .v-mid { background: var(--orange-soft); color: var(--orange); }
+.bars { display:grid; grid-template-columns: minmax(0, 190px) repeat(var(--n), minmax(0, 1fr)); gap: 6px 14px; align-items:center; font-size:13.5px; }
+.bars .h { font-weight:700; color: var(--muted); font-size:12.5px; }
+.bar { position:relative; height:22px; background: var(--surface-2); border-radius:5px; overflow:hidden; }
+.bar i { position:absolute; left:0; top:0; bottom:0; background: var(--accent); opacity:.55; border-radius:5px; }
+.bar.neg i { background: var(--red); }
+.bar span { position:absolute; left:8px; top:0; line-height:22px; font-size:12.5px; font-weight:700; font-variant-numeric: tabular-nums; }
+pre.prompt { background: var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-size:13px; line-height:1.65; overflow-x:auto; white-space:pre-wrap; }
+ul.tight { margin: 8px 0 0; padding-left: 1.2em; } ul.tight li { margin: 5px 0; }
+td.num, th.num { text-align:right; font-variant-numeric: tabular-nums; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } nav.toc { position: static; } .bars { grid-template-columns: minmax(0,120px) repeat(var(--n), minmax(0,1fr)); gap:6px 8px; } }
+</style></head><body>
+<div class="layout">
+<nav class="toc"><div class="label">目次</div><a href="#key">要点</a><a href="#q">1. 問い</a><a href="#m">2. 方法</a><a href="#r1">3. なぞりは減ったか</a><a href="#r2">4. ファンダは使われたか</a><a href="#r3">5. 業種の知識は効いたか</a><a href="#r4">6. 予想の大きさとばらつき</a><a href="#why">7. なぜこうなったか</a><a href="#next">8. 次の手</a><a href="#limits">9. 注意点とファイル</a></nav>
+<main>
+<header class="hero"><div class="eyebrow">LLM-BLM 実験レポート</div><h1>実験 F：3ターンの会話にしてから数字を聞く</h1><p>2026年10月13日実施。業種の読み方とセクターの見通しを先に文章で答えさせ、そのあとで銘柄のデータを渡して予想させる方式を試しました。モデルは gpt-4o-mini です。これまでの実験は <a href="LLM-BLM_実験のまとめ.html">LLM-BLM_実験のまとめ.html</a> にあります。</p></header>
+
+<section id="key"><div class="card key"><h3 style="margin-top:0">要点</h3><ol>
+<li><b>3ターンにしても、値動きのなぞりは減りませんでした。むしろ強まりました。</b>予想と直近1か月のリターンの順位相関は、+0.58 から +0.80 に上がりました。</li>
+<li><b>原因は、LLM 自身の最初の回答にあります。</b>ターン1で、32業種のうち30業種が「モメンタムと直近のリターンが短期の予想の鍵」と答え、そのとおりに数字を出しました。</li>
+<li><b>つまり、なぞりは「知識を使えていない」のではなく、「1か月先なら値動きで決まる」というモデルの見方そのものです。</b></li>
+<li><b>答えを5段階に変えても、なぞりは減りません</b>（+0.77）。数字から数字への足し算だけが原因ではありませんでした。</li>
+<li><b>業種の知識は、型どおりの文章でした。</b>REIT の12業種すべてで「PER は誤解を招く」と答えましたが、同じ文は REIT 以外の20業種のうち9業種にも出てきます。業界で使う FFO には一度も触れず、純利益率と ROE は12業種すべてで「効率を表す」と肯定しました。</li>
+<li><b>3ターンにすると、30個の回答がそろいすぎます。</b>ばらつきが約3分の1になり、Black-Litterman では予想をさらに強く信じる方向に働きます。</li>
+</ol></div></section>
+
+<section id="q"><h2><span class="num">1</span>問い</h2>
+<p>実験 D・E で、gpt-4o-mini は渡した数字をなぞり、ファンダや業種の知識を使っていないことがわかりました。そこで、次の2つを確かめました。</p>
+<ul class="tight">
+<li><b>会話にする効果：</b>先に業種とセクターについて文章で答えさせれば、その内容を踏まえて予想するようになるか。</li>
+<li><b>答えの形を変える効果：</b>数字ではなく5段階で答えさせれば、入力の数字をそのまま足すことができなくなり、なぞりが減るか。</li>
+</ul>
+</section>
+
+<section id="m"><h2><span class="num">2</span>方法</h2>
+<div class="table-wrap"><table><tr><th></th><th>内容</th></tr><tr><td>対象</td><td>資本財セクター（238）と REIT（81）。3つの判断日（2025-06-30、2025-12-31、2026-05-29）、のべ319銘柄</td></tr><tr><td>条件</td><td>①1ターン・数字（実験 D の結果を使う）　②3ターン・数字　③1ターン・5段階　④3ターン・5段階</td></tr><tr><td>回答</td><td>1リクエストで30個（temperature 1.0）。新しく送ったのは 957 リクエスト、失敗 0 件、読み取れない回答 0 個</td></tr><tr><td>ターン1・2の回答</td><td>temperature 0 で1回だけ作り、同じ業種・同じ月の全銘柄で使い回した（ターン1は32業種、ターン2は96通り）</td></tr></table></div>
+<h3>3ターンの中身</h3>
+<div class="table-wrap"><table><tr><th>ターン</th><th>こちらが聞くこと</th><th>LLM の回答</th></tr><tr><td>1</td><td>この業種では、12個の指標のうちどれが翌月のリターンに関係し、どれが誤解を招くか（80語以内）</td><td>文章。業種ごとに1つ</td></tr><tr><td>2</td><td>セクターの指標、市場の指標、レポートの要約を渡し、セクターの翌月の見通しを聞く（80語以内）</td><td>文章。業種 × 月ごとに1つ</td></tr><tr><td>3</td><td>銘柄のデータ（値動き5個、ファンダ7個）を渡し、予想を聞く</td><td>数字、または5段階。30個</td></tr></table></div>
+<p>5段階は「同じセクターのほかの銘柄と比べた翌月のリターン」を、−2（かなり低い）〜 +2（かなり高い）で答えさせました。</p>
+<h3>ターン1の質問と回答の例（Retail REITs）</h3>
+<pre class="prompt">We will look at a company in the sub-industry &quot;Retail REITs&quot; (sector: Real Estate). These indicators will be given:
+- 12-month momentum, latest month excluded
+- Return over the latest month
+- 12-month momentum minus the sector&#x27;s
+- 30-day volatility, per year
+- Beta to the S&amp;P 500
+- Price / earnings, last 4 quarters
+- Price / book
+- Revenue growth, year on year
+- Net income growth, year on year
+- Net margin
+- Return on equity
+- Long-term debt / equity
+
+In at most 80 words: in this sub-industry, which of these indicators say something about the stock&#x27;s return over the next month, which are misleading because of how the business or its accounting works, and how should they be read?</pre>
+<pre class="prompt">In Retail REITs, 12-month momentum and return over the latest month are key indicators for short-term stock performance. However, metrics like price/earnings and price/book can be misleading due to accounting practices in real estate. Revenue and net income growth provide insight into operational health, while net margin and return on equity indicate efficiency. Long-term debt/equity is crucial for assessing financial risk. Focus on momentum and recent returns for short-term predictions, while considering growth metrics for long-term viability.</pre>
+<h3>ターン2の質問と回答の例（Aerospace &amp; Defense、2025-06-30）</h3>
+<pre class="prompt">Here is the state of the sector and of the market on 2025-06-30.
+
+[Sector: Industrials]  (value, z-score among the 11 sectors)
+Momentum 3 / 6 / 12 months, latest month excluded: 0.0508 (+1.38) / -7.24e-05 (+0.65) / 0.174 (+0.57)
+30-day volatility, per year: 0.125 (-1.12)
+Price / earnings: 28 (-0.02)
+
+[Market]
+VIX (percent per year): 16.7
+VIX / 3-month VIX: 0.86
+SKEW index: 139.6
+3-month Treasury bill yield (percent per year): 4.19
+
+[Monthly outlook of an asset manager, published 2025-06-26]
+Summary: The US economy shows signs of recovery, with expectations for GDP growth and a positive outlook for equities driven by technology. However, inflation concerns persist, and bond yields are expected to remain stable.
+Key risks: Key risks include geopolitical tensions and uncertainties surrounding trade policies, which could impact market stability.
+
+In at most 80 words: what is the outlook for this sector over the next month, and what would make a stock in it do better or worse than the sector?</pre>
+<pre class="prompt">The Aerospace &amp; Defense sector shows positive momentum over 12 months, suggesting potential for growth amid a recovering economy. However, recent negative momentum and volatility indicate caution. Stocks may outperform the sector if they have strong earnings reports or favorable contract news. Conversely, geopolitical tensions or adverse trade policies could hinder performance, especially for companies reliant on government contracts. Overall, the sector&#x27;s outlook is cautiously optimistic, influenced by broader economic conditions and specific company developments.</pre>
+<p class="muted">ターン2で渡したレポートは、判断日までに公表されていた最新の号です（この例では 2025-06-26 公表）。</p>
+</section>
+
+<section id="r1"><h2><span class="num">3</span>結果1：なぞりは減ったか</h2>
+<p>予想と値動きの指標の順位相関です（判断日ごとに計算して平均）。</p>
+<h3>資本財（238）</h3>
+<div class="bars" style="--n:4"><div></div><div class="h">1ターン・数字</div><div class="h">3ターン・数字</div><div class="h">1ターン・5段階</div><div class="h">3ターン・5段階</div><div>直近1か月のリターン</div><div class="bar"><i style="width:68%"></i><span>+0.58</span></div><div class="bar"><i style="width:94%"></i><span>+0.80</span></div><div class="bar"><i style="width:91%"></i><span>+0.77</span></div><div class="bar"><i style="width:76%"></i><span>+0.65</span></div><div>12か月のモメンタム</div><div class="bar"><i style="width:42%"></i><span>+0.36</span></div><div class="bar"><i style="width:58%"></i><span>+0.49</span></div><div class="bar"><i style="width:54%"></i><span>+0.46</span></div><div class="bar"><i style="width:81%"></i><span>+0.69</span></div></div>
+<h3>REIT（81）</h3>
+<div class="bars" style="--n:4"><div></div><div class="h">1ターン・数字</div><div class="h">3ターン・数字</div><div class="h">1ターン・5段階</div><div class="h">3ターン・5段階</div><div>直近1か月のリターン</div><div class="bar"><i style="width:62%"></i><span>+0.53</span></div><div class="bar"><i style="width:78%"></i><span>+0.66</span></div><div class="bar"><i style="width:79%"></i><span>+0.67</span></div><div class="bar"><i style="width:45%"></i><span>+0.38</span></div><div>12か月のモメンタム</div><div class="bar"><i style="width:44%"></i><span>+0.37</span></div><div class="bar"><i style="width:49%"></i><span>+0.42</span></div><div class="bar"><i style="width:33%"></i><span>+0.28</span></div><div class="bar"><i style="width:81%"></i><span>+0.69</span></div></div>
+<ul class="tight">
+<li><b>3ターン・数字：</b>直近1か月のリターンとの相関が、どちらの業種でも上がりました。</li>
+<li><b>1ターン・5段階：</b>答えの形を変えただけでも、相関は上がりました。</li>
+<li><b>3ターン・5段階：</b>直近1か月のリターンとの相関は、REIT では下がりましたが（+0.38）、資本財では元より高いままです（+0.65）。どちらの業種でも、12か月のモメンタムとの相関が +0.69 に上がりました。なぞる対象が移っただけです。</li>
+</ul>
+<h3>予想は、入力からどれだけ機械的に決まっているか</h3>
+<p>予想の順位を、8つの入力の順位で回帰しました（資本財、213件）。決定係数は「入力の順位だけで予想の順位がどれだけ説明できるか」です。</p>
+<div class="table-wrap"><table><tr><th></th><th class=num>1ターン・数字</th><th class=num>3ターン・数字</th><th class=num>1ターン・5段階</th><th class=num>3ターン・5段階</th></tr><tr><td>決定係数</td><td class=num>0.46</td><td class=num>0.84</td><td class=num>0.83</td><td class=num>0.85</td></tr><tr><td>直近1か月のリターンの係数</td><td class=num>0.60</td><td class=num>0.79</td><td class=num>0.75</td><td class=num>0.60</td></tr><tr><td>12か月のモメンタムの係数</td><td class=num>0.31</td><td class=num>0.43</td><td class=num>0.39</td><td class=num>0.64</td></tr><tr><td>売上高の前年同期比の係数</td><td class=num>0.12</td><td class=num>0.07</td><td class=num>0.13</td><td class=num>0.09</td></tr><tr><td>純利益の前年同期比の係数</td><td class=num>−0.04</td><td class=num>0.05</td><td class=num>0.11</td><td class=num>0.10</td></tr><tr><td>PER の係数</td><td class=num>0.01</td><td class=num>−0.04</td><td class=num>0.01</td><td class=num>0.01</td></tr><tr><td>ROE の係数</td><td class=num>0.28</td><td class=num>0.05</td><td class=num>0.15</td><td class=num>0.11</td></tr></table></div>
+<p>新しい3条件は、どれも決定係数が 0.83〜0.85 です。予想の順位の8割以上が、入力の順位の足し算で説明できます。大半は値動きの2項目です。</p>
+</section>
+
+<section id="r2"><h2><span class="num">4</span>結果2：ファンダは使われたか</h2>
+<p>予想とファンダの指標の順位相関です（資本財）。</p>
+<div class="bars" style="--n:4"><div></div><div class="h">1ターン・数字</div><div class="h">3ターン・数字</div><div class="h">1ターン・5段階</div><div class="h">3ターン・5段階</div><div>売上高の前年同期比</div><div class="bar"><i style="width:35%"></i><span>+0.21</span></div><div class="bar"><i style="width:40%"></i><span>+0.24</span></div><div class="bar"><i style="width:55%"></i><span>+0.33</span></div><div class="bar"><i style="width:50%"></i><span>+0.30</span></div><div>純利益の前年同期比</div><div class="bar"><i style="width:25%"></i><span>+0.15</span></div><div class="bar"><i style="width:43%"></i><span>+0.26</span></div><div class="bar"><i style="width:58%"></i><span>+0.35</span></div><div class="bar"><i style="width:60%"></i><span>+0.36</span></div><div>PER</div><div class="bar"><i style="width:15%"></i><span>+0.09</span></div><div class="bar"><i style="width:32%"></i><span>+0.19</span></div><div class="bar"><i style="width:35%"></i><span>+0.21</span></div><div class="bar"><i style="width:38%"></i><span>+0.23</span></div><div>PBR</div><div class="bar"><i style="width:18%"></i><span>+0.11</span></div><div class="bar"><i style="width:13%"></i><span>+0.08</span></div><div class="bar"><i style="width:32%"></i><span>+0.19</span></div><div class="bar"><i style="width:23%"></i><span>+0.14</span></div><div>純利益率</div><div class="bar neg"><i style="width:18%"></i><span>-0.11</span></div><div class="bar neg"><i style="width:23%"></i><span>-0.14</span></div><div class="bar neg"><i style="width:8%"></i><span>-0.05</span></div><div class="bar neg"><i style="width:13%"></i><span>-0.08</span></div><div>ROE</div><div class="bar"><i style="width:13%"></i><span>+0.08</span></div><div class="bar neg"><i style="width:8%"></i><span>-0.05</span></div><div class="bar"><i style="width:8%"></i><span>+0.05</span></div><div class="bar"><i style="width:0%"></i><span>+0.00</span></div><div>負債の重さ</div><div class="bar"><i style="width:5%"></i><span>+0.03</span></div><div class="bar neg"><i style="width:3%"></i><span>-0.02</span></div><div class="bar neg"><i style="width:7%"></i><span>-0.04</span></div><div class="bar neg"><i style="width:17%"></i><span>-0.10</span></div></div>
+<ul class="tight">
+<li><b>成長率との相関は少し上がりました</b>（+0.15 → +0.26〜0.36）。</li>
+<li><b>ただし、ほかの入力をそろえると小さくなります。</b>上の回帰では、成長率の係数は 0.05〜0.13 です。成長している会社は株価も上がっていることが多く、単純な相関はモメンタムの影響を含んでいます。</li>
+<li><b>水準の指標（PBR、純利益率、ROE、負債）は、どの条件でもほぼ使われていません。</b></li>
+</ul>
+</section>
+
+<section id="r3"><h2><span class="num">5</span>結果3：業種の知識は効いたか</h2>
+<h3>ターン1で何と答えたか</h3>
+<div class="table-wrap"><table><tr><th>回答に含まれていた内容</th><th class=num>REIT（12業種）</th><th class=num>それ以外（20業種）</th></tr>
+<tr><td>「モメンタムと直近のリターンが短期の予想の鍵」</td><td class=num colspan=2 style="text-align:center">32業種のうち 30</td></tr>
+<tr><td>「PER と PBR は誤解を招く」</td><td class=num>12</td><td class=num>9</td></tr>
+<tr><td>「純利益率と ROE は誤解を招く」</td><td class=num>0</td><td class=num>10</td></tr>
+<tr><td>「純利益率と ROE は効率を表す」（肯定）</td><td class=num>12</td><td class=num>8</td></tr>
+<tr><td>業界で使う FFO（funds from operations）に触れた</td><td class=num>0</td><td class=num>—</td></tr>
+</table></div>
+<ul class="tight">
+<li><b>文章は、業種が違ってもほぼ同じ型です。</b>「PER と PBR は誤解を招く」か「純利益率と ROE は誤解を招く」のどちらかを選び、理由は「会計の慣行が違うため」と書く形でした。</li>
+<li><b>REIT で「PER は誤解を招く」を選んだこと自体は正しいです。</b>ただ、同じ文が人材サービスや電気部品にも出てくるので、REIT の事情を踏まえた答えとは言い切れません。</li>
+<li><b>REIT の純利益が当てにならないことには、たどり着いていません。</b>純利益率と ROE を12業種すべてで肯定し、FFO には一度も触れませんでした。</li>
+</ul>
+<h3>予想は実際に変わったか（REIT、81）</h3>
+<div class="bars" style="--n:4"><div></div><div class="h">1ターン・数字</div><div class="h">3ターン・数字</div><div class="h">1ターン・5段階</div><div class="h">3ターン・5段階</div><div>PER</div><div class="bar"><i style="width:30%"></i><span>+0.18</span></div><div class="bar"><i style="width:15%"></i><span>+0.09</span></div><div class="bar neg"><i style="width:20%"></i><span>-0.12</span></div><div class="bar neg"><i style="width:18%"></i><span>-0.11</span></div><div>純利益率</div><div class="bar neg"><i style="width:20%"></i><span>-0.12</span></div><div class="bar"><i style="width:0%"></i><span>+0.00</span></div><div class="bar"><i style="width:33%"></i><span>+0.20</span></div><div class="bar"><i style="width:47%"></i><span>+0.28</span></div><div>ROE</div><div class="bar neg"><i style="width:3%"></i><span>-0.02</span></div><div class="bar"><i style="width:15%"></i><span>+0.09</span></div><div class="bar"><i style="width:48%"></i><span>+0.29</span></div><div class="bar"><i style="width:38%"></i><span>+0.23</span></div><div>純利益の前年同期比</div><div class="bar"><i style="width:50%"></i><span>+0.30</span></div><div class="bar"><i style="width:58%"></i><span>+0.35</span></div><div class="bar"><i style="width:58%"></i><span>+0.35</span></div><div class="bar"><i style="width:55%"></i><span>+0.33</span></div></div>
+<ul class="tight">
+<li><b>PER との相関は、3ターン・数字で +0.18 から +0.09 に下がりました。</b>ただし、ターン1がない「1ターン・5段階」でも −0.12 なので、ターン1の効果とは言えません。</li>
+<li><b>純利益率と ROE は、逆に関係が強まりました</b>（5段階の条件で +0.20〜0.29）。REIT では意味の薄い指標です。ターン1で肯定したことと向きが合います。</li>
+</ul>
+<p class="muted">REIT は1つの判断日あたり27銘柄です。この人数では相関が ±0.2 程度は偶然で動くので、ここの数字は傾向として読んでください。</p>
+</section>
+
+<section id="r4"><h2><span class="num">6</span>結果4：予想の大きさとばらつき</h2>
+<h3>数字で答えさせた条件（資本財）</h3>
+<div class="table-wrap"><table><tr><th></th><th class=num>1ターン・数字</th><th class=num>3ターン・数字</th></tr><tr><td>予想の平均（日次）</td><td class=num>0.17%</td><td class=num>0.07%</td></tr><tr><td>銘柄間の予想のばらつき</td><td class=num>0.22%</td><td class=num>0.14%</td></tr><tr><td>30個の回答のばらつき</td><td class=num>0.20%</td><td class=num>0.07%</td></tr><tr><td>日次 1% を超える回答の割合</td><td class=num>2.7%</td><td class=num>0.4%</td></tr></table></div>
+<ul class="tight">
+<li><b>桁は壊れていません。</b>実験 E（比率の明言）のような、日次 1% を超える回答の急増は起きませんでした。</li>
+<li><b>30個の回答がそろいすぎます。</b>ばらつきが約3分の1になりました。Black-Litterman では回答の分散を「予想の不確かさ」として使うので、分散が小さくなると、予想をさらに強く信じることになります。既存手法の問題（予想を 99.9% 採用する）を悪化させる向きです。</li>
+</ul>
+<h3>5段階で答えさせた条件（資本財）</h3>
+<div class="table-wrap"><table><tr><th></th><th class=num>−2</th><th class=num>−1</th><th class=num>0</th><th class=num>+1</th><th class=num>+2</th><th class=num>30個の回答のばらつき</th></tr><tr><td>1ターン・5段階</td><td class=num>6%</td><td class=num>53%</td><td class=num>9%</td><td class=num>25%</td><td class=num>7%</td><td class=num>0.22</td></tr><tr><td>3ターン・5段階</td><td class=num>11%</td><td class=num>49%</td><td class=num>8%</td><td class=num>22%</td><td class=num>10%</td><td class=num>0.17</td></tr></table></div>
+<ul class="tight">
+<li><b>「0（同じくらい）」がほとんど選ばれません</b>（8〜9%）。−1 か +1 に分かれます。</li>
+<li><b>半分が −1 です。</b>「セクターのほかの銘柄と比べて」と聞いているので、本来は上下が同じくらいになるはずです。</li>
+<li><b>30個がほぼ同じ答えになります。</b>5段階でばらつき 0.2 は、30個のうち大半が同じ段階を選んでいる状態です。</li>
+</ul>
+</section>
+
+<section id="why"><h2><span class="num">7</span>なぜこうなったか</h2>
+<div class="grid2">
+<div class="card"><h4>モデルは「1か月先は値動きで決まる」と考えている</h4><p>ターン1で、32業種のうち30業種が自分から「モメンタムと直近のリターンが短期の予想の鍵」と答えました。なぞりは、知識が使われていないのではなく、モデルの見方がそのまま出たものです。</p></div>
+<div class="card"><h4>会話にすると、その見方が固まる</h4><p>自分が書いた方針が手元にある状態で数字を答えるので、方針どおりに答えます。決定係数が 0.46 から 0.84 に上がり、30個の回答のばらつきが3分の1になったのは、このためと見ています。</p></div>
+<div class="card"><h4>足し算だけが原因ではなかった</h4><p>答えを5段階にしても、なぞりは減りませんでした。「入力の数字と答えの単位が同じだから足してしまう」という説明だけでは足りません。</p></div>
+<div class="card"><h4>業種の知識は、型どおりの一言どまり</h4><p>「PER は誤解を招く」という文は、REIT 以外の業種にも同じ形で出てきます。REIT では FFO に触れず、純利益率と ROE は肯定しました。これを予想に反映させても、業種に合った読み方にはなりません。</p></div>
+</div>
+</section>
+
+<section id="next"><h2><span class="num">8</span>次の手</h2>
+<p>今回の結果から、「LLM に数字を読ませて、銘柄の順位を付けさせる」方向には限界が見えました。考えられる手は次のとおりです。</p>
+<div class="table-wrap"><table><tr><th>案</th><th>内容</th><th>今回の結果との関係</th></tr><tr><td>予測の期間を長くする</td><td>翌月ではなく、四半期や半年先を聞く</td><td>モデルは「短期だから値動きを重視する」と述べている。期間が長ければ、ファンダを使う可能性がある。四半期ベースの予想は、もともと計画にある</td></tr><tr><td>値動きを入力から外す</td><td>銘柄の値動きの5項目を渡さない</td><td>なぞる対象をなくす。ただし実験 E では、成長率をなぞるようになった</td></tr><tr><td>LLM の役割を文章の部分に絞る</td><td>数字の部分は統計モデル（回帰）に任せ、LLM にはレポートなどの文章から、セクターや市場の見通しだけを出させる</td><td>数字の読み方では、回帰と同じか、それより単純なことしかしていない。LLM にしかできない部分に絞る</td></tr><tr><td>ターン1をこちらで書く</td><td>業種の読み方を LLM に答えさせず、正しい読み方をこちらで与える</td><td>LLM 自身の回答は型どおりで、しかも値動き重視に誘導する。ただし、人が書いた規則を入れることになる</td></tr></table></div>
+<p><b>おすすめは、1つ目と3つ目です。</b>1つ目は、今回と同じ規模の実験ですぐ確かめられます（質問文の「翌月」を「次の四半期」に変え、ターン1の回答が変わるかを見る）。3つ目は、設計の方向を変える話なので、1つ目の結果を見てから決めるのがよいです。</p>
+</section>
+
+<section id="limits"><h2><span class="num">9</span>注意点とファイル</h2>
+<ul class="tight">
+<li><b>規模が小さい。</b>3つの判断日、2つの業種グループだけです。資本財（1判断日あたり約79銘柄）の傾向ははっきりしていますが、REIT（27銘柄）の数字は偶然で動きます。</li>
+<li><b>3ターンの条件は、入力も増えています。</b>ターン2でセクター・市場・レポートの情報を渡しました。ただし、同じセクター・同じ月の銘柄には同じ情報なので、銘柄間の順位相関には直接は効きません。</li>
+<li><b>ターン1・2の回答は1通りだけです。</b>temperature 0 で1回作ったものを使い回しました。別の回答なら、結果が変わる可能性があります。</li>
+<li><b>予想が当たったかは見ていません。</b>見たのは、予想が入力のどれに沿っているかです。</li>
+<li><b>「1ターン・数字」は、プロンプトの置き方が少し違います。</b>実験 D の結果を使ったので、予想の指示がシステムプロンプトにあります。ほかの3条件では、指示をユーザーの発言の最後に置きました。</li>
+<li><b>モデルは gpt-4o-mini だけです。</b></li>
+</ul>
+<div class="card tree" style="margin-top:14px">
+<div class="row"><div class="name">LLM-BLM_実験/turns_exp.py</div><div class="desc">実験のスクリプト（3ターンの組み立てと実行）</div></div>
+<div class="row"><div class="name">LLM-BLM_実験/turns_analyse.py</div><div class="desc">分析のスクリプト</div></div>
+<div class="row"><div class="name">LLM-BLM_実験/turns_texts.json</div><div class="desc">ターン1（32業種）とターン2（96通り）の質問と回答の全文</div></div>
+<div class="row"><div class="name">LLM-BLM_実験/turns_results.pkl</div><div class="desc">ターン3の全回答（957リクエスト × 30個）</div></div>
+</div>
+</section>
+</main></div></body></html>

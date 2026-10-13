@@ -166,7 +166,9 @@ quarter_values AS (
     FROM picked WHERE kind = 'stock'
 ),
 best AS (
-    SELECT *, ROW_NUMBER() OVER (PARTITION BY symbol, concept, period_end ORDER BY derived, priority) AS choice
+    -- the value filed first wins: a tag that appears only in a later filing (as a comparative figure)
+    -- must not replace what was known when the quarter was reported
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY symbol, concept, period_end ORDER BY filed_date, derived, priority) AS choice
     FROM quarter_values
 )
 SELECT symbol,
@@ -266,6 +268,31 @@ CREATE TABLE IF NOT EXISTS sector_metrics (
     value       REAL NOT NULL,                  -- returns and volatility are decimal fractions (0.05 = 5%)
     computed_at TEXT NOT NULL,
     PRIMARY KEY (as_of_date, gics_sector, metric)
+) WITHOUT ROWID;
+
+-- Indicators of each index member on a decision date, computed by marketdb/build_stock_metrics.py
+-- from data known on that date (prices up to it, financial statements filed by it).
+-- A metric that cannot be computed has no row (short price history, loss-making, statements too old, ...),
+-- and neither has one that misleads in the stock's industry (INDUSTRY_EXCLUSIONS in marketdb/transform/stock.py)
+CREATE TABLE IF NOT EXISTS stock_metrics (
+    as_of_date  TEXT NOT NULL,                  -- last trading day of a month (nothing after it was used)
+    symbol      TEXT NOT NULL REFERENCES tickers(symbol),
+    metric      TEXT NOT NULL,                  -- price behaviour:
+                                                --   'momentum_12m': return from 252 to 21 trading days ago (the latest month left out)
+                                                --   'return_1m': return over the last 21 trading days
+                                                --   'relative_momentum_12m': momentum_12m minus the same return of the sector ETF
+                                                --   'volatility_30d': yearly volatility of daily returns over 30 trading days (mean of the last 5 days)
+                                                --   'beta_1y': slope of the daily returns on the S&P 500 over 252 trading days
+                                                -- fundamentals (latest quarter filed by the date; T4Q = sum of its last 4 quarters):
+                                                --   'pe_trailing': market cap / T4Q net income      'pb': market cap / equity
+                                                --   'revenue_growth_yoy', 'net_income_growth_yoy': quarter / same quarter a year before - 1
+                                                --   'net_margin': T4Q net income / T4Q revenue      'roe': T4Q net income / equity
+                                                --   'debt_to_equity': long-term debt / equity
+                                                --   'fundamentals_age_days': days since the end of that quarter
+                                                --   'filing_age_days': days since it was filed
+    value       REAL NOT NULL,                  -- returns, growth and margins are decimal fractions (0.05 = 5%)
+    computed_at TEXT NOT NULL,
+    PRIMARY KEY (as_of_date, symbol, metric)
 ) WITHOUT ROWID;
 
 -- ============================================================
@@ -382,3 +409,17 @@ SELECT as_of_date,
          / NULLIF(sqrt(AVG(value * value) OVER w - AVG(value) OVER w * AVG(value) OVER w), 0) AS z_score
 FROM sector_metrics
 WINDOW w AS (PARTITION BY as_of_date, metric);
+
+-- Stock indicators with the position among the stocks of the same sector on the same date
+-- (percentile: 0 = lowest value, 100 = highest; NULL when fewer than 5 stocks of the sector have the metric,
+-- e.g. the price / earnings ratio in Real Estate, where it is not computed for REITs)
+CREATE VIEW IF NOT EXISTS stock_metric_scores AS
+SELECT m.as_of_date,
+       m.symbol,
+       t.gics_sector,
+       m.metric,
+       m.value,
+       CASE WHEN COUNT(*) OVER w >= 5 THEN 100.0 * PERCENT_RANK() OVER (w ORDER BY m.value) END AS sector_percentile
+FROM stock_metrics m
+JOIN tickers t ON t.symbol = m.symbol
+WINDOW w AS (PARTITION BY m.as_of_date, m.metric, t.gics_sector);

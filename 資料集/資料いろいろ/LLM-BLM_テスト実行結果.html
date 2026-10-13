@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-BLM テスト実行結果</title>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --border: #dedad0;
+  --accent: #2f6fb3;
+  --accent-soft: #e4eef9;
+  --green: #2e7d4f;
+  --green-soft: #e3f3e9;
+  --orange: #b4621a;
+  --orange-soft: #fbeedf;
+  --purple: #6a4bb0;
+  --purple-soft: #eee8fa;
+  --red: #b23a3a;
+  --red-soft: #fbe6e6;
+  --code-bg: #f3f1ea;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #24282d;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #33383f;
+    --accent: #7cb2ec;
+    --accent-soft: #1f3248;
+    --green: #74c79a;
+    --green-soft: #1d3428;
+    --orange: #e9a462;
+    --orange-soft: #3a2a1a;
+    --purple: #b39cf0;
+    --purple-soft: #2c2440;
+    --red: #ec8a8a;
+    --red-soft: #3c2222;
+    --code-bg: #24282d;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --surface-2: #24282d; --text: #e6e8eb;
+  --muted: #9aa1ab; --border: #33383f; --accent: #7cb2ec; --accent-soft: #1f3248;
+  --green: #74c79a; --green-soft: #1d3428; --orange: #e9a462; --orange-soft: #3a2a1a;
+  --purple: #b39cf0; --purple-soft: #2c2440; --red: #ec8a8a; --red-soft: #3c2222;
+  --code-bg: #24282d; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15.5px;
+}
+code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+pre {
+  background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.55; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+nav.toc .label { font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .08em; margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--border); }
+nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+header.hero { margin-bottom: 36px; }
+header.hero .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; }
+header.hero h1 { font-size: 30px; line-height: 1.35; margin: 6px 0 12px; }
+header.hero p { color: var(--muted); margin: 0; max-width: 760px; }
+
+section { margin-bottom: 56px; scroll-margin-top: 20px; }
+h2 { font-size: 22px; margin: 0 0 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: var(--surface); border-radius: 6px; font-size: 14px; padding: 1px 9px; }
+h3 { font-size: 17px; margin: 26px 0 10px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { position: relative; padding-top: 44px; }
+.idea .badge { position: absolute; top: 16px; left: 22px; font-weight: 700; font-size: 13px; color: var(--accent); }
+.idea h4 { margin: 0 0 6px; font-size: 16px; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+
+/* directory tree */
+.tree { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.9; }
+.tree .row { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 12px; border-bottom: 1px dashed var(--border); }
+.tree .row:last-child { border-bottom: none; }
+.tree .name { white-space: pre; overflow-x: auto; }
+.tree .desc { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; font-family: "Hiragino Sans", sans-serif; }
+.t-script { background: var(--accent-soft); color: var(--accent); }
+.t-data { background: var(--green-soft); color: var(--green); }
+.t-out { background: var(--orange-soft); color: var(--orange); }
+.t-nb { background: var(--purple-soft); color: var(--purple); }
+
+/* flow */
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.stage { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.stage .step-label { text-align: right; padding-top: 16px; font-weight: 700; color: var(--muted); font-size: 13px; }
+.lane { display: flex; gap: 12px; flex-wrap: wrap; }
+.node { flex: 1 1 200px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid; background: var(--surface); }
+.node .title { font-weight: 700; font-size: 14.5px; }
+.node .sub { font-size: 12.5px; color: var(--muted); }
+.node.script { border-color: var(--accent); background: var(--accent-soft); }
+.node.data { border-color: var(--green); background: var(--green-soft); }
+.node.out { border-color: var(--orange); background: var(--orange-soft); }
+.node.nb { border-color: var(--purple); background: var(--purple-soft); }
+.node.ext { border-style: dashed; border-color: var(--muted); }
+.arrow { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+.arrow span { grid-column: 2; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.6; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid; }
+
+/* timeline */
+.timeline { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0 6px; }
+.tl-head { font-size: 12.5px; text-align: center; color: var(--muted); font-weight: 700; }
+.tl-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.tl-train { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.tl-test { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange); }
+.tl-empty { background: transparent; }
+
+/* step details */
+.step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.step .circle { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.step .card h3 { margin-top: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step .card h3 code { font-size: 14px; }
+.io { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 6px 0 12px; }
+.io .in, .io .outp { border-radius: 6px; padding: 2px 10px; }
+.io .in { background: var(--green-soft); color: var(--green); }
+.io .outp { background: var(--orange-soft); color: var(--orange); }
+.step ul, .step ol { padding-left: 1.3em; margin: 8px 0; }
+.step li { margin: 3px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.formula { background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 10px; padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+.formula .cm { color: var(--muted); font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+
+.callout { border-left: 4px solid var(--orange); background: var(--orange-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14.5px; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-soft); }
+
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sev { font-size: 12px; font-weight: 700; text-align: center; border-radius: 6px; padding: 3px 0; }
+.sev.high { background: var(--red-soft); color: var(--red); }
+.sev.mid { background: var(--orange-soft); color: var(--orange); }
+.sev.low { background: var(--surface-2); color: var(--muted); }
+.issue p { margin: 0; }
+.issue .where { font-size: 12.5px; color: var(--muted); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 20px 16px 60px; }
+  nav.toc { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .stage, .arrow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .stage .step-label { text-align: left; padding-top: 0; }
+  .arrow span { grid-column: 1; }
+  .tree .row { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 0; }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .issue { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sev { width: 88px; }
+  .timeline { gap: 3px; }
+  .tl-cell { font-size: 10.5px; }
+  header.hero h1 { font-size: 24px; }
+}
+
+.muted { color: var(--muted); font-size: 12.5px; }
+td.good { color: var(--green); font-weight: 700; }
+td.bad { color: var(--red); font-weight: 700; }
+.kpis { display:grid; grid-template-columns: repeat(4,1fr); gap:12px; }
+.kpi .v { font-size: 26px; font-weight: 700; line-height:1.2; }
+.kpi .k { color: var(--muted); font-size: 13px; }
+.plot { width:100%; height:auto; display:block; }
+.plot .grid { stroke: var(--border); stroke-width:1; }
+.plot .zero { stroke: var(--muted); stroke-width:1; stroke-dasharray:3 3; }
+.plot .ax { fill: var(--muted); font-size: 11px; }
+.plot .lbl { fill: var(--text); font-size: 13px; font-weight:700; }
+.plot .dot { fill: var(--accent); fill-opacity:.35; }
+.plot .qline { stroke: var(--accent); stroke-width:3; }
+.plot .act { fill: var(--orange); }
+.plot-legend { display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin-top:8px; }
+.sw { display:inline-block; width:12px; height:12px; vertical-align:-1px; margin-right:5px; }
+@media (max-width:900px) { .kpis { grid-template-columns: repeat(2,1fr); } }
+</style></head><body>
+<div class="layout">
+<nav class="toc"><div class="label">目次</div>
+<a href="#summary">1. 結論</a><a href="#what">2. 実行内容</a><a href="#files">3. 出力ファイル</a><a href="#views">4. LLMの予想</a><a href="#llama">5. Llamaとの比較</a><a href="#bl">6. BLまで通す</a><a href="#findings">7. 分かったこと</a><a href="#next">8. 次にやること</a></nav>
+<main>
+<header class="hero"><div class="eyebrow">LLM-BLM 動作確認</div>
+<h1>OpenAI API（gpt-4o-mini）での少数データのテスト実行結果</h1>
+<p>5銘柄 × 2か月 × 30回 ＝ 300回のAPI呼び出しで <code>run.py</code> を動かし、出力をBlack-Littermanまで通して確認しました。</p></header>
+
+<section id="summary"><h2><span class="num">1</span>結論</h2>
+<div class="kpis">
+<div class="card kpi"><div class="v">成功</div><div class="k">run.py が最後まで完了（約4分）</div></div>
+<div class="card kpi"><div class="v">300 / 300</div><div class="k">回答のパース成功（失敗0回）</div></div>
+<div class="card kpi"><div class="v">一致</div><div class="k">価格データは元リポジトリと誤差 1e-6 未満</div></div>
+<div class="card kpi"><div class="v">3件</div><div class="k">本番前に直したい点</div></div>
+</div>
+<div class="callout info" style="margin-top:16px">OpenAI 版の <code>run.py</code> は正しく動き、出力JSONは元論文と同じ形式で、後続の Black-Litterman にそのまま渡せます。一方で、Wikipedia の 403 エラー（修正済み）、月末日の欠落、少数銘柄で最適化が動かない問題が見つかりました（<a href="#findings">7章</a>）。</div>
+</section>
+
+<section id="what"><h2><span class="num">2</span>実行内容</h2>
+<div class="card">
+<div class="table-wrap"><table>
+<tr><th style="width:140px">項目</th><th>設定</th></tr>
+<tr><td>モデル</td><td><code>gpt-4o-mini</code>（<code>.env</code> の <code>OPENAI_MODEL</code>）</td></tr>
+<tr><td>銘柄</td><td>AAPL, NVDA, JPM, XOM, JNJ（セクターがばらけるように選定）</td></tr>
+<tr><td>期間</td><td>2024年6月・7月（6月の予想を7月の実績で答え合わせできるように2か月）</td></tr>
+<tr><td>試行回数</td><td>1銘柄あたり30回（論文と同じ）</td></tr>
+<tr><td>出力先</td><td><code>工房/LLM-BLM_test_run/</code>（リポジトリ内の本番データは上書きしていません）</td></tr>
+</table></div>
+<h3>実行コマンド</h3>
+<pre><code>cd LLM-BLM
+.venv/bin/python run.py --start 2024-06-01 --end 2024-07-01 \
+  --tickers AAPL,NVDA,JPM,XOM,JNJ --n_samples 30 --out_dir ../LLM-BLM_test_run</code></pre>
+<h3>このために run.py に加えた変更</h3>
+<ul>
+<li><b>引数の追加：</b><code>--start</code> / <code>--end</code> / <code>--tickers</code> / <code>--n_samples</code> / <code>--out_dir</code>。何も指定しなければ、これまでどおり全銘柄・7か月・30回・リポジトリ直下に保存します。</li>
+<li><b>Wikipedia の 403 エラー対策：</b>最初の実行で、S&amp;P500 の銘柄一覧の取得が <code>HTTP Error 403: Forbidden</code> で失敗しました。User-Agent ヘッダーを付けて解決しています。<b>元のコードのままでは、現在は誰が実行しても動きません。</b></li>
+</ul></div></section>
+
+<section id="files"><h2><span class="num">3</span>出力ファイル</h2>
+<div class="card tree">
+<div class="row"><div class="name">LLM-BLM_test_run/</div><div class="desc"></div></div>
+<div class="row"><div class="name">├── yfinance/</div><div class="desc"></div></div>
+<div class="row"><div class="name">│   ├── <span class="tag t-data">データ</span>data_2024-06-01_2024-06-30.csv</div><div class="desc">5銘柄の終値（6月）</div></div>
+<div class="row"><div class="name">│   ├── <span class="tag t-data">データ</span>returns_2024-06-01_2024-06-30.csv</div><div class="desc">日次リターン（6月、18営業日分）</div></div>
+<div class="row"><div class="name">│   └── <span class="tag t-data">データ</span>…_2024-07-01_2024-07-31.csv</div><div class="desc">同じく7月分（20営業日分）</div></div>
+<div class="row"><div class="name">├── responses/</div><div class="desc"></div></div>
+<div class="row"><div class="name">│   ├── <span class="tag t-out">出力</span>gpt-4o-mini_2024-06-01_2024-06-30.json</div><div class="desc">6月のデータを見せたときの「7月の予想」30個 × 5銘柄</div></div>
+<div class="row"><div class="name">│   └── <span class="tag t-out">出力</span>gpt-4o-mini_2024-07-01_2024-07-31.json</div><div class="desc">7月のデータを見せたときの「8月の予想」</div></div>
+<div class="row"><div class="name">├── <span class="tag t-nb">ログ</span>run_log.txt</div><div class="desc">実行ログ（LLMの全回答が出力されています）</div></div>
+<div class="row"><div class="name">└── <span class="tag t-nb">集計</span>summary.json</div><div class="desc">このページの数値の元データ</div></div>
+</div>
+<h3>JSONの中身（AAPL・6月の例）</h3>
+<pre><code>"AAPL": {
+  "ticker": "AAPL",
+  "Security": "Apple Inc.",
+  "GICS Sector": "Information Technology",
+  "GICS Sub-Industry": "Technology Hardware, Storage &amp; Peripherals",
+  "pct_change": [0.0016, 0.0078, -0.0071, 0.0124, …],   // 6月の日次リターン 18日分
+  "expected_return": [0.0055, 0.0048, 0.0033, 0.0054, …]  // LLMの予想 30個
+}</code></pre>
+</section>
+
+<section id="views"><h2><span class="num">4</span>LLMの予想（ビュー）</h2>
+<p>Black-Litterman では、30個の予想の<b>平均がビュー Q</b>、<b>分散が自信のなさ Ω</b> になります。値はすべて「1日あたりの平均リターン」です。</p>
+<div class="card">
+<h3 style="margin-top:0">6月のデータから7月を予想 → 7月の実績で答え合わせ</h3>
+<svg viewBox="0 0 760 292" class="plot" role="img" aria-label="6月時点のLLM予想30個と7月の実際の平均日次リターン">
+<line x1="130.9" y1="20" x2="130.9" y2="262" class="grid"/>
+<text x="130.9" y="280" class="ax" text-anchor="middle">-1.0%</text>
+<line x1="283.2" y1="20" x2="283.2" y2="262" class="grid"/>
+<text x="283.2" y="280" class="ax" text-anchor="middle">-0.5%</text>
+<line x1="435.5" y1="20" x2="435.5" y2="262" class="zero"/>
+<text x="435.5" y="280" class="ax" text-anchor="middle">+0.0%</text>
+<line x1="587.7" y1="20" x2="587.7" y2="262" class="grid"/>
+<text x="587.7" y="280" class="ax" text-anchor="middle">+0.5%</text>
+<line x1="740.0" y1="20" x2="740.0" y2="262" class="grid"/>
+<text x="740.0" y="280" class="ax" text-anchor="middle">+1.0%</text>
+<text x="58" y="55.0" class="lbl" text-anchor="end">AAPL</text>
+<circle cx="601.7" cy="43.0" r="3.2" class="dot"/>
+<circle cx="581.6" cy="54.2" r="3.2" class="dot"/>
+<circle cx="534.6" cy="47.8" r="3.2" class="dot"/>
+<circle cx="600.1" cy="59.0" r="3.2" class="dot"/>
+<circle cx="546.4" cy="52.6" r="3.2" class="dot"/>
+<circle cx="506.2" cy="46.2" r="3.2" class="dot"/>
+<circle cx="569.8" cy="57.4" r="3.2" class="dot"/>
+<circle cx="573.0" cy="51.0" r="3.2" class="dot"/>
+<circle cx="536.6" cy="44.6" r="3.2" class="dot"/>
+<circle cx="544.5" cy="55.8" r="3.2" class="dot"/>
+<circle cx="528.4" cy="49.4" r="3.2" class="dot"/>
+<circle cx="472.5" cy="43.0" r="3.2" class="dot"/>
+<circle cx="618.3" cy="54.2" r="3.2" class="dot"/>
+<circle cx="502.0" cy="47.8" r="3.2" class="dot"/>
+<circle cx="513.3" cy="59.0" r="3.2" class="dot"/>
+<circle cx="526.9" cy="52.6" r="3.2" class="dot"/>
+<circle cx="594.5" cy="46.2" r="3.2" class="dot"/>
+<circle cx="522.0" cy="57.4" r="3.2" class="dot"/>
+<circle cx="655.5" cy="51.0" r="3.2" class="dot"/>
+<circle cx="496.4" cy="44.6" r="3.2" class="dot"/>
+<circle cx="507.1" cy="55.8" r="3.2" class="dot"/>
+<circle cx="615.1" cy="49.4" r="3.2" class="dot"/>
+<circle cx="508.7" cy="43.0" r="3.2" class="dot"/>
+<circle cx="546.3" cy="54.2" r="3.2" class="dot"/>
+<circle cx="504.8" cy="47.8" r="3.2" class="dot"/>
+<circle cx="516.2" cy="59.0" r="3.2" class="dot"/>
+<circle cx="558.3" cy="52.6" r="3.2" class="dot"/>
+<circle cx="501.4" cy="46.2" r="3.2" class="dot"/>
+<circle cx="551.9" cy="57.4" r="3.2" class="dot"/>
+<circle cx="550.9" cy="51.0" r="3.2" class="dot"/>
+<line x1="546.2" y1="37.0" x2="546.2" y2="65.0" class="qline"/>
+<path d="M452.9,42.0 l7,9 l-7,9 l-7,-9 z" class="act"/>
+<text x="58" y="101.0" class="lbl" text-anchor="end">NVDA</text>
+<circle cx="534.5" cy="89.0" r="3.2" class="dot"/>
+<circle cx="574.5" cy="100.2" r="3.2" class="dot"/>
+<circle cx="630.9" cy="93.8" r="3.2" class="dot"/>
+<circle cx="573.0" cy="105.0" r="3.2" class="dot"/>
+<circle cx="645.6" cy="98.6" r="3.2" class="dot"/>
+<circle cx="658.0" cy="92.2" r="3.2" class="dot"/>
+<circle cx="449.6" cy="103.4" r="3.2" class="dot"/>
+<circle cx="583.0" cy="97.0" r="3.2" class="dot"/>
+<circle cx="613.3" cy="90.6" r="3.2" class="dot"/>
+<circle cx="700.9" cy="101.8" r="3.2" class="dot"/>
+<circle cx="570.0" cy="95.4" r="3.2" class="dot"/>
+<circle cx="605.2" cy="89.0" r="3.2" class="dot"/>
+<circle cx="660.6" cy="100.2" r="3.2" class="dot"/>
+<circle cx="684.2" cy="93.8" r="3.2" class="dot"/>
+<circle cx="634.6" cy="105.0" r="3.2" class="dot"/>
+<circle cx="646.1" cy="98.6" r="3.2" class="dot"/>
+<circle cx="582.6" cy="92.2" r="3.2" class="dot"/>
+<circle cx="592.0" cy="103.4" r="3.2" class="dot"/>
+<circle cx="660.4" cy="97.0" r="3.2" class="dot"/>
+<circle cx="645.9" cy="90.6" r="3.2" class="dot"/>
+<circle cx="596.5" cy="101.8" r="3.2" class="dot"/>
+<circle cx="563.0" cy="95.4" r="3.2" class="dot"/>
+<circle cx="661.7" cy="89.0" r="3.2" class="dot"/>
+<circle cx="610.9" cy="100.2" r="3.2" class="dot"/>
+<circle cx="613.9" cy="93.8" r="3.2" class="dot"/>
+<circle cx="709.4" cy="105.0" r="3.2" class="dot"/>
+<circle cx="649.9" cy="98.6" r="3.2" class="dot"/>
+<circle cx="613.6" cy="92.2" r="3.2" class="dot"/>
+<circle cx="482.8" cy="103.4" r="3.2" class="dot"/>
+<circle cx="556.1" cy="97.0" r="3.2" class="dot"/>
+<line x1="610.1" y1="83.0" x2="610.1" y2="111.0" class="qline"/>
+<path d="M180.4,88.0 l7,9 l-7,9 l-7,-9 z" class="act"/>
+<text x="58" y="147.0" class="lbl" text-anchor="end">JPM</text>
+<circle cx="488.0" cy="135.0" r="3.2" class="dot"/>
+<circle cx="471.8" cy="146.2" r="3.2" class="dot"/>
+<circle cx="501.4" cy="139.8" r="3.2" class="dot"/>
+<circle cx="504.5" cy="151.0" r="3.2" class="dot"/>
+<circle cx="450.8" cy="144.6" r="3.2" class="dot"/>
+<circle cx="486.4" cy="138.2" r="3.2" class="dot"/>
+<circle cx="476.3" cy="149.4" r="3.2" class="dot"/>
+<circle cx="519.0" cy="143.0" r="3.2" class="dot"/>
+<circle cx="533.0" cy="136.6" r="3.2" class="dot"/>
+<circle cx="503.0" cy="147.8" r="3.2" class="dot"/>
+<circle cx="496.2" cy="141.4" r="3.2" class="dot"/>
+<circle cx="521.7" cy="135.0" r="3.2" class="dot"/>
+<circle cx="487.0" cy="146.2" r="3.2" class="dot"/>
+<circle cx="468.9" cy="139.8" r="3.2" class="dot"/>
+<circle cx="550.9" cy="151.0" r="3.2" class="dot"/>
+<circle cx="467.6" cy="144.6" r="3.2" class="dot"/>
+<circle cx="504.3" cy="138.2" r="3.2" class="dot"/>
+<circle cx="522.7" cy="149.4" r="3.2" class="dot"/>
+<circle cx="498.8" cy="143.0" r="3.2" class="dot"/>
+<circle cx="467.6" cy="136.6" r="3.2" class="dot"/>
+<circle cx="476.0" cy="147.8" r="3.2" class="dot"/>
+<circle cx="489.2" cy="141.4" r="3.2" class="dot"/>
+<circle cx="456.1" cy="135.0" r="3.2" class="dot"/>
+<circle cx="444.3" cy="146.2" r="3.2" class="dot"/>
+<circle cx="531.3" cy="139.8" r="3.2" class="dot"/>
+<circle cx="526.2" cy="151.0" r="3.2" class="dot"/>
+<circle cx="491.2" cy="144.6" r="3.2" class="dot"/>
+<circle cx="484.9" cy="138.2" r="3.2" class="dot"/>
+<circle cx="516.8" cy="149.4" r="3.2" class="dot"/>
+<circle cx="494.9" cy="143.0" r="3.2" class="dot"/>
+<line x1="494.4" y1="129.0" x2="494.4" y2="157.0" class="qline"/>
+<path d="M517.2,134.0 l7,9 l-7,9 l-7,-9 z" class="act"/>
+<text x="58" y="193.0" class="lbl" text-anchor="end">XOM</text>
+<circle cx="502.7" cy="181.0" r="3.2" class="dot"/>
+<circle cx="484.2" cy="192.2" r="3.2" class="dot"/>
+<circle cx="471.0" cy="185.8" r="3.2" class="dot"/>
+<circle cx="473.3" cy="197.0" r="3.2" class="dot"/>
+<circle cx="473.3" cy="190.6" r="3.2" class="dot"/>
+<circle cx="465.6" cy="184.2" r="3.2" class="dot"/>
+<circle cx="485.6" cy="195.4" r="3.2" class="dot"/>
+<circle cx="486.1" cy="189.0" r="3.2" class="dot"/>
+<circle cx="464.1" cy="182.6" r="3.2" class="dot"/>
+<circle cx="510.9" cy="193.8" r="3.2" class="dot"/>
+<circle cx="478.4" cy="187.4" r="3.2" class="dot"/>
+<circle cx="483.8" cy="181.0" r="3.2" class="dot"/>
+<circle cx="509.3" cy="192.2" r="3.2" class="dot"/>
+<circle cx="463.3" cy="185.8" r="3.2" class="dot"/>
+<circle cx="442.7" cy="197.0" r="3.2" class="dot"/>
+<circle cx="469.0" cy="190.6" r="3.2" class="dot"/>
+<circle cx="452.9" cy="184.2" r="3.2" class="dot"/>
+<circle cx="452.5" cy="195.4" r="3.2" class="dot"/>
+<circle cx="476.8" cy="189.0" r="3.2" class="dot"/>
+<circle cx="543.5" cy="182.6" r="3.2" class="dot"/>
+<circle cx="439.2" cy="193.8" r="3.2" class="dot"/>
+<circle cx="473.0" cy="187.4" r="3.2" class="dot"/>
+<circle cx="471.2" cy="181.0" r="3.2" class="dot"/>
+<circle cx="459.2" cy="192.2" r="3.2" class="dot"/>
+<circle cx="464.8" cy="185.8" r="3.2" class="dot"/>
+<circle cx="465.1" cy="197.0" r="3.2" class="dot"/>
+<circle cx="500.3" cy="190.6" r="3.2" class="dot"/>
+<circle cx="462.5" cy="184.2" r="3.2" class="dot"/>
+<circle cx="470.2" cy="195.4" r="3.2" class="dot"/>
+<circle cx="455.0" cy="189.0" r="3.2" class="dot"/>
+<line x1="475.0" y1="175.0" x2="475.0" y2="203.0" class="qline"/>
+<path d="M479.8,180.0 l7,9 l-7,9 l-7,-9 z" class="act"/>
+<text x="58" y="239.0" class="lbl" text-anchor="end">JNJ</text>
+<circle cx="447.0" cy="227.0" r="3.2" class="dot"/>
+<circle cx="450.7" cy="238.2" r="3.2" class="dot"/>
+<circle cx="488.8" cy="231.8" r="3.2" class="dot"/>
+<circle cx="459.6" cy="243.0" r="3.2" class="dot"/>
+<circle cx="457.1" cy="236.6" r="3.2" class="dot"/>
+<circle cx="456.8" cy="230.2" r="3.2" class="dot"/>
+<circle cx="477.7" cy="241.4" r="3.2" class="dot"/>
+<circle cx="465.7" cy="235.0" r="3.2" class="dot"/>
+<circle cx="450.4" cy="228.6" r="3.2" class="dot"/>
+<circle cx="463.8" cy="239.8" r="3.2" class="dot"/>
+<circle cx="459.9" cy="233.4" r="3.2" class="dot"/>
+<circle cx="458.3" cy="227.0" r="3.2" class="dot"/>
+<circle cx="450.4" cy="238.2" r="3.2" class="dot"/>
+<circle cx="464.6" cy="231.8" r="3.2" class="dot"/>
+<circle cx="456.6" cy="243.0" r="3.2" class="dot"/>
+<circle cx="460.3" cy="236.6" r="3.2" class="dot"/>
+<circle cx="464.7" cy="230.2" r="3.2" class="dot"/>
+<circle cx="444.4" cy="241.4" r="3.2" class="dot"/>
+<circle cx="467.3" cy="235.0" r="3.2" class="dot"/>
+<circle cx="459.8" cy="228.6" r="3.2" class="dot"/>
+<circle cx="451.5" cy="239.8" r="3.2" class="dot"/>
+<circle cx="458.5" cy="233.4" r="3.2" class="dot"/>
+<circle cx="459.6" cy="227.0" r="3.2" class="dot"/>
+<circle cx="472.3" cy="238.2" r="3.2" class="dot"/>
+<circle cx="459.7" cy="231.8" r="3.2" class="dot"/>
+<circle cx="461.0" cy="243.0" r="3.2" class="dot"/>
+<circle cx="463.4" cy="236.6" r="3.2" class="dot"/>
+<circle cx="462.6" cy="230.2" r="3.2" class="dot"/>
+<circle cx="466.0" cy="241.4" r="3.2" class="dot"/>
+<circle cx="453.1" cy="235.0" r="3.2" class="dot"/>
+<line x1="460.4" y1="221.0" x2="460.4" y2="249.0" class="qline"/>
+<path d="M585.8,226.0 l7,9 l-7,9 l-7,-9 z" class="act"/>
+</svg>
+<div class="plot-legend">
+<span><span class="sw" style="background:var(--accent);opacity:.4;border-radius:50%"></span>30回の予想それぞれ</span>
+<span><span class="sw" style="background:var(--accent);width:4px"></span>予想の平均（Q）</span>
+<span><span class="sw" style="background:var(--orange);transform:rotate(45deg)"></span>7月の実際の平均日次リターン</span>
+</div>
+<div class="table-wrap" style="margin-top:14px"><table>
+<tr><th>銘柄</th><th>有効回答</th><th>入力：6月の平均</th><th>予想 Q</th><th>予想のばらつき（標準偏差）</th><th>予想の範囲</th><th>7月の実績</th></tr>
+<tr><td><b>AAPL</b><br><span class='muted'>Apple</span></td><td>30/30</td><td>+0.48%</td><td><b>+0.36%</b></td><td>0.14%</td><td>+0.12% 〜 +0.72%</td><td class='good'>+0.06%</td></tr><tr><td><b>NVDA</b><br><span class='muted'>NVIDIA</span></td><td>30/30</td><td>+0.45%</td><td><b>+0.57%</b></td><td>0.19%</td><td>+0.05% 〜 +0.90%</td><td class='bad'>-0.84%</td></tr><tr><td><b>JPM</b><br><span class='muted'>JPMorgan Chase</span></td><td>30/30</td><td>+0.02%</td><td><b>+0.19%</b></td><td>0.08%</td><td>+0.03% 〜 +0.38%</td><td class='good'>+0.27%</td></tr><tr><td><b>XOM</b><br><span class='muted'>ExxonMobil</span></td><td>30/30</td><td>+0.04%</td><td><b>+0.13%</b></td><td>0.07%</td><td>+0.01% 〜 +0.35%</td><td class='good'>+0.15%</td></tr><tr><td><b>JNJ</b><br><span class='muted'>Johnson & Johnson</span></td><td>30/30</td><td>-0.06%</td><td><b>+0.08%</b></td><td>0.03%</td><td>+0.03% 〜 +0.18%</td><td class='good'>+0.49%</td></tr>
+</table></div>
+<p class="muted">7月の実績は、予想と符号（プラス/マイナス）が合っていれば緑、外れていれば赤で表示しています。</p>
+</div>
+<div class="card" style="margin-top:14px">
+<h3 style="margin-top:0">7月のデータから8月を予想（参考）</h3>
+<div class="table-wrap"><table>
+<tr><th>銘柄</th><th>有効回答</th><th>入力：7月の平均</th><th>予想 Q</th><th>ばらつき</th></tr>
+<tr><td><b>AAPL</b></td><td>30/30</td><td>+0.06%</td><td><b>+0.29%</b></td><td>0.09%</td></tr><tr><td><b>NVDA</b></td><td>30/30</td><td>-0.84%</td><td><b>-1.08%</b></td><td>0.55%</td></tr><tr><td><b>JPM</b></td><td>30/30</td><td>+0.27%</td><td><b>+0.39%</b></td><td>0.12%</td></tr><tr><td><b>XOM</b></td><td>30/30</td><td>+0.15%</td><td><b>+0.26%</b></td><td>0.13%</td></tr><tr><td><b>JNJ</b></td><td>30/30</td><td>+0.49%</td><td><b>+0.46%</b></td><td>0.14%</td></tr>
+</table></div></div>
+<h3>読み取れること</h3>
+<ul>
+<li><b>入力をほぼなぞっている：</b>予想は「先月の平均」に近い値になります。7月の NVDA は先月が −0.84% だったので、予想も −1.08% とマイナスになりました。</li>
+<li><b>プラスに偏りがち：</b>6月時点の予想は5銘柄すべてプラスでした。先月がマイナスだった JNJ（−0.06%）もプラスと予想しています。</li>
+<li><b>NVDA を大きく外した：</b>+0.57% と予想しましたが、実際は −0.84% でした（2024年7月のハイテク株の調整）。ただし予想のばらつきも5銘柄で一番大きく、Black-Litterman では「自信のないビュー」として弱めに扱われます。</li>
+<li>符号は5銘柄中4銘柄で当たりましたが、全部プラスと予想した結果にすぎず、5銘柄では予測力の判断はできません。</li>
+</ul></section>
+
+<section id="llama"><h2><span class="num">5</span>元論文の Llama との比較（同じ銘柄・同じ月）</h2>
+<div class="card"><div class="table-wrap"><table>
+<tr><th>銘柄（7月）</th><th>GPT 予想 Q</th><th>GPT ばらつき</th><th>Llama 予想 Q</th><th>Llama ばらつき</th></tr>
+<tr><td><b>AAPL</b></td><td>+0.29%</td><td>0.09%</td><td>-403.84%</td><td class='bad'>2156.79%</td></tr><tr><td><b>NVDA</b></td><td>-1.08%</td><td>0.55%</td><td>-12.25%</td><td class='bad'>69.03%</td></tr><tr><td><b>JPM</b></td><td>+0.39%</td><td>0.12%</td><td>+66.13%</td><td class='bad'>418.12%</td></tr><tr><td><b>XOM</b></td><td>+0.26%</td><td>0.13%</td><td>+0.56%</td><td class='bad'>0.60%</td></tr><tr><td><b>JNJ</b></td><td>+0.46%</td><td>0.14%</td><td>-41.40%</td><td class='bad'>224.55%</td></tr>
+</table></div>
+<p>元論文の Llama-3.1-8B は、AAPL で −404%/日 のようなありえない値が混ざり、ばらつきが非常に大きくなっています。gpt-4o-mini の回答は、すべて現実的な範囲に収まっていました。論文では「ばらつきが大きい ＝ 自信がない」として扱うので、<b>モデルを替えると Ω の大きさが桁違いに変わり、結果に大きく影響する</b>点は覚えておく必要があります。</p>
+</div></section>
+
+<section id="bl"><h2><span class="num">6</span>Black-Litterman まで通してみる（5銘柄のおもちゃ版）</h2>
+<p>出力が後続処理に使えるかを見るため、<code>evaluate_multiple.py</code> の <code>black_litterman_LLM()</code> にそのまま渡しました。6月のデータでウェイトを決め、7月の実績で評価しています。</p>
+<div class="callout"><b>最初の結果：ウェイトが全銘柄 20.0%（等ウェイトと完全に同じ）。</b>最適化が1回で「収束した」と判断して止まり、初期値から動いていませんでした。5銘柄だと目的関数の値が 0.0002 程度と小さく、SciPy の初期設定の収束判定（ftol = 1e-6）にすぐ引っかかるためです。元論文の約500銘柄の結果ではウェイトが動いていたので、少数銘柄で起きやすい問題ですが、本番でも注意が必要です。</div>
+<p>収束判定を厳しく（<code>ftol=1e-12</code>）した結果が下の表です。市場均衡リターン Π の計算で、元コードどおり年率 2% を日次リターンから引いた場合と、日次に直した 2%/252 を使った場合の2通りを比べています。</p>
+<div class="card"><div class="table-wrap"><table>
+<tr><th rowspan="2">銘柄</th><th colspan="3">元コードどおり（rf = 0.02）</th><th colspan="2">日次に直した場合（rf = 0.02/252）</th><th rowspan="2">7月の実績（月間）</th></tr>
+<tr><th>Π</th><th>事後リターン</th><th>ウェイト</th><th>Π</th><th>ウェイト</th></tr>
+<tr><td><b>AAPL</b></td><td>-1.43%</td><td>+0.04%</td><td>15.6%</td><td>+0.32%</td><td>27.9%</td><td>+0.9%</td></tr><tr><td><b>NVDA</b></td><td>-2.94%</td><td>+0.04%</td><td>7.1%</td><td>+0.67%</td><td>15.4%</td><td>-16.5%</td></tr><tr><td><b>JPM</b></td><td>+0.54%</td><td>+0.14%</td><td>42.6%</td><td>-0.12%</td><td>53.1%</td><td>+5.3%</td></tr><tr><td><b>XOM</b></td><td>+0.63%</td><td>+0.09%</td><td>10.8%</td><td>-0.14%</td><td>3.7%</td><td>+2.8%</td></tr><tr><td><b>JNJ</b></td><td>+0.54%</td><td>+0.06%</td><td>23.8%</td><td>-0.12%</td><td>0.0%</td><td>+10.2%</td></tr>
+<tr><td><b>7月の成績</b></td><td colspan="3"><b>+3.95%</b></td><td colspan="2"><b>+0.60%</b></td><td>等ウェイト +0.45% / 時価総額加重 -5.04%</td></tr>
+</table></div>
+<ul>
+<li><b>元コードどおりだと Π がおかしい：</b>AAPL と NVDA の Π が −1.4%/日、−2.9%/日 と、ありえない大きさのマイナスになります。日次リターンから年率 2% をそのまま引いているためです。</li>
+<li><b>事後リターンはビューに引っ張られる：</b>LLMのビュー（ばらつきが小さく自信あり）の影響が強く、Π がおかしくても、事後リターンは +0.04〜0.14%/日 の範囲に収まっています。</li>
+<li>5銘柄・1か月の結果なので、成績の良し悪しは判断できません。<b>計算が最後まで通ることの確認</b>として見てください。</li>
+</ul></div></section>
+
+<section id="findings"><h2><span class="num">7</span>分かったこと</h2>
+<div class="issues">
+<div class="card issue"><span class="sev low">OK</span><div><p><b>OpenAI 版 run.py は正常に動作。</b>構造化出力のおかげで、300回すべて <code>{"expected_return": 数値}</code> の形で返ってきました。出力JSONは元論文と同じ形式です。</p><div class="where">run.py</div></div></div>
+<div class="card issue"><span class="sev low">OK</span><div><p><b>価格データは元リポジトリと一致。</b>6月・7月の日次リターンは、元の <code>yfinance/</code> と誤差 1e-6 未満で一致しました（日付・行数も同じ）。</p><div class="where">yfinance/returns_*.csv</div></div></div>
+<div class="card issue"><span class="sev high">修正済み</span><div><p><b>Wikipedia の取得が 403 エラー。</b>User-Agent ヘッダーを付けて解決しました。</p><div class="where">run.py</div></div></div>
+<div class="card issue"><span class="sev mid">要修正</span><div><p><b>月末日のデータが欠ける。</b>yfinance の <code>end</code> は「その日を含まない」ので、7月のデータが 7/30 で終わり、7/31 が入っていません。月初日のリターンも <code>pct_change()</code> で消えるため、7月は本来22営業日のところ20日分しかありません（元論文も同じ）。</p><div class="where">run.py の yf.download</div></div></div>
+<div class="card issue"><span class="sev mid">要修正</span><div><p><b>最適化が初期値で止まることがある。</b>目的関数の値が小さいと、SLSQP が1回で止まり等ウェイトのままになります。<code>options={"ftol": 1e-12}</code> などの指定がおすすめです。</p><div class="where">evaluate_multiple.py / baselines.py</div></div></div>
+<div class="card issue"><span class="sev mid">要確認</span><div><p><b>市場均衡リターン Π の単位の不一致</b>（前回の解説で指摘した点）が、実際の数値でも確認できました。</p><div class="where">evaluate_multiple.py</div></div></div>
+<div class="card issue"><span class="sev low">補足</span><div><p><b>プロンプトの単位が曖昧。</b>プロンプトでは「percentage change」と書いていますが、入力も出力も小数（0.003 ＝ 0.3%）です。GPT は入力に合わせて小数で答えていましたが、モデルによっては「0.3」と答える恐れがあります。</p><div class="where">run.py のプロンプト</div></div></div>
+</div></section>
+
+<section id="next"><h2><span class="num">8</span>次にやること</h2>
+<div class="card"><ol>
+<li>前回相談した構成（データ取得・LLMに渡す情報・プロンプト・LLM呼び出し・実行用）に <code>run.py</code> を分割する</li>
+<li>月末日の欠落と最適化の収束判定を直す</li>
+<li>銘柄数を 50 程度に増やして中規模でテストする（50銘柄 × 30回 × 7か月 ≈ 1万回）</li>
+<li>問題がなければ全銘柄で本番実行する（約10万回。数時間かかるので並列化を検討）</li>
+</ol></div></section>
+
+<footer>2026-10-09 実行。モデル：gpt-4o-mini。出力データ：工房/LLM-BLM_test_run/</footer>
+</main></div></body></html>

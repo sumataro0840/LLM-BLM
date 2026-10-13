@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-BLM 今後の計画</title>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --border: #dedad0;
+  --accent: #2f6fb3;
+  --accent-soft: #e4eef9;
+  --green: #2e7d4f;
+  --green-soft: #e3f3e9;
+  --orange: #b4621a;
+  --orange-soft: #fbeedf;
+  --purple: #6a4bb0;
+  --purple-soft: #eee8fa;
+  --red: #b23a3a;
+  --red-soft: #fbe6e6;
+  --code-bg: #f3f1ea;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #24282d;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #33383f;
+    --accent: #7cb2ec;
+    --accent-soft: #1f3248;
+    --green: #74c79a;
+    --green-soft: #1d3428;
+    --orange: #e9a462;
+    --orange-soft: #3a2a1a;
+    --purple: #b39cf0;
+    --purple-soft: #2c2440;
+    --red: #ec8a8a;
+    --red-soft: #3c2222;
+    --code-bg: #24282d;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --surface-2: #24282d; --text: #e6e8eb;
+  --muted: #9aa1ab; --border: #33383f; --accent: #7cb2ec; --accent-soft: #1f3248;
+  --green: #74c79a; --green-soft: #1d3428; --orange: #e9a462; --orange-soft: #3a2a1a;
+  --purple: #b39cf0; --purple-soft: #2c2440; --red: #ec8a8a; --red-soft: #3c2222;
+  --code-bg: #24282d; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15.5px;
+}
+code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+pre {
+  background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.55; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+nav.toc .label { font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .08em; margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--border); }
+nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+header.hero { margin-bottom: 36px; }
+header.hero .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; }
+header.hero h1 { font-size: 30px; line-height: 1.35; margin: 6px 0 12px; }
+header.hero p { color: var(--muted); margin: 0; max-width: 760px; }
+
+section { margin-bottom: 56px; scroll-margin-top: 20px; }
+h2 { font-size: 22px; margin: 0 0 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: var(--surface); border-radius: 6px; font-size: 14px; padding: 1px 9px; }
+h3 { font-size: 17px; margin: 26px 0 10px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { position: relative; padding-top: 44px; }
+.idea .badge { position: absolute; top: 16px; left: 22px; font-weight: 700; font-size: 13px; color: var(--accent); }
+.idea h4 { margin: 0 0 6px; font-size: 16px; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+
+/* directory tree */
+.tree { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.9; }
+.tree .row { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 12px; border-bottom: 1px dashed var(--border); }
+.tree .row:last-child { border-bottom: none; }
+.tree .name { white-space: pre; overflow-x: auto; }
+.tree .desc { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; font-family: "Hiragino Sans", sans-serif; }
+.t-script { background: var(--accent-soft); color: var(--accent); }
+.t-data { background: var(--green-soft); color: var(--green); }
+.t-out { background: var(--orange-soft); color: var(--orange); }
+.t-nb { background: var(--purple-soft); color: var(--purple); }
+
+/* flow */
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.stage { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.stage .step-label { text-align: right; padding-top: 16px; font-weight: 700; color: var(--muted); font-size: 13px; }
+.lane { display: flex; gap: 12px; flex-wrap: wrap; }
+.node { flex: 1 1 200px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid; background: var(--surface); }
+.node .title { font-weight: 700; font-size: 14.5px; }
+.node .sub { font-size: 12.5px; color: var(--muted); }
+.node.script { border-color: var(--accent); background: var(--accent-soft); }
+.node.data { border-color: var(--green); background: var(--green-soft); }
+.node.out { border-color: var(--orange); background: var(--orange-soft); }
+.node.nb { border-color: var(--purple); background: var(--purple-soft); }
+.node.ext { border-style: dashed; border-color: var(--muted); }
+.arrow { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+.arrow span { grid-column: 2; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.6; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid; }
+
+/* timeline */
+.timeline { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0 6px; }
+.tl-head { font-size: 12.5px; text-align: center; color: var(--muted); font-weight: 700; }
+.tl-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.tl-train { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.tl-test { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange); }
+.tl-empty { background: transparent; }
+
+/* step details */
+.step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.step .circle { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.step .card h3 { margin-top: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step .card h3 code { font-size: 14px; }
+.io { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 6px 0 12px; }
+.io .in, .io .outp { border-radius: 6px; padding: 2px 10px; }
+.io .in { background: var(--green-soft); color: var(--green); }
+.io .outp { background: var(--orange-soft); color: var(--orange); }
+.step ul, .step ol { padding-left: 1.3em; margin: 8px 0; }
+.step li { margin: 3px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.formula { background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 10px; padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+.formula .cm { color: var(--muted); font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+
+.callout { border-left: 4px solid var(--orange); background: var(--orange-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14.5px; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-soft); }
+
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sev { font-size: 12px; font-weight: 700; text-align: center; border-radius: 6px; padding: 3px 0; }
+.sev.high { background: var(--red-soft); color: var(--red); }
+.sev.mid { background: var(--orange-soft); color: var(--orange); }
+.sev.low { background: var(--surface-2); color: var(--muted); }
+.issue p { margin: 0; }
+.issue .where { font-size: 12.5px; color: var(--muted); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 20px 16px 60px; }
+  nav.toc { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .stage, .arrow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .stage .step-label { text-align: left; padding-top: 0; }
+  .arrow span { grid-column: 1; }
+  .tree .row { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 0; }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .issue { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sev { width: 88px; }
+  .timeline { gap: 3px; }
+  .tl-cell { font-size: 10.5px; }
+  header.hero h1 { font-size: 24px; }
+}
+
+.er { width:100%; height:auto; display:block; }
+.er .ent { fill: var(--surface); stroke: var(--border); stroke-width:1.5; }
+.er .ent-h.c-green { fill: var(--green-soft); }
+.er .ent-h.c-purple { fill: var(--purple-soft); }
+.er .ent-h.c-orange { fill: var(--orange-soft); }
+.er .ent-t { fill: var(--text); font-weight:700; font-size:14px; }
+.er .ent-k { fill: var(--orange); font-size:11px; font-weight:700; }
+.er .ent-c { fill: var(--text); font-size:13px; font-family: "SF Mono", Menlo, monospace; }
+.er .rel { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel.dashed { stroke-dasharray: 5 4; }
+.er .rel-m { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel-a { fill: var(--muted); }
+.er .rel-t { fill: var(--muted); font-size:12px; }
+.pill { display:inline-block; font-size:11px; font-weight:700; border-radius:4px; padding:0 6px; margin:1px 2px 1px 0; white-space:nowrap; }
+.pill.pk { background: var(--orange-soft); color: var(--orange); }
+.pill.fk { background: var(--accent-soft); color: var(--accent); }
+.pill.nn { background: var(--surface-2); color: var(--muted); }
+.pill.ck { background: var(--purple-soft); color: var(--purple); }
+td.good { color: var(--green); font-weight:700; }
+td.bad { color: var(--red); font-weight:700; }
+table.result td { font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; }
+tr.hl td { background: var(--orange-soft); }
+tr.drop td { color: var(--red); text-decoration: line-through; }
+tr.drop td:last-child { text-decoration: none; }
+.steps { counter-reset: st; display:grid; gap:10px; margin:12px 0; }
+.steps .card { position:relative; padding-left:58px; }
+.steps .card::before { counter-increment: st; content: counter(st); position:absolute; left:18px; top:18px; width:28px; height:28px; border-radius:50%; background: var(--accent); color: var(--surface); font-weight:700; display:flex; align-items:center; justify-content:center; }
+.steps .card h4 { margin:0 0 4px; font-size:15px; }
+.steps .card p { margin:0; font-size:14px; color: var(--muted); }
+.null { color: var(--muted); font-style: italic; }
+pre.sql { border-left: 4px solid var(--accent); }
+.tcard { margin-bottom: 18px; }
+.tcard h3 { margin-top:0; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.tcard h3 .role { font-size:12.5px; font-weight:400; color:var(--muted); }
+.tcard .new { font-size:11px; font-weight:700; background: var(--accent); color: var(--surface); border-radius:4px; padding:0 6px; }
+.grid2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+.grid2 .card h4 { margin:0 0 6px; font-size:15px; }
+.grid2 .card p { margin:0; font-size:14px; color:var(--muted); }
+.verdict { display:inline-block; font-size:12px; font-weight:700; border-radius:6px; padding:1px 8px; }
+.verdict.ok { background: var(--green-soft); color: var(--green); }
+.verdict.ng { background: var(--red-soft); color: var(--red); }
+.verdict.mid { background: var(--orange-soft); color: var(--orange); }
+.formula-big { text-align:center; font-size:17px; font-weight:700; padding:16px; border-radius:10px; background: var(--accent-soft); border:1px solid var(--accent); margin:14px 0; line-height:1.9; }
+.formula-big small { display:block; font-size:12.5px; font-weight:400; color: var(--muted); }
+.kpis-db { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis-db .v { font-size:18px; font-weight:700; }
+.kpis-db .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis-db { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.status { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+.status .card .v { font-weight:700; font-size:15px; }
+.status .card .k { color:var(--muted); font-size:13px; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--accent); }
+@media (max-width:900px) { .grid2, .status { grid-template-columns: minmax(0,1fr); } }
+
+.er .ent-h.c-blue { fill: var(--accent-soft); }
+a { color: var(--accent); }
+.doclink { display:flex; gap:12px; align-items:center; background: var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin: 0 0 28px; font-size:14px; }
+.doclink b { white-space:nowrap; }
+td.num { text-align:right; font-family: "SF Mono", Menlo, monospace; }
+.muted { color: var(--muted); font-size: 12.5px; }
+.diff td:first-child { font-weight:700; white-space:nowrap; }
+.impact { display:inline-block; font-size:11.5px; font-weight:700; border-radius:5px; padding:0 7px; white-space:nowrap; }
+.impact.s { background: var(--surface-2); color: var(--muted); }
+.impact.m { background: var(--orange-soft); color: var(--orange); }
+.impact.l { background: var(--red-soft); color: var(--red); }
+.quote { border:1px dashed var(--border); border-radius:10px; padding:12px 16px; margin:10px 0; background: var(--surface); font-size:14.5px; }
+.quote .t { font-size:12px; font-weight:700; color: var(--accent); margin-bottom:4px; }
+.figure { background:#fff; border-radius:10px; padding:8px; border:1px solid var(--border); }
+.figure img { width:100%; height:auto; display:block; }
+.kpis5 { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis5 .v { font-size:22px; font-weight:700; line-height:1.25; }
+.kpis5 .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis5 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+.pipe { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:14px; margin:14px 0; }
+.pipe .card { position:relative; border-top:4px solid var(--border); }
+.pipe .card.done { border-top-color: var(--green); }
+.pipe .card.next { border-top-color: var(--accent); }
+.pipe .card.later { border-top-color: var(--purple); }
+.pipe .card h4 { margin:6px 0 6px; font-size:16px; }
+.pipe .card p { margin:0; font-size:14px; color: var(--muted); }
+.pipe .card:not(:last-child)::after { content:"→"; position:absolute; right:-13px; top:42%; color: var(--muted); font-weight:700; }
+.st { display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 10px; }
+.st.done { background: var(--green-soft); color: var(--green); }
+.st.next { background: var(--accent-soft); color: var(--accent); }
+.st.later { background: var(--purple-soft); color: var(--purple); }
+.st.idea { background: var(--orange-soft); color: var(--orange); }
+@media (max-width:900px) { .pipe { grid-template-columns: 1fr; } .pipe .card:not(:last-child)::after { content:"↓"; right:auto; left:50%; top:auto; bottom:-17px; } }
+</style></head><body>
+<div class="layout">
+<nav class="toc"><div class="label">目次</div><a href="#summary">1. 要点</a><a href="#thesis">2. 論点の置き方</a><a href="#flow">3. 全体の流れ</a><a href="#s1">4. 段階1：比率の調整まで</a><a href="#s2">5. 段階2：フィードバック</a><a href="#s3">6. 段階3：セクターの予想</a><a href="#leak">7. 情報が漏れる経路</a><a href="#inputs">8. 何を入力するか</a><a href="#reports">9. レポートの作り方</a><a href="#papers">10. 参考にする論文</a><a href="#tables">11. 追加するテーブル</a><a href="#cov">12. 共分散の作り方</a><a href="#freq">13. 月次か四半期か</a><a href="#filing">14. 財務データの開示日</a><a href="#next">15. 進める順番と決めること</a></nav>
+<main>
+<header class="hero"><div class="eyebrow">LLM-BLM 今後の計画</div><h1>これからやりたいことと、その進め方</h1><p>LLM の予想を使った比率の調整、結果へのフィードバック、セクター単位の予想という3つの段階について、論点の置き方、情報の漏れのふさぎ方、今後足す入力、必要なテーブル、進める順番をまとめます。</p></header>
+
+<div class="doclink"><b>関連資料</b><span>今あるテーブルとビューは <a href="LLM-BLM_DB設計.html">LLM-BLM_DB設計.html</a>、データの作り方と注意点は <a href="LLM-BLM_データの扱い方.html">LLM-BLM_データの扱い方.html</a> にあります。この資料は、これから作るものの計画です。</span></div>
+
+<section id="summary"><h2><span class="num">1</span>要点</h2>
+<div class="callout info"><b>今の目的：</b>細かい改善より先に、最後まで一度通すこと。LLM の予想から、比率の調整、元の S&amp;P500 との比較までを動かします。<br>
+<b>レポートの主役：</b>モデルの比較ではなく、<b>設計</b>にします。見せ場は、未来の情報が漏れる経路を1つずつふさいだことです。</div>
+<div class="kpis5">
+<div class="card"><div class="v">3 段階</div><div class="k">比率の調整 → フィードバック → セクターの予想</div></div>
+<div class="card"><div class="v">あと 5 テーブル</div><div class="k">段階1で2つ、段階2で2つ、段階3で1つ（今は9つ）</div></div>
+<div class="card"><div class="v">月次がメイン</div><div class="k">評価できる回数が30回ある。四半期は10回</div></div>
+<div class="card"><div class="v">共分散は直近1年</div><div class="k">日次リターンで計算し、毎月更新する。補正が必要</div></div>
+</div>
+<p class="muted" style="margin-top:12px">表の「案」は、まだ決めていない提案です。名前や列は、作るときに変わる可能性があります。</p>
+</section>
+
+<section id="thesis"><h2><span class="num">2</span>論点の置き方</h2>
+<div class="grid2">
+<div class="card"><h4>主役：設計</h4><p>当時知り得た情報だけで動く仕組みを作り、LLM の予想を Black-Litterman に入れた比率を、元の S&amp;P500 と比べる。</p></div>
+<div class="card"><h4>脇役：モデルの比較</h4><p>余裕があれば足す確認にとどめる。元の論文がすでにやっていて、予算・期間・知識の期限の問題で、はっきりした結論を出しにくい。</p></div>
+</div>
+<h3>元の論文にない要素（設計として示せること）</h3>
+<div class="table-wrap"><table>
+<tr><th>要素</th><th>内容</th><th>状態</th></tr>
+<tr><td>その時点の構成銘柄</td><td>各判断日に在籍していた銘柄だけを対象にする</td><td><span class="st done">済み</span></td></tr>
+<tr><td>提出日つきの財務データ</td><td>判断日までに公表された値だけを使える</td><td><span class="st done">データは済み</span></td></tr>
+<tr><td>実行ごとに再現できる保存</td><td>モデルの版、プロンプト、設定、全回答を実行番号ごとに残す</td><td><span class="st done">済み</span></td></tr>
+<tr><td>単位を明示したプロンプト</td><td>リターンが小数であることを明記し、桁の違う回答を防ぐ</td><td><span class="st done">済み</span></td></tr>
+<tr><td>安定した共分散</td><td>直近1年の日次リターンと縮小推定</td><td><span class="st next">段階1</span></td></tr>
+<tr><td>結果へのフィードバック</td><td>数字で要因を分解し、当時の資料と合わせて LLM に説明させる</td><td><span class="st later">段階2</span></td></tr>
+<tr><td>セクターの予想</td><td>セクター単位の予想を Black-Litterman にそのまま入れる</td><td><span class="st later">段階3</span></td></tr>
+<tr><td>統計モデルとの比較</td><td>同じ変数を渡したロジスティック回帰と比べ、LLM が何を足しているかを示す</td><td><span class="st later">段階3</span></td></tr>
+<tr><td>漏れの影響を測る実験</td><td>未来の情報が混ざった入力と、当時の情報だけの入力で成績を比べる</td><td><span class="st later">段階3</span></td></tr>
+</table></div>
+<h3>使うモデル</h3>
+<ul>
+<li><b>gpt-4o-mini を使い続けます。</b>知識が2023年10月までなので、評価期間（2024年4月〜2026年9月）の30か月すべてを「答えを知らない状態」で評価できます。料金も、個別銘柄の30か月分で4〜5ドルです。</li>
+<li><b>この利点は、渡す情報が当時のものだけである場合に限ります。</b>入力から未来が漏れると、モデルが知らなくても意味がなくなります（「情報が漏れる経路」の章）。</li>
+<li><b>モデルを比べる場合は、セクターの予想（段階3）で行います。</b>1か月に聞くのは11セクターだけなので、上位モデルでも数ドル〜数十ドルで済み、評価の回数（30回）も減りません。成績は、モデルの知識の期限の前と後で分けて出します。</li>
+<li><b>予算の上限は、全部合わせて5万円（300ドル強）です。</b></li>
+</ul>
+</section>
+
+<section id="flow"><h2><span class="num">3</span>全体の流れ</h2>
+<div class="pipe">
+<div class="card done"><span class="st done">済み</span><h4>データと LLM の予想</h4><p>株価・構成銘柄・比率・財務諸表を DB に保存。LLM に各銘柄の翌月リターンを30個ずつ答えさせて保存（2024年4月〜2026年9月の予想。2026-10-10 に実行）。</p></div>
+<div class="card next"><span class="st next">段階1・次にやる</span><h4>比率の調整</h4><p>LLM の予想を Black-Litterman に入れ、最適化（QP）で比率を決める。元の S&amp;P500 の比率と、翌月のリターンを比べる。</p></div>
+<div class="card later"><span class="st later">段階2</span><h4>フィードバック</h4><p>なぜ良かったか・悪かったかを、運用会社の月次レポートを参照して LLM に説明させる。月に1回の会話。</p></div>
+<div class="card later"><span class="st later">段階3</span><h4>セクターの予想</h4><p>レポートと過去の値動き・財務データから、セクター単位で予想させる。セクター内の比率は、ベータと時価総額で調整する。</p></div>
+</div>
+</section>
+
+<section id="s1"><h2><span class="num">4</span>段階1：比率の調整まで</h2>
+<p>LLM の予想（<code>llm_view_stats</code> の平均と分散）から、調整後の比率を計算して保存します。</p>
+<div class="steps">
+<div class="card"><h4>市場の均衡リターンを出す</h4><p>判断日の時価総額の比率（<code>index_weights</code>）と共分散から逆算する。保存しない。</p></div>
+<div class="card"><h4>LLM の予想と混ぜる（Black-Litterman）</h4><p>30個の回答の平均を「予想」、分散を「予想の不確かさ」として、均衡リターンを修正する。</p></div>
+<div class="card"><h4>最適化（QP）で比率を決める</h4><p>修正後の期待リターンと共分散から、空売りなし・合計1の条件で比率を求める。</p></div>
+<div class="card"><h4>翌月のリターンを比べる</h4><p>調整後の比率と、元の S&amp;P500 の比率（時価総額加重）で、それぞれ翌月のリターンを計算する。</p></div>
+</div>
+<h3>追加するもの（案）</h3>
+<div class="table-wrap"><table>
+<tr><th>種類</th><th>名前</th><th>中身</th></tr>
+<tr><td>テーブル</td><td><code>portfolio_runs</code></td><td>計算の条件。使った LLM の実行（<code>run_id</code>）、手法（BL、平均分散、等金額、時価総額）、τ、リスク回避度、共分散の計算期間</td></tr>
+<tr><td>テーブル</td><td><code>portfolio_weights</code></td><td>結果。条件・判断日・銘柄ごとの比率</td></tr>
+<tr><td>ビュー</td><td>翌月のリターン</td><td>比率 × 翌月の株価の動き。<code>prices</code> から計算する</td></tr>
+</table></div>
+<ul>
+<li><b>元の S&amp;P500 の比率</b>は、今ある <code>index_weights</code> ビューからそのまま出せます。</li>
+<li><b>比較用の戦略</b>（等金額など）も同じ2つのテーブルに、手法の違う行として入れます。</li>
+<li><b>コードの置き場所</b>は、新しく作る <code>blm/</code> フォルダです。<code>llm/</code> とは DB を通してだけつながります。</li>
+</ul>
+<div class="callout info"><b>今の予想の性質（2026-10-10 の実行、最初の確認）：</b>予想は楽観的で（平均で1日 +0.18%、実際は +0.02%）、どの銘柄が上がるかはほとんど当たっていません（順位相関は30か月の平均で +0.05）。入力が1か月分の日次リターンだけなので、不自然ではありません。入力を足す理由になります。</div>
+<div class="callout"><b>一番の技術的な問題は共分散です。</b>銘柄数（約500）に対してデータの数が足りず、そのままでは最適化が正しく解けません。対処は「共分散の作り方」の章にまとめています。</div>
+<h3>元の実装にあった問題（作り直すときに避ける）</h3>
+<div class="table-wrap"><table>
+<tr><th>問題</th><th>内容</th></tr>
+<tr><td>最適化が動かない</td><td>目的関数の値が小さすぎて、最初の等金額の比率のまま止まることがある。停止条件の許容誤差を小さくする必要がある</td></tr>
+<tr><td>単位の混在</td><td>均衡リターンの計算で、日次のリターンから年率の無リスク金利（0.02）を引いている</td></tr>
+<tr><td>共分散のデータ不足</td><td>その月の約20日分だけで共分散を計算している</td></tr>
+</table></div>
+</section>
+
+<section id="s2"><h2><span class="num">5</span>段階2：フィードバック</h2>
+<p>調整後の比率が、元の S&amp;P500 より良かった月・悪かった月について、その理由を LLM に説明させます。運用会社の月次レポートを参照させます。月に1回の会話なので、負荷は小さいです。</p>
+<h3>追加するもの（案）</h3>
+<div class="table-wrap"><table>
+<tr><th>種類</th><th>名前</th><th>中身</th></tr>
+<tr><td>テーブル</td><td><code>reports</code></td><td>月次レポートの本文。発行元、対象月、<b>公表日</b>、出典</td></tr>
+<tr><td>テーブル</td><td><code>llm_feedback</code></td><td>フィードバックの結果。どの比率・どの月・どのレポートに対するものか、プロンプト、回答</td></tr>
+<tr><td>ビュー</td><td>要因の分解</td><td>どのセクター・どの銘柄の比率の差が、リターンの差にどれだけ効いたか</td></tr>
+</table></div>
+<h3>気をつける点</h3>
+<div class="table-wrap"><table>
+<tr><th>点</th><th>内容</th><th>対処</th></tr>
+<tr><td>LLM の「理由」は検証できない</td><td>もっともらしい説明を作るだけになりがち。変数の寄与率のような統計量も、LLM は正しく計算できない</td><td>先に数字で寄与と要因を出し、その結果を LLM に渡す。LLM には「数字の説明」をさせる（「何を入力するか」の章）</td></tr>
+<tr><td>レポートの公表日</td><td>4月のレポートは5月初めに出る。フィードバックを次の予想に使う場合、判断日より後のレポートを使うと先読みになる</td><td><code>reports</code> に公表日を持たせ、判断日以前のものだけ使う</td></tr>
+<tr><td>レポートの入手</td><td>手作業になる</td><td>どの会社のレポートを使うか、30か月分を集められるかを先に確認する。作り方は「レポートの作り方」の章</td></tr>
+<tr><td>フィードバックの使い道</td><td>読むだけか、次の予想に反映するかで作りが変わる</td><td>反映する場合は、同じ期間で改善と評価をしないように、期間を分ける</td></tr>
+</table></div>
+</section>
+
+<section id="s3"><h2><span class="num">6</span>段階3：セクターの予想</h2>
+<p>個別銘柄を1つずつ予想させる代わりに、セクター単位で「どこが上がりそうか・下がりそうか」を予想させます。入力は、その月のレポート、過去の値動き、財務データです。その後、セクター内の比率を、ベータと時価総額から調整します。</p>
+<h3>追加するもの（案）</h3>
+<div class="table-wrap"><table>
+<tr><th>種類</th><th>名前</th><th>中身</th></tr>
+<tr><td>テーブル</td><td><code>llm_sector_views</code></td><td>セクターごとの回答。今の <code>llm_views</code> は銘柄が対象なので、別に持つ</td></tr>
+<tr><td>ビュー</td><td>セクターの集計</td><td>セクター別のリターン、時価総額、財務項目の合計。判断日までに公表された値だけに絞る</td></tr>
+</table></div>
+<h3>評価</h3>
+<div class="table-wrap"><table>
+<tr><th>点</th><th>評価</th></tr>
+<tr><td>時間の節約</td><td><span class="st idea">理由としては弱い</span> 30個の回答を1回で受け取る形にしたので、500銘柄でも1か月あたり約5分、30か月で3時間弱で終わる</td></tr>
+<tr><td>問いの立て方</td><td><span class="st done">やる価値あり</span> 20日分のリターンから個別銘柄を500個予想するより、レポートと財務データから11セクターを予想する方が、LLM に向いている</td></tr>
+<tr><td>セクター内の調整</td><td><span class="st done">自分でルールを作らなくてよい</span> Black-Litterman は「このセクターは上がる」という予想をそのまま扱える。セクターとの連動が強い銘柄ほど大きく比率が動く結果が、計算から出る。段階1と同じコードが使える</td></tr>
+<tr><td>財務データの頻度</td><td><span class="st idea">注意</span> 決算は四半期ごとなので、月によっては新しい情報がほとんどない</td></tr>
+<tr><td>セクターの合計</td><td><span class="st idea">注意</span> 金融の売上高は、会社ごとに定義が違う。決算期の区切りも会社ごとに違う（「財務データの開示日」の章）</td></tr>
+<tr><td>モデルの知識</td><td><span class="st idea">注意</span> レポートを渡すと、LLM は日付が分かる。gpt-4o-mini の知識は2023年10月までなので今は問題ない。新しいモデルに替えると、評価期間の結果を知っている可能性がある。<b>「渡した情報だけで考えて」とプロンプトに書いても、これは防げない</b></td></tr>
+</table></div>
+</section>
+
+<section id="leak"><h2><span class="num">7</span>設計の見せ場：情報が漏れる経路をふさぐ</h2>
+<p>過去のデータで戦略を試すとき、判断した時点では知り得なかった情報が混ざると、成績が実力より良く見えます。この研究では、漏れる経路を1つずつ挙げて、ふさいだかどうかを示します。</p>
+<div class="table-wrap"><table>
+<tr><th>経路</th><th>どう漏れるか</th><th>ふさぎ方</th><th>状態</th></tr>
+<tr><td><b>① モデルの知識</b></td><td>LLM が、評価期間の相場を学習で知っている</td><td>知識の期限が評価期間より前のモデルを使う（gpt-4o-mini は2023年10月まで、評価は2024年4月から）。プロンプトに日付を入れない</td><td><span class="st done">済み</span></td></tr>
+<tr><td><b>② 渡す資料</b></td><td>レポートや要約に、後から書かれた内容が混ざる</td><td>公表日が判断日以前の資料だけを使う。AI に検索させず、渡した資料だけを整理させる。引用元の日付を確認する</td><td><span class="st later">段階2・3</span></td></tr>
+<tr><td><b>③ 構成銘柄</b></td><td>後から指数に入った銘柄を、過去にさかのぼって使う</td><td>判断日に在籍していた銘柄だけを対象にする（<code>index_membership</code>）</td><td><span class="st done">済み</span></td></tr>
+<tr><td><b>④ 財務データの提出日</b></td><td>まだ公表されていない決算や、後から修正された数字を使う</td><td>提出日（<code>filed_date</code>）が判断日以前の値だけを使う。保存しているのは最初に提出された値</td><td><span class="st done">データは済み</span> 判断日で絞るビューは段階3</td></tr>
+<tr><td>⑤ 株価と共分散</td><td>判断日より後の株価を、入力や共分散に使う</td><td>入力は判断日までのリターン。共分散も判断日までの1年分</td><td><span class="st done">入力は済み</span> 共分散は段階1</td></tr>
+<tr><td>⑥ 設定やモデルの選び方</td><td>評価期間の成績を見て、設定（τ など）やモデルを選ぶ</td><td>選ぶ期間と、成績を示す期間を分ける</td><td><span class="st next">段階1で区切りを決める</span></td></tr>
+</table></div>
+<h3>ふさぎきれていない経路（レポートに書く）</h3>
+<div class="table-wrap"><table>
+<tr><th>経路</th><th>内容</th><th>影響</th></tr>
+<tr><td>除外した28銘柄</td><td>「後で上場廃止になった」という当時は分からない情報で、対象から外している。無料のデータでは株価が取れない</td><td>生存者バイアス。全戦略に同じ除外を適用するので、戦略同士の比較は公平</td></tr>
+<tr><td>社名・ティッカー・セクター</td><td>当時のものではなく、2026年10月時点のものを LLM に渡している</td><td>小さい。後の社名変更などが伝わる</td></tr>
+<tr><td>要約に使う AI の知識</td><td>資料の要約を新しいモデルにさせると、要約に未来の知識が混ざる可能性がある</td><td>何か月分かを元の資料と読み比べて確認する</td></tr>
+</table></div>
+<h3>漏れの影響を測る実験</h3>
+<div class="callout info">同じ月について、<b>A：検索して書かせたレポート</b>（未来の情報が混ざる）と、<b>B：当時の資料だけから作ったレポート</b>を用意し、それぞれを入力にした場合の成績を比べます。A だけ成績が良ければ、漏れの影響を数字で示せます。<code>2025-01_sector_report.md</code> は A の実例として使えます。</div>
+</section>
+
+<section id="inputs"><h2><span class="num">8</span>何を入力するか（今後の課題）</h2>
+<p>今、LLM に渡しているのは、社名・業種と、1か月分の日次リターンだけです。今後足す入力の候補を、「判断日までに知り得た情報か」を確認できるかどうかと合わせて整理します。</p>
+<div class="table-wrap"><table>
+<tr><th>入力</th><th>取得元</th><th>当時の情報だと確認する方法</th><th>使う段階</th><th>状態</th></tr>
+<tr><td>日次リターン（1か月）</td><td>DB の <code>prices</code></td><td>判断日までの日付だけを使う</td><td>今</td><td><span class="st done">使用中</span></td></tr>
+<tr><td>社名、GICS セクター・サブ業種</td><td>DB の <code>tickers</code></td><td>現在の情報（ふさぎきれていない経路）</td><td>今</td><td><span class="st done">使用中</span></td></tr>
+<tr><td>セクター別のリターン・時価総額</td><td><code>prices</code>、<code>index_weights</code> から集計</td><td>判断日までの日付だけを使う</td><td>3</td><td><span class="st later">ビューを作る</span></td></tr>
+<tr><td>財務データ（売上・利益の伸びなど）</td><td>DB の <code>fundamentals_quarterly</code></td><td><code>filed_date</code> が判断日以前</td><td>3</td><td><span class="st later">データあり</span></td></tr>
+<tr><td>運用会社の月次レポート</td><td>自分で集める</td><td>公表日が判断日以前。公表日を記録する</td><td>2・3</td><td><span class="st idea">未着手</span></td></tr>
+<tr><td>レポートの要約（セクターのスコア）</td><td>上のレポートだけを AI に渡して作る</td><td>引用元が渡した資料の中にあり、日付が判断日以前</td><td>3</td><td><span class="st idea">未着手</span></td></tr>
+<tr><td>金利、予想変動率（VIX など）</td><td>yfinance（「参考にする論文」の章も参照）</td><td>判断日の市場価格そのものなので、作り方から当時の情報になる</td><td>1・3</td><td><span class="st later">取得できることを確認済み</span></td></tr>
+<tr><td>成績の要因分解</td><td>DB から計算</td><td>対象の月が終わった後の数字。次の月以降の判断にだけ使う</td><td>2</td><td><span class="st later">ビューを作る</span></td></tr>
+</table></div>
+<h3>セクターの予想に渡す変数の候補</h3>
+<p>入力は4つのまとまりに分け、①から順に足していきます。</p>
+<div class="table-wrap"><table>
+<tr><th>まとまり</th><th>変数</th><th>取得元</th><th>メモ</th></tr>
+<tr><td rowspan="4"><b>① 値動き</b></td><td>セクターの過去1・3・6・12か月のリターンと、指数との差</td><td>DB から計算</td><td>勢いが続く効果がよく知られている。最初に入れる</td></tr>
+<tr><td>変動の大きさ、ベータ</td><td>DB から計算</td><td>過去1年の日次リターンから</td></tr>
+<tr><td>実績ベースの下落リスク（下位5%の日の平均、最大下落率）</td><td>DB から計算</td><td>下の「下落リスクの出し方」</td></tr>
+<tr><td>セクター内で上昇した銘柄の割合、指数に占める比率とその変化</td><td>DB から計算</td><td>少数の大型株だけが上げているのかが分かる</td></tr>
+<tr><td rowspan="2"><b>② 財務</b></td><td>売上・利益の前年同期比、利益率の変化</td><td><code>fundamentals_quarterly</code></td><td><code>filed_date</code> が判断日以前の値だけ。金融の売上は定義に注意</td></tr>
+<tr><td>割安さ（セクターの利益 ÷ 時価総額）</td><td>財務データと時価総額</td><td>同上</td></tr>
+<tr><td rowspan="4"><b>③ 市場環境</b></td><td>短期金利の水準と3か月の変化、10年債との差</td><td>yfinance（<code>^IRX</code>、<code>^TNX</code>）</td><td>下の「政策金利」</td></tr>
+<tr><td>予想変動率（VIX）、期間別の差、歪度の指数</td><td>yfinance（<code>^VIX</code>、<code>^VIX3M</code>、<code>^SKEW</code>）</td><td>下の「オプションの情報」</td></tr>
+<tr><td>原油、ドル、金の値動き</td><td>yfinance</td><td>エネルギー、素材、海外売上の多いセクターに関係する</td></tr>
+<tr><td>社債の信用リスク（高利回り債と国債の値動きの差）</td><td>yfinance の ETF</td><td>景気への警戒の強さ</td></tr>
+<tr><td><b>④ 文章</b></td><td>月次レポートの要約</td><td>自分で集める</td><td>公表日の確認が必要（「レポートの作り方」の章）</td></tr>
+</table></div>
+<p class="muted">使わないもの：アナリストの業績予想とその修正（効果は大きいが、過去分が無料で手に入らない）。物価や雇用などの経済指標（後から改定されるので、最初に発表された値を集める手間がかかる。必要になったら検討する）。</p>
+
+<h3>変数ごとの検討メモ</h3>
+<div class="grid2">
+<div class="card"><h4>政策金利：入れる。水準より変化</h4><p>会合は年8回で、水準は変わらない月の方が多いです。効くのは「3か月前からの変化」と「長期と短期の金利差」で、金融・不動産・公益の判断材料になります。gpt-4o-mini は評価期間の金利を知らないので、渡さないと古い前提（5.25〜5.5%）で考えます。3か月物の国債利回りが、政策金利の代わりになります。</p></div>
+<div class="card"><h4>下落リスクの出し方：実績から直接求める</h4><p>共分散から計算した VaR は、標準偏差を定数倍しただけなので、変動の大きさを渡すのと同じ情報です。下落の情報を渡すなら、過去1年の実際の日次リターンから、下位5%の日の平均（CVaR）や最大下落率を求めます。リスクは最適化の側ですでに共分散として使うので、LLM に渡すのは2〜3個で十分です。</p></div>
+<div class="card"><h4>オプションの情報：VIX で足りる</h4><p>VIX は S&amp;P500 のオプションから計算された指数なので、オプションの情報の要約です。自分で分布を推定する必要はありません。足すなら、期間別の差（3か月 − 1か月。マイナスは目先の強い警戒）と、歪度の指数です。尖度の指数はありません。VIX は実際の変動より高めに出るので、水準そのものより、時期ごとの高い・低いで使います。</p></div>
+<div class="card"><h4>先物：期待リターンは取れない</h4><p>株価指数の先物価格は「現物 + 持ち越しのコスト」で、相場の見通しは入っていません。オプションから出る分布も、中心は無リスク金利に固定されます。期待リターンは、時価総額の比率から逆算する均衡リターン（Black-Litterman の出発点）から取ります。金利の先物からは、政策金利の見通しが取れます。</p></div>
+</div>
+<div class="callout info"><b>全体の考え方：</b>市場価格に入っている情報は市場から取り、LLM にはそこからのずれだけを答えさせます。期待リターンは均衡リターン、変動の大きさは VIX、銘柄どうしの連動は過去1年の株価、金利の見通しは国債利回りから取ります。どれも判断日の価格そのものなので、漏れの心配がありません。</div>
+<p class="muted">データの確認：VIX（9日・1か月・3か月・6か月）、歪度の指数、債券の予想変動率、国債利回り（3か月・5年・10年・30年）、先物（S&amp;P500、10年債、政策金利の直近の限月）は、yfinance で2023年3月〜2026年9月の全期間が取れることを確認済みです。<code>^GSPC</code> と同じように <code>tickers</code> と <code>prices</code> に入れられるので、テーブルは増えません。</p>
+
+<h3>どの変数を使うかの決め方</h3>
+<p>候補を全部入れると、何が効いたのか分からなくなります。統計モデルで変数を選び、選んだ後は変えません。</p>
+<div class="steps">
+<div class="card"><h4>評価期間より前のデータを用意する</h4><p>値動き・金利・VIX は何十年分も取れる。セクターの値動きは、セクター別の ETF（1998年から。不動産は2015年、通信サービスは2018年から）で代用する。たとえば2010〜2023年を使う。</p></div>
+<div class="card"><h4>統計モデルで変数を選ぶ</h4><p>「そのセクターが翌月、指数全体を上回ったか」を予測する。効かない変数の係数が自動的に0になる方法（L1 正則化）を使い、残った変数を採用する。</p></div>
+<div class="card"><h4>変数を固定して、評価期間で使う</h4><p>2024年以降の結果を見て変数を入れ替えない。入れ替えると、「漏れる経路」の⑥（設定の選び方）に当たる。</p></div>
+</div>
+<p class="muted">限界：統計モデルで効く変数と、LLM で効く変数は同じとは限りません。文章（④）は、この方法では選べません。あくまで数字の変数を絞る目安です。</p>
+
+<h3>比較用の統計モデル：ロジスティック回帰を主にする</h3>
+<p>変数を選ぶのに使ったモデルは、そのまま LLM の比較相手になります。同じ変数を渡したとき、LLM が統計モデルに勝てるかを見ます。候補は、ロジスティック回帰と XGBoost（決定木を多数組み合わせる方法）です。</p>
+<div class="table-wrap"><table>
+<tr><th></th><th>ロジスティック回帰</th><th>XGBoost</th></tr>
+<tr><td>データの量との相性</td><td><b>少なくても安定する</b></td><td>データが少なく雑音が多いと、過去に合わせすぎやすい。月次・セクター単位では数千件しかない</td></tr>
+<tr><td>結果の読みやすさ</td><td><b>係数の符号と大きさで、どの変数がどちらに効くかが分かる</b></td><td>重要度は出るが、向きや理由は読み取りにくい</td></tr>
+<tr><td>統計的な検定</td><td><b>変数ごとにカイ二乗検定ができる</b></td><td>できない</td></tr>
+<tr><td>調整する設定</td><td>正則化の強さ1つ</td><td>木の深さ、本数、学習率など多い。設定を選ぶこと自体が漏れの経路になる</td></tr>
+<tr><td>変数の組み合わせの効果</td><td>直線的な関係しか見ない</td><td><b>「金利が上がっていて、かつ変動が大きいとき」のような組み合わせを拾える</b></td></tr>
+</table></div>
+<ul>
+<li><b>主に使うのはロジスティック回帰です。</b>データが少ないこと、どの変数が効いたかを説明する必要があること、設定の少なさが理由です。</li>
+<li><b>XGBoost は、確認用に1回だけ使います。</b>「直線的でない関係を見落としていないか」を確かめるためです。評価期間より前のデータの中で、学習に使っていない期間の成績を比べます。XGBoost がはっきり上回らなければ、ロジスティック回帰だけで進めます。</li>
+<li><b>比較から読み取れること：</b>数字だけを渡して LLM が回帰に勝てないなら、数字の処理は回帰で十分です。LLM の強みが出るとすれば、回帰では扱えない文章（レポート）を足したときです。「LLM は何を足しているのか」を示せます。</li>
+</ul>
+
+<h3>どの変数が効いたかの出し方</h3>
+<p>寄与は LLM に答えさせず、数字で出します。LLM は統計量を正しく計算できず、「金利を重視しました」といった自己説明も、実際の挙動と一致するとは限らないためです。</p>
+<div class="table-wrap"><table>
+<tr><th>知りたいこと</th><th>方法</th><th>内容</th></tr>
+<tr><td>どの入力が LLM の予想を良くしたか</td><td><b>入力を抜き差しして比べる</b></td><td>まとまりを1つずつ足した実行を別々に保存し、成績の差を見る。差がその入力の寄与。セクターの予想は1回の実行が30問なので、何通り試しても安い</td></tr>
+<tr><td>どの変数が統計的に効いているか</td><td><b>回帰の検定</b></td><td>ロジスティック回帰で、その変数を入れた場合と抜いた場合の当てはまりの差を検定する（尤度比検定。カイ二乗検定の一種）</td></tr>
+<tr><td>比率の差のうち、何が成績に効いたか</td><td><b>要因分解</b></td><td>セクターの配分の差と、セクター内の銘柄の差に分ける</td></tr>
+</table></div>
+<ul>
+<li><b>フィードバックの LLM の役割は、説明です。</b>上の数字の表と当時のレポートを受け取り、「この月は金利の入力が効いた。レポートによれば、利下げ観測で不動産が買われたため」のように文章にまとめます。計算はさせません。</li>
+<li><b>どの入力を使った実行かは、<code>llm_runs</code> に列を足して記録します。</b>テーブルは増えません。</li>
+<li><b>30か月では、差がはっきり出ない可能性が高いです。</b>「効いた・効かなかった」と言い切らず、差の大きさと、そのぶれの幅を一緒に示します。</li>
+</ul>
+
+<h3>入力を足すときの決まり</h3>
+<ul>
+<li><b>どの入力にも「いつ知り得たか」の日付を持たせます。</b>日付が分からない情報は使いません。</li>
+<li><b>まとまりごとに足して、効果を切り分けます。</b>①値動き → ②財務 → ③市場環境 → ④文章の順に足し、それぞれ別の実行（<code>run_id</code>）として保存して、同じ計算で比べます。</li>
+<li><b>生の数字より、加工した形で渡します。</b>LLM は数字の大小の判断が得意ではありません。「過去1年の中で上位何%か」のように、位置づけが分かる形にします。</li>
+<li><b>単位をそろえて明記します。</b>個別銘柄のプロンプトで起きた、小数とパーセントの混同を繰り返さないためです。</li>
+<li><b>「先月の事実」と「今後の見通し」を分けます。</b>先月上がったセクターを強気とするだけなら、過去のリターンから計算できるので、LLM もレポートも要りません。</li>
+<li><b>日付が分かる入力を渡すときは、モデルの知識の期限を確認します。</b></li>
+<li><b>最初は、①値動きと、③のうち金利・VIX だけで始めます。</b>どれも DB か yfinance から機械的に作れて、漏れの心配がありません。</li>
+</ul>
+</section>
+
+<section id="reports"><h2><span class="num">9</span>レポートの作り方</h2>
+<p>運用会社のレポートをそのまま渡す代わりに、AI に月ごとのレポートを作らせて渡す案です。形式は使いやすいですが、作り方によっては未来の情報が入ります。</p>
+<h3>試作（<code>2025-01_sector_report.md</code>）で見つかった問題</h3>
+<div class="table-wrap"><table>
+<tr><th>問題</th><th>例</th></tr>
+<tr><td><b>対象月より後の情報が入っている</b></td><td>「自動車関税は15%で妥結する見通し」とあるが、日米が15%で合意したのは2025年7月。引用にも「2025年の振り返りと2026年の株式市場」（2026年1月）、「2025年プレイバック」（2025年末）、2025年12月の利上げの調査（「利息負担で経常利益が平均1.3%減」の出どころ）、2025年4月の資料が含まれる</td></tr>
+<tr><td>その結果、スコアが未来を知っている</td><td>「自動車：やや強気 +1」は、半年後の結果を知ったうえで付いている</td></tr>
+<tr><td>推定で埋めた数字がある</td><td>東証グロース250の前月末の値が「704.62（推定）」</td></tr>
+<tr><td>対象が日本株</td><td>指数は日経平均と TOPIX、セクターは日本向けの15分類。DB は S&amp;P500 と GICS の11セクター</td></tr>
+<tr><td>内容が「その月の振り返り」</td><td>1月に何が上がったかをスコアにしている。使えるのは2月以降の予想だけ</td></tr>
+</table></div>
+<p>原因は、AI に今日の時点で検索させたことです。今日の検索は、後から書かれた記事を必ず拾います。</p>
+<h3>作り方</h3>
+<div class="steps">
+<div class="card"><h4>元の資料を自分で集める</h4><p>運用会社の月次レポートなど、公表日がはっきりしているものを使う。公表日を記録する。</p></div>
+<div class="card"><h4>AI には、その資料だけを渡す</h4><p>検索はさせない。新しい知識を足させず、渡した文章を整理させるだけにする。</p></div>
+<div class="card"><h4>決まった形式で出させる</h4><p>試作の CSV・JSON の形を、GICS の11セクターに合わせて使う。「先月の事実」と「今後の見通し」を分ける。</p></div>
+<div class="card"><h4>引用を機械的に確認する</h4><p>根拠が渡した資料の中にあるか、資料の公表日が判断日以前かを確認する。何か月分かは、元の資料と読み比べる。</p></div>
+</div>
+<p class="muted">判断日との関係にも注意が必要です。9月の振り返りレポート（10月初めに公表）を9月の予想に使うと、それだけで先読みになります。</p>
+</section>
+
+<section id="papers"><h2><span class="num">10</span>参考にする論文</h2>
+<div class="card">
+<h3 style="margin-top:0">霧生・枇々木（2014）「複数資産にインプライド分布を用いた最適資産配分モデル」</h3>
+<p class="muted">日本オペレーションズ・リサーチ学会和文論文誌 Vol. 57, pp. 112–134。ファイル：<code>JORSJ_2014_Kiriu.pdf</code></p>
+<p><b>内容：</b>資産配分では、将来のリターンの分布をどう見積もるかが成績を左右します。普通は過去のデータから見積もりますが、この論文は、オプションの価格から逆算した分布（インプライド分布）を使います。オプションの価格には、市場参加者の将来の見通しが反映されているからです。</p>
+<div class="table-wrap"><table>
+<tr><th>項目</th><th>内容</th></tr>
+<tr><td>対象</td><td>国内株式・外国株式・国内債券・外国債券の4資産。2000年1月〜2013年9月、月次で見直し</td></tr>
+<tr><td>手法</td><td>オプション価格から分布を推定し、資産どうしの関係はコピュラでつなぐ。下落リスク（CVaR）を小さくする最適化で比率を決める</td></tr>
+<tr><td>工夫</td><td>オプションの満期日が資産ごとに違う問題を、補間（薄板スプライン）で解消し、複数の資産に同時に使えるようにした。オプションがない資産には、過去データの分布を混ぜて使える</td></tr>
+<tr><td>結果</td><td>オプションから作った分布を使うと、過去データだけの場合より成績が良い。複数の資産に使うと、さらに良くなる。一方、過去データを使った補正（リスク調整）は、成績を下げた</td></tr>
+</table></div>
+</div>
+<h3>この研究で使える点</h3>
+<div class="table-wrap"><table>
+<tr><th>論文の考え方</th><th>この研究での使い道</th></tr>
+<tr><td><b>オプションの価格は、判断日の時点の「将来の見通し」である</b></td><td>入力の候補になる。判断日の市場価格そのものなので、未来の情報が漏れる心配がなく、「漏れをふさぐ」という設計の方針と合う。LLM の知識にも頼らない</td></tr>
+<tr><td>資産ごとに、情報源を混ぜて使う</td><td>オプションの情報があるものにはそれを使い、ないものは過去データで補う。Black-Litterman も、予想がある資産だけを修正し、ない資産は市場の均衡のままにするので、同じ構造になっている</td></tr>
+<tr><td>過去データから見積もった平均は、成績を下げる</td><td>期待リターンを過去の平均から取らず、市場の均衡と予想から作る今の方針の裏づけになる</td></tr>
+<tr><td>資産クラス → 個別資産の2段階で決める</td><td>セクター → セクター内の銘柄という、段階3の考え方と同じ</td></tr>
+<tr><td>評価の指標</td><td>シャープレシオに加えて、下落リスクに対するリターン（CVaR レシオ）でも比べる</td></tr>
+</table></div>
+<h3>具体的な使い方の案</h3>
+<div class="table-wrap"><table>
+<tr><th>案</th><th>内容</th><th>難しさ</th></tr>
+<tr><td>A. 市場全体の予想変動率を入力に足す</td><td>VIX（S&amp;P500 のオプションから計算される指数）や、その期間別・偏りの指数を、LLM への入力に使う。共分散にも使える：過去1年で計算した共分散を、指数全体の変動が VIX と合うように拡大・縮小する（連動の形は過去から、大きさは市場の見通しから）</td><td>低い。yfinance で全期間が取れることを確認済み</td></tr>
+<tr><td>B. LLM の予想と、オプション市場の見通しを比べる</td><td>「LLM の回答のばらつき」と「オプションが示す変動の大きさ」が対応しているかを見る。予想の不確かさ（Ω）の決め方の検証になる</td><td>中くらい</td></tr>
+<tr><td>C. セクターや個別銘柄のインプライド分布を使う</td><td>論文と同じように、オプション価格から分布を推定して最適化に入れる</td><td>高い。過去のオプション価格は、無料ではほぼ手に入らない（yfinance で取れるのは現在の価格だけ）</td></tr>
+</table></div>
+<p>まず A から始めるのが現実的です。C は、データの入手方法が見つかった場合の発展として位置づけます。</p>
+</section>
+
+<section id="tables"><h2><span class="num">11</span>追加するテーブル</h2>
+<div class="table-wrap"><table>
+<tr><th>段階</th><th>テーブル（案）</th><th>1行の単位</th><th>つながる先</th></tr>
+<tr><td rowspan="2">1</td><td><code>portfolio_runs</code></td><td>比率の計算1回</td><td><code>llm_runs</code></td></tr>
+<tr><td><code>portfolio_weights</code></td><td>条件 × 判断日 × 銘柄</td><td><code>portfolio_runs</code>、<code>tickers</code></td></tr>
+<tr><td rowspan="2">2</td><td><code>reports</code></td><td>レポート1本</td><td>―</td></tr>
+<tr><td><code>llm_feedback</code></td><td>条件 × 月のフィードバック1件</td><td><code>portfolio_runs</code>、<code>reports</code></td></tr>
+<tr><td>3</td><td><code>llm_sector_views</code></td><td>実行 × 判断日 × セクター × 回答</td><td><code>llm_runs</code></td></tr>
+</table></div>
+<p>テーブルは今の9つから、最終的に14になります。次のものは保存せず、ビューか、その場の計算で出します。</p>
+<ul>
+<li>元の S&amp;P500 の比率（<code>index_weights</code> ビュー。すでにある）</li>
+<li>LLM の回答の平均と分散（<code>llm_view_stats</code> ビュー。すでにある）</li>
+<li>共分散、均衡リターン、修正後の期待リターン（毎回、株価から計算する）</li>
+<li>翌月のリターン、要因の分解、セクターの集計（ビューで作る）</li>
+</ul>
+</section>
+
+<section id="cov"><h2><span class="num">12</span>共分散の作り方</h2>
+<div class="callout info"><b>方針：</b>判断日までの直近1年の日次リターンで共分散を計算し、毎月更新します。そのうえで、縮小推定で補正します。</div>
+<p>毎月、窓を1か月ずつずらして計算し直す方法は「ローリング・ウィンドウ」と呼ばれ、標準的なやり方です。</p>
+<div class="grid2">
+<div class="card"><h4>先読みにならない</h4><p>使うのは判断日までのデータだけです。</p></div>
+<div class="card"><h4>窓が重なっても問題ない</h4><p>先月と今月で 11/12 のデータが同じです。共分散はゆっくり変わるものなので、推定としてはこれで構いません。</p></div>
+<div class="card"><h4>期待リターンには使わない</h4><p>過去の平均リターンは当てになりません。Black-Litterman は、期待リターンを市場の均衡と LLM の予想から作ります。過去データから取るのは共分散だけです。</p></div>
+<div class="card"><h4>最初の月から1年分ある</h4><p>DB は2023年3月からあるので、最初の判断月（2024年3月）でも1年分を使えます。</p></div>
+</div>
+<h3>注意点</h3>
+<div class="table-wrap"><table>
+<tr><th>点</th><th>内容</th><th>対処</th></tr>
+<tr><td>1年分でも足りない</td><td>日次データは約250個で、銘柄数（約500）より少ない。そのままの共分散行列は最適化に使えない</td><td>縮小推定（Ledoit-Wolf という定番の方法）で補正する。scikit-learn に入っている</td></tr>
+<tr><td>窓の長さ</td><td>短いと最近の動きに敏感でぶれやすい。長いと安定するが、古い情報が残る</td><td>まずは単純な1年にする。長さは <code>portfolio_runs</code> に記録し、後で変えて比べられるようにする</td></tr>
+<tr><td>上場して1年未満の銘柄</td><td>分社化などで入った銘柄は、1年分のデータがない</td><td>ある分だけで計算するか、その月は対象から外すかを決める（未定）</td></tr>
+<tr><td>元の実装との違い</td><td>元は、その月の約20日分だけで計算している</td><td>レポートに変更点として書く</td></tr>
+</table></div>
+</section>
+
+<section id="freq"><h2><span class="num">13</span>月次か四半期か</h2>
+<p>四半期にしても、共分散の扱いは変わりません。四半期のリターンは1年に4個しかないので、共分散は日次データから計算し、期間の長さに合わせて拡大するだけです。それ以外の違いは次の通りです。</p>
+<div class="table-wrap"><table>
+<tr><th></th><th>月次</th><th>四半期</th></tr>
+<tr><td>評価できる回数</td><td><b>30回</b></td><td>10回。差が出ても、偶然と区別しにくい</td></tr>
+<tr><td>LLM を呼ぶ回数</td><td>30か月分</td><td>3分の1</td></tr>
+<tr><td>売買の回数</td><td>多い</td><td>少ない。売買コストを考えるなら有利</td></tr>
+<tr><td>財務データとの相性</td><td>新しい決算がない月がある</td><td><b>決算が四半期ごとなので合う</b></td></tr>
+<tr><td>途中の変化</td><td>毎月見直す</td><td>3か月間、比率と構成銘柄の入れ替えを放置する</td></tr>
+</table></div>
+<ul>
+<li><b>メインは月次のままにします。</b>評価の回数が3倍あるためです。</li>
+<li><b>四半期は、セクターの予想と財務データを使う段階（段階3）で試します。</b></li>
+<li><b>中間の形もあります。</b>「毎月見直すが、予想は3か月先」にすれば、評価の回数を30回のまま保てます。ただし、評価の期間が重なります。</li>
+<li><b>四半期にする場合の判断日は、2月末・5月末・8月末・11月末が良いです。</b>暦の四半期末では、直前の四半期の決算がまだ出ていません（次の章）。</li>
+</ul>
+<p class="muted">テーブルは対応済みです。<code>llm_views</code> は判断日（<code>as_of_date</code>）で回答を区別し、<code>llm_runs</code> に入力の長さと予想の期間を記録するので、月次と四半期の両方が同じテーブルに入ります。</p>
+</section>
+
+<section id="filing"><h2><span class="num">14</span>財務データの開示日</h2>
+<p>決算期の区切りも、提出までの日数も、会社ごとに違います。DB で実際の分布を調べました（2024〜2025年に終わる四半期、561銘柄・約4,400件）。</p>
+<div class="grid2">
+<div class="card"><h4>① 四半期の区切りが違う</h4>
+<div class="table-wrap"><table>
+<tr><th>四半期の終わり</th><th>割合</th><th>例</th></tr>
+<tr><td>3・6・9・12月末（暦どおり）</td><td>約87%</td><td>Microsoft、JPMorgan</td></tr>
+<tr><td>1・4・7・10月末</td><td>約9%</td><td>Walmart、NVIDIA</td></tr>
+<tr><td>2・5・8・11月末</td><td>約4%</td><td>Oracle、Costco</td></tr>
+</table></div></div>
+<div class="card"><h4>② 期末から提出までの日数が違う</h4>
+<div class="table-wrap"><table>
+<tr><th></th><th>日数</th></tr>
+<tr><td>早い方の5%</td><td>23日以内</td></tr>
+<tr><td>中央値</td><td>34日</td></tr>
+<tr><td>遅い方の5%</td><td>57日以上</td></tr>
+</table></div>
+<p class="muted">年次の決算（第4四半期）は監査があるので、遅くなります。</p></div>
+</div>
+<h3>同じ四半期でも、そろうまでに1か月以上かかる</h3>
+<p>2025年6月末に終わった四半期（485銘柄）が、いつまでに提出されたかです。</p>
+<div class="table-wrap"><table>
+<tr><th>日付</th><th>提出済みの割合</th></tr>
+<tr><td>7月15日</td><td>0.2%</td></tr>
+<tr><td>7月31日</td><td>45%</td></tr>
+<tr><td>8月10日</td><td>95%</td></tr>
+<tr><td>8月31日</td><td>99%</td></tr>
+</table></div>
+<p>7月末に判断すると、半分以上の銘柄は1つ前の四半期のデータしかありません。8月末なら、ほぼ全部そろいます。</p>
+<h3>扱い方</h3>
+<ul>
+<li><b>基本の条件：</b>判断日ごとに、「<code>filed_date</code> が判断日以前の中で、いちばん新しい四半期」を銘柄ごとに選びます。これで先読みは起きません。</li>
+<li><b>銘柄によってデータの古さが違ってよい：</b>同じ判断日でも、ある銘柄は1か月前の決算、別の銘柄は3か月前の決算になります。実際の投資家も同じ状況です。</li>
+<li><b>セクターで合計するとき：</b>「各社の最新の四半期」を足し合わせ、期末日をそろえようとしません。前年の同じ四半期と比べた伸び率にすると、区切りの違いと季節性の両方をならせます。</li>
+</ul>
+<div class="callout"><b>知っておくこと</b>
+<ul style="margin:6px 0 0">
+<li><b><code>filed_date</code> は安全側の日付です。</b>正式な報告書（10-Q、10-K）の提出日で、実際にはその数日〜数週間前に決算発表で数字が公表されています。先読みにはなりませんが、市場はもっと早く知っていました。</li>
+<li><b>日数がおかしい値が少しあります。</b>提出が期末より前（最小 -56日）や、1年以上後（最大 423日）の行があります。項目ごとに別の書類の日付を拾っているのが原因と思われます。財務データを使う段階で、件数を調べて除きます。</li>
+</ul></div>
+</section>
+
+<section id="next"><h2><span class="num">15</span>進める順番と決めること</h2>
+<div class="steps">
+<div class="card"><h4>LLM の回答を確認する</h4><p>30か月分がそろったら、回答の分布と欠けを確認し、資料を更新する。</p></div>
+<div class="card"><h4>段階1：比率の調整まで通す</h4><p><code>portfolio_runs</code> と <code>portfolio_weights</code> を定義し、<code>blm/</code> に Black-Litterman と最適化を書く。翌月のリターンを、元の S&amp;P500 と比べる。</p></div>
+<div class="card"><h4>段階2：要因の分解 → フィードバック</h4><p>数字での分解を先に作り、その後にレポートを参照する LLM を足す。</p></div>
+<div class="card"><h4>段階3：セクターの予想</h4><p>セクターの予想を足し、個別銘柄の予想と同じ枠組みで比べる。入力を1つずつ足して効果を見る。四半期と、漏れの影響を測る実験もここで行う。</p></div>
+</div>
+<p>段階1を通せば、段階2と3は入力を変えるだけになります。</p>
+<h3>先に決めること</h3>
+<div class="table-wrap"><table>
+<tr><th>段階</th><th>決めること</th><th>今の考え</th></tr>
+<tr><td>1</td><td>共分散の窓の長さと補正の方法</td><td>直近1年の日次、Ledoit-Wolf</td></tr>
+<tr><td>1</td><td>上場して1年未満の銘柄の扱い</td><td>未定</td></tr>
+<tr><td>1</td><td>比較する戦略</td><td>時価総額加重（元の S&amp;P500）、等金額、平均分散、Black-Litterman</td></tr>
+<tr><td>1</td><td>設定を選ぶ期間と、成績を示す期間の区切り</td><td>未定。前半で選び、後半で示す</td></tr>
+<tr><td>2</td><td>どの運用会社のレポートを使うか</td><td>未定。米国株とセクターの記述があり、公表日が分かり、30か月分を集められるものを選ぶ</td></tr>
+<tr><td>2・3</td><td>レポートを要約する AI と、その形式</td><td>渡した資料だけを整理させる。形式は GICS の11セクターに合わせる</td></tr>
+<tr><td>2</td><td>フィードバックを次の予想に使うか</td><td>未定。使うなら、改善する期間と評価する期間を分ける</td></tr>
+<tr><td>3</td><td>月次か四半期か</td><td>月次をメインにして、四半期は比較として試す</td></tr>
+<tr><td>3</td><td>セクターに渡す財務項目</td><td>未定。前年同期比の伸び率が扱いやすい</td></tr>
+<tr><td>1</td><td>上場直後の銘柄の扱い</td><td>入力の日数に下限を設けて外す（2024年9月の AMTM は入力が4日分で、予想が極端になった）</td></tr>
+<tr><td>1・3</td><td>オプション市場の情報を使うか</td><td>VIX で共分散の大きさを合わせる方法を、「過去だけ」と比べる。セクターの入力にも使う</td></tr>
+<tr><td>3</td><td>変数を選ぶのに使う期間と方法</td><td>2010〜2023年、ロジスティック回帰（L1 正則化）。XGBoost は確認用に1回</td></tr>
+<tr><td>3</td><td>最初に渡す変数</td><td>①値動きと、③のうち金利・VIX</td></tr>
+<tr><td>3</td><td>モデルの比較をするか</td><td>余裕があれば、セクターの予想で行う。主役にはしない</td></tr>
+</table></div>
+<div class="callout"><b>レポートで触れること：</b>評価は30か月分しかありません。差が出ても、統計的に強いことは言えません。</div>
+</section>
+
+<footer>2026-10-10 作成。割合や日数は、同日の DB から計算した値です。</footer>
+</main></div></body></html>

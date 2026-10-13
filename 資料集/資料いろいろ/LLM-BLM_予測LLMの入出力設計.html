@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-BLM 予測 LLM の入出力設計</title>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --border: #dedad0;
+  --accent: #2f6fb3;
+  --accent-soft: #e4eef9;
+  --green: #2e7d4f;
+  --green-soft: #e3f3e9;
+  --orange: #b4621a;
+  --orange-soft: #fbeedf;
+  --purple: #6a4bb0;
+  --purple-soft: #eee8fa;
+  --red: #b23a3a;
+  --red-soft: #fbe6e6;
+  --code-bg: #f3f1ea;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #24282d;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #33383f;
+    --accent: #7cb2ec;
+    --accent-soft: #1f3248;
+    --green: #74c79a;
+    --green-soft: #1d3428;
+    --orange: #e9a462;
+    --orange-soft: #3a2a1a;
+    --purple: #b39cf0;
+    --purple-soft: #2c2440;
+    --red: #ec8a8a;
+    --red-soft: #3c2222;
+    --code-bg: #24282d;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --surface-2: #24282d; --text: #e6e8eb;
+  --muted: #9aa1ab; --border: #33383f; --accent: #7cb2ec; --accent-soft: #1f3248;
+  --green: #74c79a; --green-soft: #1d3428; --orange: #e9a462; --orange-soft: #3a2a1a;
+  --purple: #b39cf0; --purple-soft: #2c2440; --red: #ec8a8a; --red-soft: #3c2222;
+  --code-bg: #24282d; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15.5px;
+}
+code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+pre {
+  background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.55; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+nav.toc .label { font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .08em; margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--border); }
+nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+header.hero { margin-bottom: 36px; }
+header.hero .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; }
+header.hero h1 { font-size: 30px; line-height: 1.35; margin: 6px 0 12px; }
+header.hero p { color: var(--muted); margin: 0; max-width: 760px; }
+
+section { margin-bottom: 56px; scroll-margin-top: 20px; }
+h2 { font-size: 22px; margin: 0 0 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: var(--surface); border-radius: 6px; font-size: 14px; padding: 1px 9px; }
+h3 { font-size: 17px; margin: 26px 0 10px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { position: relative; padding-top: 44px; }
+.idea .badge { position: absolute; top: 16px; left: 22px; font-weight: 700; font-size: 13px; color: var(--accent); }
+.idea h4 { margin: 0 0 6px; font-size: 16px; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+
+/* directory tree */
+.tree { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.9; }
+.tree .row { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 12px; border-bottom: 1px dashed var(--border); }
+.tree .row:last-child { border-bottom: none; }
+.tree .name { white-space: pre; overflow-x: auto; }
+.tree .desc { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; font-family: "Hiragino Sans", sans-serif; }
+.t-script { background: var(--accent-soft); color: var(--accent); }
+.t-data { background: var(--green-soft); color: var(--green); }
+.t-out { background: var(--orange-soft); color: var(--orange); }
+.t-nb { background: var(--purple-soft); color: var(--purple); }
+
+/* flow */
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.stage { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.stage .step-label { text-align: right; padding-top: 16px; font-weight: 700; color: var(--muted); font-size: 13px; }
+.lane { display: flex; gap: 12px; flex-wrap: wrap; }
+.node { flex: 1 1 200px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid; background: var(--surface); }
+.node .title { font-weight: 700; font-size: 14.5px; }
+.node .sub { font-size: 12.5px; color: var(--muted); }
+.node.script { border-color: var(--accent); background: var(--accent-soft); }
+.node.data { border-color: var(--green); background: var(--green-soft); }
+.node.out { border-color: var(--orange); background: var(--orange-soft); }
+.node.nb { border-color: var(--purple); background: var(--purple-soft); }
+.node.ext { border-style: dashed; border-color: var(--muted); }
+.arrow { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+.arrow span { grid-column: 2; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.6; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid; }
+
+/* timeline */
+.timeline { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0 6px; }
+.tl-head { font-size: 12.5px; text-align: center; color: var(--muted); font-weight: 700; }
+.tl-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.tl-train { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.tl-test { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange); }
+.tl-empty { background: transparent; }
+
+/* step details */
+.step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.step .circle { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.step .card h3 { margin-top: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step .card h3 code { font-size: 14px; }
+.io { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 6px 0 12px; }
+.io .in, .io .outp { border-radius: 6px; padding: 2px 10px; }
+.io .in { background: var(--green-soft); color: var(--green); }
+.io .outp { background: var(--orange-soft); color: var(--orange); }
+.step ul, .step ol { padding-left: 1.3em; margin: 8px 0; }
+.step li { margin: 3px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.formula { background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 10px; padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+.formula .cm { color: var(--muted); font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+
+.callout { border-left: 4px solid var(--orange); background: var(--orange-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14.5px; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-soft); }
+
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sev { font-size: 12px; font-weight: 700; text-align: center; border-radius: 6px; padding: 3px 0; }
+.sev.high { background: var(--red-soft); color: var(--red); }
+.sev.mid { background: var(--orange-soft); color: var(--orange); }
+.sev.low { background: var(--surface-2); color: var(--muted); }
+.issue p { margin: 0; }
+.issue .where { font-size: 12.5px; color: var(--muted); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 20px 16px 60px; }
+  nav.toc { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .stage, .arrow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .stage .step-label { text-align: left; padding-top: 0; }
+  .arrow span { grid-column: 1; }
+  .tree .row { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 0; }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .issue { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sev { width: 88px; }
+  .timeline { gap: 3px; }
+  .tl-cell { font-size: 10.5px; }
+  header.hero h1 { font-size: 24px; }
+}
+
+.er { width:100%; height:auto; display:block; }
+.er .ent { fill: var(--surface); stroke: var(--border); stroke-width:1.5; }
+.er .ent-h.c-green { fill: var(--green-soft); }
+.er .ent-h.c-purple { fill: var(--purple-soft); }
+.er .ent-h.c-orange { fill: var(--orange-soft); }
+.er .ent-t { fill: var(--text); font-weight:700; font-size:14px; }
+.er .ent-k { fill: var(--orange); font-size:11px; font-weight:700; }
+.er .ent-c { fill: var(--text); font-size:13px; font-family: "SF Mono", Menlo, monospace; }
+.er .rel { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel.dashed { stroke-dasharray: 5 4; }
+.er .rel-m { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel-a { fill: var(--muted); }
+.er .rel-t { fill: var(--muted); font-size:12px; }
+.pill { display:inline-block; font-size:11px; font-weight:700; border-radius:4px; padding:0 6px; margin:1px 2px 1px 0; white-space:nowrap; }
+.pill.pk { background: var(--orange-soft); color: var(--orange); }
+.pill.fk { background: var(--accent-soft); color: var(--accent); }
+.pill.nn { background: var(--surface-2); color: var(--muted); }
+.pill.ck { background: var(--purple-soft); color: var(--purple); }
+td.good { color: var(--green); font-weight:700; }
+td.bad { color: var(--red); font-weight:700; }
+table.result td { font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; }
+tr.hl td { background: var(--orange-soft); }
+tr.drop td { color: var(--red); text-decoration: line-through; }
+tr.drop td:last-child { text-decoration: none; }
+.steps { counter-reset: st; display:grid; gap:10px; margin:12px 0; }
+.steps .card { position:relative; padding-left:58px; }
+.steps .card::before { counter-increment: st; content: counter(st); position:absolute; left:18px; top:18px; width:28px; height:28px; border-radius:50%; background: var(--accent); color: var(--surface); font-weight:700; display:flex; align-items:center; justify-content:center; }
+.steps .card h4 { margin:0 0 4px; font-size:15px; }
+.steps .card p { margin:0; font-size:14px; color: var(--muted); }
+.null { color: var(--muted); font-style: italic; }
+pre.sql { border-left: 4px solid var(--accent); }
+.tcard { margin-bottom: 18px; }
+.tcard h3 { margin-top:0; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.tcard h3 .role { font-size:12.5px; font-weight:400; color:var(--muted); }
+.tcard .new { font-size:11px; font-weight:700; background: var(--accent); color: var(--surface); border-radius:4px; padding:0 6px; }
+.grid2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+.grid2 .card h4 { margin:0 0 6px; font-size:15px; }
+.grid2 .card p { margin:0; font-size:14px; color:var(--muted); }
+.verdict { display:inline-block; font-size:12px; font-weight:700; border-radius:6px; padding:1px 8px; }
+.verdict.ok { background: var(--green-soft); color: var(--green); }
+.verdict.ng { background: var(--red-soft); color: var(--red); }
+.verdict.mid { background: var(--orange-soft); color: var(--orange); }
+.formula-big { text-align:center; font-size:17px; font-weight:700; padding:16px; border-radius:10px; background: var(--accent-soft); border:1px solid var(--accent); margin:14px 0; line-height:1.9; }
+.formula-big small { display:block; font-size:12.5px; font-weight:400; color: var(--muted); }
+.kpis-db { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis-db .v { font-size:18px; font-weight:700; }
+.kpis-db .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis-db { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.status { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+.status .card .v { font-weight:700; font-size:15px; }
+.status .card .k { color:var(--muted); font-size:13px; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--accent); }
+@media (max-width:900px) { .grid2, .status { grid-template-columns: minmax(0,1fr); } }
+
+.er .ent-h.c-blue { fill: var(--accent-soft); }
+.er .ent-h.c-red { fill: var(--red-soft); }
+a { color: var(--accent); }
+.doclink { display:flex; gap:12px; align-items:center; background: var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin: 0 0 28px; font-size:14px; }
+.doclink b { white-space:nowrap; }
+td.num { text-align:right; font-family: "SF Mono", Menlo, monospace; }
+.muted { color: var(--muted); font-size: 12.5px; }
+.diff td:first-child { font-weight:700; white-space:nowrap; }
+.impact { display:inline-block; font-size:11.5px; font-weight:700; border-radius:5px; padding:0 7px; white-space:nowrap; }
+.impact.s { background: var(--surface-2); color: var(--muted); }
+.impact.m { background: var(--orange-soft); color: var(--orange); }
+.impact.l { background: var(--red-soft); color: var(--red); }
+.quote { border:1px dashed var(--border); border-radius:10px; padding:12px 16px; margin:10px 0; background: var(--surface); font-size:14.5px; }
+.quote .t { font-size:12px; font-weight:700; color: var(--accent); margin-bottom:4px; }
+.figure { background:#fff; border-radius:10px; padding:8px; border:1px solid var(--border); }
+.figure img { width:100%; height:auto; display:block; }
+.kpis5 { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis5 .v { font-size:22px; font-weight:700; line-height:1.25; }
+.kpis5 .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis5 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+.st { display:inline-block; font-size:11.5px; font-weight:700; border-radius:5px; padding:0 7px; white-space:nowrap; }
+.st.done { background: var(--green-soft); color: var(--green); }
+.st.plan { background: var(--orange-soft); color: var(--orange); }
+.st.open { background: var(--red-soft); color: var(--red); }
+pre.prompt { background: var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; font-size:13px; line-height:1.7; overflow-x:auto; white-space:pre-wrap; }
+td.blk { font-weight:700; white-space:nowrap; }
+ul.tight { margin: 8px 0 0; padding-left: 1.2em; } ul.tight li { margin: 4px 0; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } nav.toc { position: static; } .stage, .arrow { grid-template-columns: 1fr; } .stage .step-label { text-align:left; padding-top:0; } .arrow span { grid-column:1; } }
+</style></head><body>
+<div class="layout">
+<nav class="toc"><div class="label">目次</div><a href="#overview">1. 全体の流れ</a><a href="#inputs">2. 入力</a><a href="#pit">3. 未来の情報を使わない決まり</a><a href="#prompt">4. プロンプトの形</a><a href="#outputs">5. 出力</a><a href="#db">6. DB への追加</a><a href="#runs">7. 実行の条件</a><a href="#open">8. 未決定の点</a></nav>
+<main>
+<header class="hero"><div class="eyebrow">LLM-BLM 設計書</div><h1>予測 LLM の入出力設計</h1><p>各銘柄の翌月のリターンを予測させる LLM（gpt-4o-mini）に、何を渡して何を受け取るかの設計です。<span class="st done">済</span> は実装済み、<span class="st plan">予定</span> はこれから作るもの、<span class="st open">未決定</span> は決めていないものを表します。</p></header>
+
+<section id="overview"><h2><span class="num">1</span>全体の流れ</h2>
+<p>判断日（各月の最後の取引日）ごとに、その日の S&amp;P500 の構成銘柄すべてについて、次の流れを1回ずつ行います。</p>
+<div class="card"><div class="flow">
+<div class="stage"><div class="step-label">データ</div><div class="lane">
+<div class="node data"><div class="title">株価・財務諸表 <span class="st done">済</span></div><div class="sub">prices、fundamentals_quarterly、market_caps</div></div>
+<div class="node data"><div class="title">セクター・市場の指標 <span class="st done">済</span></div><div class="sub">sector_metrics、^VIX、^VIX3M、^SKEW、^IRX</div></div>
+<div class="node data"><div class="title">レポートの要約 <span class="st done">済</span></div><div class="sub">report_values（us_summary、key_risks）</div></div>
+</div></div>
+<div class="arrow"><span>↓</span></div>
+<div class="stage"><div class="step-label">加工</div><div class="lane">
+<div class="node script"><div class="title">銘柄ごとの指標を計算 <span class="st done">済</span></div><div class="sub">値動き5個、ファンダ7個。セクター内の順位も付ける</div></div>
+<div class="node script"><div class="title">プロンプトを組み立てる <span class="st plan">予定</span></div><div class="sub">使うまとまり（A〜F）は実行ごとに選ぶ</div></div>
+</div></div>
+<div class="arrow"><span>↓</span></div>
+<div class="stage"><div class="step-label">LLM</div><div class="lane">
+<div class="node nb"><div class="title">gpt-4o-mini に30回答えさせる <span class="st done">済</span></div><div class="sub">1回のリクエストで30個。翌月の日次平均リターン</div></div>
+</div></div>
+<div class="arrow"><span>↓</span></div>
+<div class="stage"><div class="step-label">出力</div><div class="lane">
+<div class="node out"><div class="title">llm_views に保存 <span class="st done">済</span></div><div class="sub">30個の回答をそのまま保存</div></div>
+<div class="node out"><div class="title">平均と分散 <span class="st done">済</span></div><div class="sub">llm_view_stats → Black-Litterman の Q と Ω</div></div>
+</div></div>
+</div></div>
+<p class="muted">今の実装（実行番号 1）は、入力が「社名・業種」と「1か月分の日次リターン」だけです。この設計は、入力の部分を置き換えるものです。出力の形と、Black-Litterman へのつなぎ方は変えません。</p>
+</section>
+
+<section id="inputs"><h2><span class="num">2</span>入力</h2>
+<p>入力を6つのまとまりに分けます。まとまりごとに入れる・入れないを切り替えられるようにし、どれが効いたかを後で測ります（7章）。</p>
+<div class="table-wrap"><table><tr><th>まとまり</th><th>中身</th><th>値が変わる単位</th><th>状態</th></tr><tr><td><span class="blk">A</span> 銘柄の基本情報</td><td>ティッカー、社名、セクター、サブ業種</td><td>銘柄</td><td><span class="st done">済</span></td></tr><tr><td><span class="blk">B</span> 値動き</td><td>モメンタム、直近のリターン、ボラティリティ、ベータ</td><td>銘柄 × 月</td><td><span class="st done">済</span>（計算済み。プロンプトへの組み込みは予定）</td></tr><tr><td><span class="blk">C</span> ファンダメンタルズ</td><td>割安さ、成長、収益性、負債</td><td>銘柄 × 月（決算のたびに変わる）</td><td><span class="st done">済</span>（計算済み。プロンプトへの組み込みは予定）</td></tr><tr><td><span class="blk">D</span> セクター</td><td>セクターのモメンタム、ボラティリティ、PER</td><td>セクター × 月</td><td><span class="st done">済</span>（計算済み。プロンプトへの組み込みは予定）</td></tr><tr><td><span class="blk">E</span> 市場全体</td><td>VIX、VIX の期間構造、SKEW、短期金利</td><td>月</td><td><span class="st done">済</span>（データあり。プロンプトへの組み込みは予定）</td></tr><tr><td><span class="blk">F</span> レポートの文章</td><td>米国の見通しの要約、主なリスク</td><td>月</td><td><span class="st done">済</span>（抽出済み。プロンプトへの組み込みは予定）</td></tr></table></div>
+
+<h3>A　銘柄の基本情報</h3>
+<div class="table-wrap"><table><tr><th>項目</th><th>元のデータ</th><th>備考</th></tr><tr><td>ティッカー、社名</td><td><code>tickers.symbol</code>、<code>tickers.security</code></td><td>今の実装と同じ</td></tr><tr><td>セクター、サブ業種</td><td><code>tickers.gics_sector</code>、<code>tickers.gics_sub_industry</code></td><td>今の実装と同じ</td></tr></table></div>
+
+<h3>B　値動き（銘柄ごと・5個）</h3>
+<div class="table-wrap"><table><tr><th>項目</th><th>定義</th><th>元のデータ</th><th>単位</th></tr><tr><td>12か月のモメンタム</td><td>252取引日前から21取引日前までのリターン（直近1か月は除く）</td><td><code>prices.adj_close</code></td><td>小数</td></tr><tr><td>直近1か月のリターン</td><td>直近21取引日のリターン</td><td><code>prices.adj_close</code></td><td>小数</td></tr><tr><td>セクターとの差</td><td>銘柄の12か月のモメンタム − セクターETFの同じ期間のリターン</td><td><code>prices</code>、<code>sector_metrics</code></td><td>小数</td></tr><tr><td>30日のボラティリティ</td><td>過去30取引日の日次リターンの標準偏差（年率）</td><td><code>prices.adj_close</code></td><td>小数</td></tr><tr><td>ベータ</td><td>過去252取引日の日次リターンを S&amp;P500 に回帰した傾き</td><td><code>prices</code>（^GSPC）</td><td>倍</td></tr></table></div>
+<p class="muted">今の実装が渡している「1か月分の日次リターン（約20個）」は外します。LLM が渡した数字をなぞる原因になっているためです（予想と入力月の平均リターンの相関 0.89）。比較用の実行でだけ使います。</p>
+
+<h3>C　ファンダメンタルズ（銘柄ごと・7個）</h3>
+<div class="table-wrap"><table><tr><th>項目</th><th>定義</th><th>元のデータ</th></tr><tr><td>実績 PER</td><td>時価総額 ÷ 直近4四半期の純利益</td><td><code>market_caps</code>、<code>fundamentals_quarterly.net_income</code></td></tr><tr><td>PBR</td><td>時価総額 ÷ 直近の四半期の純資産</td><td><code>market_caps</code>、<code>total_equity</code></td></tr><tr><td>売上高の前年同期比</td><td>直近の四半期の売上高 ÷ 1年前の同じ四半期 − 1</td><td><code>revenue</code></td></tr><tr><td>純利益の前年同期比</td><td>直近の四半期の純利益 ÷ 1年前の同じ四半期 − 1（1年前が赤字なら空欄）</td><td><code>net_income</code></td></tr><tr><td>純利益率</td><td>直近4四半期の純利益 ÷ 売上高</td><td><code>net_income</code>、<code>revenue</code></td></tr><tr><td>ROE</td><td>直近4四半期の純利益 ÷ 直近の純資産</td><td><code>net_income</code>、<code>total_equity</code></td></tr><tr><td>負債の重さ</td><td>長期負債 ÷ 純資産</td><td><code>long_term_debt</code>、<code>total_equity</code></td></tr></table></div>
+<ul class="tight">
+<li><b>決算の日付も渡す。</b>「どの四半期の決算か」と「提出日」を添えます。3か月前の決算と先週の決算では、鮮度が違うためです。</li>
+<li><b>入れられないもの。</b>アナリストの業績予想、予想 PER、決算のサプライズは、過去の値が無料で取れないので使いません。売上と利益の前年同期比で代用します。</li>
+</ul>
+
+<h3>D　セクター（セクターごと）</h3>
+<div class="table-wrap"><table><tr><th>項目</th><th>定義</th><th>元のデータ</th></tr><tr><td>セクターのモメンタム</td><td>3・6・12か月のリターン（直近1か月は除く）と、11セクターの中での z スコア</td><td><code>sector_metric_scores</code></td></tr><tr><td>セクターのボラティリティ</td><td>セクターETFの30日のボラティリティ</td><td><code>sector_metrics</code>（volatility_30d）</td></tr><tr><td>セクターの PER</td><td>セクターの銘柄の時価総額の合計 ÷ 純利益の合計</td><td><code>sector_metrics</code>（pe_trailing）</td></tr></table></div>
+
+<h3>E　市場全体（全銘柄で共通）</h3>
+<div class="table-wrap"><table><tr><th>項目</th><th>意味</th><th>元のデータ</th></tr><tr><td>VIX</td><td>S&amp;P500 の今後30日の予想ボラティリティ（年率、%）</td><td><code>prices</code>（^VIX）</td></tr><tr><td>VIX ÷ VIX3M</td><td>1 を超えると、目先のほうが3か月先より警戒されている</td><td><code>prices</code>（^VIX、^VIX3M）</td></tr><tr><td>SKEW</td><td>大きな下落に備える保険料の高さ</td><td><code>prices</code>（^SKEW）</td></tr><tr><td>短期金利</td><td>3か月物の米国債の利回り（年率、%）</td><td><code>prices</code>（^IRX）</td></tr></table></div>
+
+<h3>F　レポートの文章（全銘柄で共通）</h3>
+<div class="table-wrap"><table><tr><th>項目</th><th>中身</th><th>元のデータ</th></tr><tr><td>見通しの要約</td><td>米国の経済と株式の見通し（英語、100語以内）</td><td><code>report_values</code>（us_summary）</td></tr><tr><td>主なリスク</td><td>米国株の主なリスク（英語、50語以内）</td><td><code>report_values</code>（key_risks）</td></tr></table></div>
+<p class="muted">レポートの予想値の表（S&amp;P500 の予想値、GDP など）は、今は入力に使いません。gpt-4o-mini の読み取りに1〜2割の誤りが残っているためです。</p>
+
+<h3>数字の渡し方</h3>
+<div class="grid2">
+<div class="card"><h4>セクター内の順位を添える</h4><p>「PER 32」だけでは高いか安いか判断しにくいので、同じセクターの銘柄の中での位置（0〜100 の百分位）を付けます。対象は、まとまり B と C の銘柄ごとの数字です。</p></div>
+<div class="card"><h4>単位をプロンプトに書く</h4><p>リターンは小数（0.05 ＝ +5%）、VIX と金利は % と、単位をラベルに書きます。今の実装で桁の取り違えが 0 件だった方法を続けます。</p></div>
+<div class="card"><h4>欠けている数字は「n/a」</h4><p>上場して間もない銘柄、赤字で PER が出ない銘柄、業種の性質でその指標が誤解を招く銘柄（銀行の負債、REIT の PER など）は、数字を作らず「n/a」と渡します。0 で埋めると、LLM が本当の 0 と区別できません。</p></div>
+<div class="card"><h4>桁数をそろえる</h4><p>小数は有効数字3桁程度に丸めます。桁が多いと入力が長くなるだけで、情報は増えません。</p></div>
+</div>
+</section>
+
+<section id="pit"><h2><span class="num">3</span>未来の情報を使わない決まり</h2>
+<p>どのまとまりも、判断日より後にわかった情報を入れません。まとまりごとの決まりは次のとおりです。</p>
+<div class="table-wrap"><table><tr><th>まとまり</th><th>使ってよい範囲</th><th>確かめ方</th></tr><tr><td>A 基本情報</td><td>判断日に指数に在籍していた銘柄だけ</td><td><code>index_membership</code> の在籍期間</td></tr><tr><td>B 値動き</td><td>判断日までの株価</td><td><code>prices.date</code> ≤ 判断日</td></tr><tr><td>C ファンダ</td><td>判断日までに提出された四半期だけ</td><td><code>fundamentals_quarterly.filed_date</code> ≤ 判断日</td></tr><tr><td>D セクター</td><td>判断日までのETFの株価と、提出済みの決算</td><td><code>sector_metrics.as_of_date</code> ＝ 判断日</td></tr><tr><td>E 市場</td><td>判断日の終値</td><td><code>prices.date</code> ＝ 判断日</td></tr><tr><td>F レポート</td><td>判断日までに公表されたレポートのうち、最新の1本</td><td><code>reports.published_date</code> ≤ 判断日</td></tr><tr><td>モデルの知識</td><td>知識が 2023年10月までの gpt-4o-mini を使い、評価は 2024年4月から</td><td><code>llm_runs.model_version</code></td></tr></table></div>
+<ul class="tight">
+<li><b>セクターの分類は今の分類です。</b>銘柄のセクターは Wikipedia の最新（または指数を外れる直前）の分類で、過去の時点の分類ではありません。期間中の分類変更は少ないので、影響は小さいと見ています。</li>
+<li><b>レポートの公表日は PDF の作成日です。</b>各号は表紙の月の前月下旬に作られているので、N月号を N月の予測に使えます（例：2024年4月号の作成日は 2024-03-27、判断日は 2024-03-28）。</li>
+</ul>
+</section>
+
+<section id="prompt"><h2><span class="num">4</span>プロンプトの形</h2>
+<p>まとまりごとに見出しを付けて並べます。使わないまとまりは、見出しごと省きます。</p>
+<h3>システムプロンプト（案）</h3>
+<pre class="prompt">You are a financial analyst. Using only the information given below, predict the average daily return of the stock over the next month.
+Every return is a decimal fraction, not a percent: 0.01 means +1%.
+Percentile = position among the stocks of the same sector (0 = lowest, 100 = highest).
+&quot;n/a&quot; means the value is not available.
+Answer the expected average daily return as a decimal fraction (answer 0.001 for +0.1% per day, never 0.1).</pre>
+<h3>ユーザープロンプト（案）</h3>
+<pre class="prompt">[Stock]
+Ticker: NVDA
+Security: Nvidia
+Sector: Information Technology
+Sub-Industry: Semiconductors
+
+[Price behaviour]  (value, percentile in sector)
+12-month momentum, latest month excluded: 0.612 (88)
+Return over the latest month: 0.043 (61)
+12-month momentum minus the sector&#x27;s: 0.084 (88)
+30-day volatility, per year: 0.412 (79)
+Beta to the S&amp;P 500: 1.85 (93)
+
+[Fundamentals]  quarter ended 2026-04-26, filed 2026-05-20  (value, percentile in sector)
+Price / earnings, last 4 quarters: 41.2 (72)
+Price / book: 33.5 (96)
+Revenue growth, year on year: 0.482 (95)
+Net income growth, year on year: 0.531 (90)
+Net margin: 0.551 (99)
+Return on equity: 0.874 (98)
+Long-term debt / equity: 0.07 (12)
+
+[Sector: Information Technology]  (value, z-score among the 11 sectors)
+Momentum 3 / 6 / 12 months: 0.110 (1.02) / 0.064 (-0.35) / 0.528 (1.79)
+30-day volatility, per year: 0.227 (1.30)
+Price / earnings: 39.8 (1.51)
+
+[Market]
+VIX (percent per year): 15.3
+VIX / 3-month VIX: 0.82
+SKEW index: 144.2
+3-month Treasury bill yield (percent per year): 3.59
+
+[Monthly outlook of an asset manager, published 2026-05-21]
+Summary: The US economy is showing strong growth supported by AI-related investments, despite geopolitical tensions. The S&amp;P 500 is expected to rise, reflecting strong corporate earnings, particularly in technology sectors.
+Key risks: Geopolitical tensions and inflationary pressures may impact market stability.</pre>
+<p class="muted">判断日 2026-05-29 の例です。[Sector]、[Market]、[Monthly outlook] の値は DB にある実際の値です。[Price behaviour] と [Fundamentals] の値は、形を示すための仮の数字です（銘柄ごとの指標はまだ計算していません）。</p>
+<p>入力の長さは、1銘柄あたり約600トークンの見込みです。今の実装（約250トークン）の2倍強で、30個の回答は入力を1回送るだけで受け取れるので、費用への影響は小さいです。</p>
+</section>
+
+<section id="outputs"><h2><span class="num">5</span>出力</h2>
+<p>出力の形は今の実装のままです。</p>
+<div class="table-wrap"><table><tr><th>項目</th><th>内容</th><th>状態</th></tr><tr><td>回答の形</td><td>JSON で <code>{"expected_return": 数値}</code>。形は API の機能で固定する</td><td><span class="st done">済</span></td></tr><tr><td>回答の意味</td><td>翌月の日次の平均リターン（小数）</td><td><span class="st done">済</span></td></tr><tr><td>回答の数</td><td>1銘柄・1か月につき30個。1回のリクエストでまとめて受け取る（<code>n=30</code>）</td><td><span class="st done">済</span></td></tr><tr><td>ばらつき</td><td><code>temperature=1.0</code>。0 にすると30個が同じ答えになり、分散が出ない</td><td><span class="st done">済</span></td></tr><tr><td>読み取れなかった回答</td><td>NULL として保存し、平均と分散の計算から外す</td><td><span class="st done">済</span></td></tr></table></div>
+<h3>保存先</h3>
+<div class="table-wrap"><table><tr><th>テーブル・ビュー</th><th>1行の単位</th><th>入るもの</th></tr><tr><td><code>llm_runs</code></td><td>実行1回</td><td>モデル、プロンプト、回答の数、temperature、メモ</td></tr><tr><td><code>llm_views</code></td><td>実行 × 判断日 × 銘柄 × 回答番号</td><td>30個の回答そのもの</td></tr><tr><td><code>llm_view_stats</code>（ビュー）</td><td>実行 × 判断日 × 銘柄</td><td>回答の平均（Black-Litterman の Q）と分散（Ω）</td></tr></table></div>
+<h3>理由の文章は出させない</h3>
+<p>回答に「理由」の欄を足すと、30個すべてに文章が付き、出力の費用が数十倍になります。理由を見たいときは、数銘柄だけを別に聞く形にします。</p>
+</section>
+
+<section id="db"><h2><span class="num">6</span>DB への追加</h2>
+<div class="table-wrap"><table><tr><th>追加するもの</th><th>形</th><th>目的</th><th>状態</th></tr><tr><td>テーブル <code>stock_metrics</code></td><td><code>(as_of_date, symbol, metric, value)</code>。<code>sector_metrics</code> の銘柄版</td><td>まとまり B・C の数字を保存する。統計モデルの変数としても同じ値を使う</td><td><span class="st done">済</span></td></tr><tr><td>ビュー <code>stock_metric_scores</code></td><td>上の値に、セクター内の百分位を付ける</td><td>プロンプトに渡す順位</td><td><span class="st done">済</span></td></tr><tr><td><code>llm_runs</code> に列を追加</td><td><code>inputs</code>（使ったまとまりの一覧を JSON で。例：["A","B","C"]）</td><td>どの入力で実行したかを残す</td><td><span class="st plan">予定</span></td></tr><tr><td><code>llm_runs</code> に列を追加</td><td><code>user_prompt_template</code>（ユーザープロンプトの型）</td><td>今はシステムプロンプトしか保存していない</td><td><span class="st plan">予定</span></td></tr></table></div>
+<p class="muted">LLM に渡した数字と、比較用の統計モデルに入れる数字を、同じテーブルから取るのが要点です。入力が同じでないと、LLM と統計モデルの差が「モデルの差」なのか「入力の差」なのか分けられません。</p>
+</section>
+
+<section id="runs"><h2><span class="num">7</span>実行の条件</h2>
+<p>まとまりを1つずつ足して実行し、どれが効いたかを測ります。</p>
+<div class="table-wrap"><table><tr><th>実行</th><th>入力</th><th>確かめること</th><th>状態</th></tr><tr><td>1</td><td>A ＋ 1か月分の日次リターン</td><td>既存手法の再現</td><td><span class="st done">済</span></td></tr><tr><td>2</td><td>A ＋ B</td><td>日次リターンの列を要約に置き換えると、なぞりが減るか</td><td><span class="st plan">予定</span></td></tr><tr><td>3</td><td>A ＋ B ＋ C</td><td>ファンダを足した効果</td><td><span class="st plan">予定</span></td></tr><tr><td>4</td><td>A ＋ B ＋ C ＋ D ＋ E</td><td>セクターと市場を足した効果</td><td><span class="st plan">予定</span></td></tr><tr><td>5</td><td>A 〜 F のすべて</td><td>レポートの文章を足した効果（LLM にしかできない部分）</td><td><span class="st plan">予定</span></td></tr></table></div>
+<ul class="tight">
+<li><b>費用：</b>実行 1 は全期間（30か月 × 約490銘柄 × 30回答）で約 1.75 ドルでした。入力が2倍強になっても、1回 3〜4 ドル、4回で 15 ドル程度の見込みです。</li>
+<li><b>比べる相手：</b>同じ B〜E の数字を入れた統計モデル（ロジスティック回帰）。実行 4 と統計モデルの差が「数字の読み方の差」、実行 5 と実行 4 の差が「文章を読んだ効果」です。</li>
+<li><b>見る指標：</b>予想と翌月の実際のリターンの順位相関、予想と入力の相関（なぞりの度合い）、30個の回答のばらつきと実際の外れ方の関係。</li>
+</ul>
+</section>
+
+<section id="open"><h2><span class="num">8</span>未決定の点</h2>
+<div class="table-wrap"><table><tr><th>点</th><th>選択肢</th><th>今の考え</th></tr><tr><td>レポートの文章は全銘柄で同じ</td><td>そのまま全銘柄に渡す ／ セクターの予測にだけ使う</td><td>まず全銘柄に渡して実行 5 で効果を見る。効かなければセクター予測に回す</td></tr><tr><td>1か月のリターンを入れるか</td><td>入れる ／ 外す</td><td>入れる。短期の反転は知られた傾向で、1個の数字ならなぞりの問題は小さい</td></tr><tr><td>百分位の母集団</td><td>セクター内 ／ 指数全体</td><td>セクター内。業種で水準が違う指標（PER、負債）が多いため</td></tr><tr><td>業種によって意味が変わるファンダ</td><td>ほかと同じ項目 ／ 項目を変える</td><td>決定：業種の性質で誤解を招く指標は作らない（n/a）。銀行・証券などは純利益率と負債の重さ、REIT と複合持株会社は PER・純利益の前年同期比・純利益率・ROE</td></tr><tr><td>決算が古い銘柄</td><td>そのまま渡す ／ 一定より古ければ n/a</td><td>決定：決算期末から 150 日を超えた銘柄は、ファンダの指標を作らない（n/a）。全体の約1%。2026年8・9月は元データの欠けで約12%</td></tr><tr><td>Black-Litterman 側の集中</td><td>上限を付ける ／ Ω を決め直す</td><td>この設計の外。入力を変えても、予想を 99.9% 採用する問題は残る</td></tr></table></div>
+</section>
+</main></div></body></html>

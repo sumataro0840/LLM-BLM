@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-BLM 中間発表の流れ</title>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --border: #dedad0;
+  --accent: #2f6fb3;
+  --accent-soft: #e4eef9;
+  --green: #2e7d4f;
+  --green-soft: #e3f3e9;
+  --orange: #b4621a;
+  --orange-soft: #fbeedf;
+  --purple: #6a4bb0;
+  --purple-soft: #eee8fa;
+  --red: #b23a3a;
+  --red-soft: #fbe6e6;
+  --code-bg: #f3f1ea;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #24282d;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #33383f;
+    --accent: #7cb2ec;
+    --accent-soft: #1f3248;
+    --green: #74c79a;
+    --green-soft: #1d3428;
+    --orange: #e9a462;
+    --orange-soft: #3a2a1a;
+    --purple: #b39cf0;
+    --purple-soft: #2c2440;
+    --red: #ec8a8a;
+    --red-soft: #3c2222;
+    --code-bg: #24282d;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --surface-2: #24282d; --text: #e6e8eb;
+  --muted: #9aa1ab; --border: #33383f; --accent: #7cb2ec; --accent-soft: #1f3248;
+  --green: #74c79a; --green-soft: #1d3428; --orange: #e9a462; --orange-soft: #3a2a1a;
+  --purple: #b39cf0; --purple-soft: #2c2440; --red: #ec8a8a; --red-soft: #3c2222;
+  --code-bg: #24282d; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15.5px;
+}
+code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+pre {
+  background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.55; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+nav.toc .label { font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .08em; margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--border); }
+nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+header.hero { margin-bottom: 36px; }
+header.hero .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; }
+header.hero h1 { font-size: 30px; line-height: 1.35; margin: 6px 0 12px; }
+header.hero p { color: var(--muted); margin: 0; max-width: 760px; }
+
+section { margin-bottom: 56px; scroll-margin-top: 20px; }
+h2 { font-size: 22px; margin: 0 0 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: var(--surface); border-radius: 6px; font-size: 14px; padding: 1px 9px; }
+h3 { font-size: 17px; margin: 26px 0 10px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { position: relative; padding-top: 44px; }
+.idea .badge { position: absolute; top: 16px; left: 22px; font-weight: 700; font-size: 13px; color: var(--accent); }
+.idea h4 { margin: 0 0 6px; font-size: 16px; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+
+/* directory tree */
+.tree { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.9; }
+.tree .row { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 12px; border-bottom: 1px dashed var(--border); }
+.tree .row:last-child { border-bottom: none; }
+.tree .name { white-space: pre; overflow-x: auto; }
+.tree .desc { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; font-family: "Hiragino Sans", sans-serif; }
+.t-script { background: var(--accent-soft); color: var(--accent); }
+.t-data { background: var(--green-soft); color: var(--green); }
+.t-out { background: var(--orange-soft); color: var(--orange); }
+.t-nb { background: var(--purple-soft); color: var(--purple); }
+
+/* flow */
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.stage { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.stage .step-label { text-align: right; padding-top: 16px; font-weight: 700; color: var(--muted); font-size: 13px; }
+.lane { display: flex; gap: 12px; flex-wrap: wrap; }
+.node { flex: 1 1 200px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid; background: var(--surface); }
+.node .title { font-weight: 700; font-size: 14.5px; }
+.node .sub { font-size: 12.5px; color: var(--muted); }
+.node.script { border-color: var(--accent); background: var(--accent-soft); }
+.node.data { border-color: var(--green); background: var(--green-soft); }
+.node.out { border-color: var(--orange); background: var(--orange-soft); }
+.node.nb { border-color: var(--purple); background: var(--purple-soft); }
+.node.ext { border-style: dashed; border-color: var(--muted); }
+.arrow { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+.arrow span { grid-column: 2; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.6; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid; }
+
+/* timeline */
+.timeline { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0 6px; }
+.tl-head { font-size: 12.5px; text-align: center; color: var(--muted); font-weight: 700; }
+.tl-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.tl-train { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.tl-test { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange); }
+.tl-empty { background: transparent; }
+
+/* step details */
+.step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.step .circle { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.step .card h3 { margin-top: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step .card h3 code { font-size: 14px; }
+.io { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 6px 0 12px; }
+.io .in, .io .outp { border-radius: 6px; padding: 2px 10px; }
+.io .in { background: var(--green-soft); color: var(--green); }
+.io .outp { background: var(--orange-soft); color: var(--orange); }
+.step ul, .step ol { padding-left: 1.3em; margin: 8px 0; }
+.step li { margin: 3px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.formula { background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 10px; padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+.formula .cm { color: var(--muted); font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+
+.callout { border-left: 4px solid var(--orange); background: var(--orange-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14.5px; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-soft); }
+
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sev { font-size: 12px; font-weight: 700; text-align: center; border-radius: 6px; padding: 3px 0; }
+.sev.high { background: var(--red-soft); color: var(--red); }
+.sev.mid { background: var(--orange-soft); color: var(--orange); }
+.sev.low { background: var(--surface-2); color: var(--muted); }
+.issue p { margin: 0; }
+.issue .where { font-size: 12.5px; color: var(--muted); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 20px 16px 60px; }
+  nav.toc { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .stage, .arrow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .stage .step-label { text-align: left; padding-top: 0; }
+  .arrow span { grid-column: 1; }
+  .tree .row { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 0; }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .issue { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sev { width: 88px; }
+  .timeline { gap: 3px; }
+  .tl-cell { font-size: 10.5px; }
+  header.hero h1 { font-size: 24px; }
+}
+
+.er { width:100%; height:auto; display:block; }
+.er .ent { fill: var(--surface); stroke: var(--border); stroke-width:1.5; }
+.er .ent-h.c-green { fill: var(--green-soft); }
+.er .ent-h.c-purple { fill: var(--purple-soft); }
+.er .ent-h.c-orange { fill: var(--orange-soft); }
+.er .ent-t { fill: var(--text); font-weight:700; font-size:14px; }
+.er .ent-k { fill: var(--orange); font-size:11px; font-weight:700; }
+.er .ent-c { fill: var(--text); font-size:13px; font-family: "SF Mono", Menlo, monospace; }
+.er .rel { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel.dashed { stroke-dasharray: 5 4; }
+.er .rel-m { stroke: var(--muted); stroke-width:1.5; fill:none; }
+.er .rel-a { fill: var(--muted); }
+.er .rel-t { fill: var(--muted); font-size:12px; }
+.pill { display:inline-block; font-size:11px; font-weight:700; border-radius:4px; padding:0 6px; margin:1px 2px 1px 0; white-space:nowrap; }
+.pill.pk { background: var(--orange-soft); color: var(--orange); }
+.pill.fk { background: var(--accent-soft); color: var(--accent); }
+.pill.nn { background: var(--surface-2); color: var(--muted); }
+.pill.ck { background: var(--purple-soft); color: var(--purple); }
+td.good { color: var(--green); font-weight:700; }
+td.bad { color: var(--red); font-weight:700; }
+table.result td { font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; }
+tr.hl td { background: var(--orange-soft); }
+tr.drop td { color: var(--red); text-decoration: line-through; }
+tr.drop td:last-child { text-decoration: none; }
+.steps { counter-reset: st; display:grid; gap:10px; margin:12px 0; }
+.steps .card { position:relative; padding-left:58px; }
+.steps .card::before { counter-increment: st; content: counter(st); position:absolute; left:18px; top:18px; width:28px; height:28px; border-radius:50%; background: var(--accent); color: var(--surface); font-weight:700; display:flex; align-items:center; justify-content:center; }
+.steps .card h4 { margin:0 0 4px; font-size:15px; }
+.steps .card p { margin:0; font-size:14px; color: var(--muted); }
+.null { color: var(--muted); font-style: italic; }
+pre.sql { border-left: 4px solid var(--accent); }
+.tcard { margin-bottom: 18px; }
+.tcard h3 { margin-top:0; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.tcard h3 .role { font-size:12.5px; font-weight:400; color:var(--muted); }
+.tcard .new { font-size:11px; font-weight:700; background: var(--accent); color: var(--surface); border-radius:4px; padding:0 6px; }
+.grid2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+.grid2 .card h4 { margin:0 0 6px; font-size:15px; }
+.grid2 .card p { margin:0; font-size:14px; color:var(--muted); }
+.verdict { display:inline-block; font-size:12px; font-weight:700; border-radius:6px; padding:1px 8px; }
+.verdict.ok { background: var(--green-soft); color: var(--green); }
+.verdict.ng { background: var(--red-soft); color: var(--red); }
+.verdict.mid { background: var(--orange-soft); color: var(--orange); }
+.formula-big { text-align:center; font-size:17px; font-weight:700; padding:16px; border-radius:10px; background: var(--accent-soft); border:1px solid var(--accent); margin:14px 0; line-height:1.9; }
+.formula-big small { display:block; font-size:12.5px; font-weight:400; color: var(--muted); }
+.kpis-db { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis-db .v { font-size:18px; font-weight:700; }
+.kpis-db .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis-db { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.status { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+.status .card .v { font-weight:700; font-size:15px; }
+.status .card .k { color:var(--muted); font-size:13px; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--accent); }
+@media (max-width:900px) { .grid2, .status { grid-template-columns: minmax(0,1fr); } }
+
+.er .ent-h.c-blue { fill: var(--accent-soft); }
+a { color: var(--accent); }
+.doclink { display:flex; gap:12px; align-items:center; background: var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin: 0 0 28px; font-size:14px; }
+.doclink b { white-space:nowrap; }
+td.num { text-align:right; font-family: "SF Mono", Menlo, monospace; }
+.muted { color: var(--muted); font-size: 12.5px; }
+.diff td:first-child { font-weight:700; white-space:nowrap; }
+.impact { display:inline-block; font-size:11.5px; font-weight:700; border-radius:5px; padding:0 7px; white-space:nowrap; }
+.impact.s { background: var(--surface-2); color: var(--muted); }
+.impact.m { background: var(--orange-soft); color: var(--orange); }
+.impact.l { background: var(--red-soft); color: var(--red); }
+.quote { border:1px dashed var(--border); border-radius:10px; padding:12px 16px; margin:10px 0; background: var(--surface); font-size:14.5px; }
+.quote .t { font-size:12px; font-weight:700; color: var(--accent); margin-bottom:4px; }
+.figure { background:#fff; border-radius:10px; padding:8px; border:1px solid var(--border); }
+.figure img { width:100%; height:auto; display:block; }
+.kpis5 { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+.kpis5 .v { font-size:22px; font-weight:700; line-height:1.25; }
+.kpis5 .k { color:var(--muted); font-size:13px; }
+@media (max-width:900px) { .kpis5 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+.pipe { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:14px; margin:14px 0; }
+.pipe .card { position:relative; border-top:4px solid var(--border); }
+.pipe .card.done { border-top-color: var(--green); }
+.pipe .card.next { border-top-color: var(--accent); }
+.pipe .card.later { border-top-color: var(--purple); }
+.pipe .card h4 { margin:6px 0 6px; font-size:16px; }
+.pipe .card p { margin:0; font-size:14px; color: var(--muted); }
+.pipe .card:not(:last-child)::after { content:"→"; position:absolute; right:-13px; top:42%; color: var(--muted); font-weight:700; }
+.st { display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 10px; }
+.st.done { background: var(--green-soft); color: var(--green); }
+.st.next { background: var(--accent-soft); color: var(--accent); }
+.st.later { background: var(--purple-soft); color: var(--purple); }
+.st.idea { background: var(--orange-soft); color: var(--orange); }
+@media (max-width:900px) { .pipe { grid-template-columns: 1fr; } .pipe .card:not(:last-child)::after { content:"↓"; right:auto; left:50%; top:auto; bottom:-17px; } }
+
+.slide { display:grid; grid-template-columns: 64px 1fr; gap:0 16px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin:12px 0; box-shadow: var(--shadow); }
+.slide .no { grid-row: 1 / span 3; font-size:30px; font-weight:800; color: var(--accent); line-height:1; padding-top:2px; }
+.slide .no small { display:block; font-size:11px; font-weight:600; color: var(--muted); margin-top:6px; }
+.slide h4 { margin:0 0 2px; font-size:13px; color: var(--muted); font-weight:600; }
+.slide .claim { font-size:17px; font-weight:700; margin:0 0 10px; line-height:1.45; }
+.slide dl { display:grid; grid-template-columns: 96px 1fr; gap:6px 12px; margin:0; font-size:14.5px; }
+.slide dt { color: var(--muted); font-weight:600; }
+.slide dd { margin:0; }
+.part { display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 10px; margin-left:8px; vertical-align:middle; }
+.part.q { background: var(--accent-soft); color: var(--accent); } .part.p { background: var(--purple-soft); color: var(--purple); }
+.part.d { background: var(--green-soft); color: var(--green); } .part.r { background: var(--orange-soft); color: var(--orange); } .part.n { background: var(--surface-2); color: var(--muted); }
+.arc { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; margin:14px 0; }
+.arc .card { position:relative; }
+.arc .card h4 { margin:4px 0 6px; font-size:15px; }
+.arc .card p { margin:0; font-size:13.5px; color: var(--muted); }
+.arc .card:not(:last-child)::after { content:"→"; position:absolute; right:-12px; top:42%; color: var(--muted); font-weight:700; }
+.big { font-size:17px; font-weight:700; line-height:1.7; border-left:4px solid var(--accent); padding:10px 16px; background: var(--accent-soft); border-radius:0 8px 8px 0; margin:14px 0; }
+@media (max-width:900px) { .arc { grid-template-columns:1fr; } .arc .card:not(:last-child)::after { content:"↓"; right:auto; left:50%; top:auto; bottom:-16px; } .slide { grid-template-columns: 44px 1fr; } .slide dl { grid-template-columns: 1fr; } }
+</style></head><body>
+<div class="layout">
+<nav class="toc"><div class="label">目次</div><a href="#summary">1. 要点</a><a href="#message">2. 軸になる主張</a><a href="#arc">3. 話の流れ</a><a href="#slides">4. スライドごとの内容</a><a href="#paper">5. 元論文の説明のコツ</a><a href="#diff">6. 最初の案から変えた点</a><a href="#figs">7. 使う図と数字</a><a href="#time">8. 時間配分</a><a href="#qa">9. 想定される質問</a><a href="#care">10. 気をつけること</a><a href="#todo">11. 発表までにやること</a></nav>
+<main>
+<header class="hero"><div class="eyebrow">LLM-BLM 中間発表</div><h1>発表の流れ：何を、どの順で話すか</h1><p>中間発表のスライド12枚について、軸になる主張、話の流れ、スライドごとの内容、元論文の説明のコツ、想定される質問をまとめます。</p></header>
+
+<div class="doclink"><b>関連資料</b><span>結果の詳細は <a href="LLM-BLM_段階1の結果.html">LLM-BLM_段階1の結果.html</a>、グラフは <code>LLM-BLM_データ確認.ipynb</code>、評価の観点は <a href="LLM-BLM_評価ポイント.html">LLM-BLM_評価ポイント.html</a>、今後の計画は <a href="LLM-BLM_今後の計画.html">LLM-BLM_今後の計画.html</a> にあります。</span></div>
+
+<section id="summary"><h2><span class="num">1</span>要点</h2>
+<div class="callout info">「やった順」に並べると、何を言いたい発表なのかが見えなくなります。<b>言いたいことを1つ決めて、「問い → 再現 → 発見 → 理由 → 次の手」の順に並べます。</b></div>
+<div class="kpis5">
+<div class="card"><div class="v">12 枚</div><div class="k">導入2、元論文3、作ったもの2、結果と考察4、今後1</div></div>
+<div class="card"><div class="v">約 15 分</div><div class="k">10分なら 5・7・10 枚目を短くする（8章）</div></div>
+<div class="card"><div class="v">主張は 1 つ</div><div class="k">正しく計算すると、比率は1〜2銘柄に集中する</div></div>
+<div class="card"><div class="v">図は 4 つ</div><div class="k">ノートの 5・6・7・8 章から。新しく描くのは2枚</div></div>
+</div>
+<p class="muted" style="margin-top:12px">発表時間と聞き手が分からないので、15分・先生と同級生が聞く想定で書いています。違う場合は、8章の時間配分で調整してください。</p>
+</section>
+
+<section id="message"><h2><span class="num">2</span>軸になる主張</h2>
+<div class="big">元論文を正しく計算し直すと、比率は1〜2銘柄に集中した。<br>元の結果が良く見えたのは、計算が途中で止まっていたためだった。<br>LLM の回答のばらつきは、予想の信頼度としては使えない。</div>
+<p>12枚のスライドは、すべてこの3文を伝えるためにあります。迷ったら、「このスライドは3文のどれを支えているか」で、入れるか外すかを決めます。</p>
+<div class="table-wrap"><table>
+<tr><th>主張</th><th>支えるスライド</th><th>根拠になる数字</th></tr>
+<tr><td>正しく計算すると、1〜2銘柄に集中する</td><td>9</td><td>実質的な銘柄数は平均 1.7（対象は約490銘柄）。最大の比率は平均 78%</td></tr>
+<tr><td>元の結果は、計算が途中で止まっていたため</td><td>5、10</td><td>元の計算は実質 6.7〜8.3 銘柄、正しく解くと 3.6〜4.5 銘柄</td></tr>
+<tr><td>回答のばらつきは、信頼度として使えない</td><td>3、8、11</td><td>順位相関は平均 +0.05。ばらつきは、実際の予測誤差の目安の 1/10〜1/20</td></tr>
+</table></div>
+</section>
+
+<section id="arc"><h2><span class="num">3</span>話の流れ</h2>
+<div class="arc">
+<div class="card"><span class="part q" style="margin:0">導入</span><h4>問い</h4><p>LLM の予想で、市場平均より良い比率を作れるか（1〜2枚目）</p></div>
+<div class="card"><span class="part p" style="margin:0">元論文</span><h4>1つの答え</h4><p>論文の方法と結果。最後に、気になった点を出す（3〜5枚目）</p></div>
+<div class="card"><span class="part d" style="margin:0">作ったもの</span><h4>確かめる道具</h4><p>作り直した仕組みと、「漏らさない」という方針（6〜7枚目）</p></div>
+<div class="card"><span class="part r" style="margin:0">結果と考察</span><h4>発見と理由</h4><p>予想は弱い → 集中する → 元はそれが隠れていた → なぜか（8〜11枚目）</p></div>
+<div class="card"><span class="part n" style="margin:0">今後</span><h4>次の手</h4><p>予想の信じ方を直し、入力を増やす（12枚目）</p></div>
+</div>
+<p>結果の4枚は、1本の鎖になっています。</p>
+<div class="callout">予想はほとんど当たらない（8）→ それなのに、強く信じる設定になっている（11で種明かし）→ だから1〜2銘柄に集中する（9）→ 元の計算では、それが隠れていた（10）</div>
+</section>
+
+<section id="slides"><h2><span class="num">4</span>スライドごとの内容</h2>
+<p>見出しは、そのままスライドの題名に使える「主張の文」にしてあります。左の時間は目安です。</p>
+<div class="slide"><div class="no">1<small>30秒</small></div><div><h4>タイトル<span class="part q">導入</span></h4><p class="claim">LLM の予想で S&amp;P500 の比率を調整する ―― 正しく計算すると何が起きるか</p><dl><dt>載せるもの</dt><dd>題名、名前、日付。副題に結論の入口を入れる</dd><dt>話すこと</dt><dd>「元論文を再現する過程で、結果の見え方が変わる点を見つけました」と、最初に行き先を言う</dd></dl></div></div><div class="slide"><div class="no">2<small>1分</small></div><div><h4>問い<span class="part q">導入</span></h4><p class="claim">LLM の予想を使えば、市場平均（S&amp;P500）より良い比率を作れるのか？</p><dl><dt>載せるもの</dt><dd>問いを1文。下に、なぜ今これを調べるか（LLM を投資判断に使う研究が増えている、など）を2〜3行</dd><dt>話すこと</dt><dd>背景はこの1枚だけ。「この問いに1つの答えを出した論文があります」と次につなぐ</dd></dl></div></div><div class="slide"><div class="no">3<small>1分30秒</small></div><div><h4>元論文①：何をしたか<span class="part p">元論文</span></h4><p class="claim">各銘柄について LLM に30回聞き、平均を「予想」、ばらつきを「自信の度合い」に使う</p><dl><dt>載せるもの</dt><dd>流れの図1枚：1か月分の株価 → LLM に30回聞く → 平均と分散 → Black-Litterman → 比率</dd><dt>話すこと</dt><dd><b>「ばらつきが小さい = 自信がある」とみなす</b>点を強調する。後半の考察は、ここを問い直す話になる</dd></dl></div></div><div class="slide"><div class="no">4<small>1分30秒</small></div><div><h4>元論文②：Black-Litterman とは<span class="part p">元論文</span></h4><p class="claim">「市場の見方」と「自分の予想」を、自信の度合いに応じて混ぜる方法</p><dl><dt>載せるもの</dt><dd>左に市場の見方（時価総額の比率）、右に自分の予想、中央で混ぜる図。式は出さない</dd><dt>話すこと</dt><dd>「自信が強いほど、予想どおりに比率を動かす。予想がなければ、市場の比率のまま」の2点だけを伝える</dd></dl></div></div><div class="slide"><div class="no">5<small>1分</small></div><div><h4>元論文③：結果と、気になった点<span class="part p">元論文</span></h4><p class="claim">論文は「市場を上回った」と報告している。ただし、計算に気になる点が3つある</p><dl><dt>載せるもの</dt><dd>上に論文の結果の図。下に疑問を3つ：① 約500銘柄に対して、20日分のデータで銘柄どうしの連動を計算 ② 構成銘柄が全期間で固定 ③ 小数とパーセントの混在</dd><dt>話すこと</dt><dd>疑問を出して終える。「そこで、計算を1つずつ確かめながら作り直しました」と次につなぐ</dd></dl></div></div><div class="slide"><div class="no">6<small>1分30秒</small></div><div><h4>作り直した全体像<span class="part d">作ったもの</span></h4><p class="claim">データ・LLM・比率の計算を分け、すべてを DB でつないだ</p><dl><dt>載せるもの</dt><dd>アーキテクチャ図：①データ（株価、構成銘柄、財務諸表）→ DB ← ②LLM（予想を保存）、DB ← ③比率の計算。数字を添える：568銘柄、3年半、予想は約44万個</dd><dt>話すこと</dt><dd>3つの部品が互いを直接呼ばず、DB を通してつながること。LLM を呼び直さずに、計算だけ何度でもやり直せる</dd></dl></div></div><div class="slide"><div class="no">7<small>1分30秒</small></div><div><h4>設計の方針<span class="part d">作ったもの</span></h4><p class="claim">「判断した時点で知り得なかった情報」を、計算に入れない</p><dl><dt>載せるもの</dt><dd>4つの経路の表：モデルの知識／渡す資料／構成銘柄／財務データの提出日。それぞれのふさぎ方</dd><dt>話すこと</dt><dd>過去のデータで試すと、未来の情報が混ざって成績が良く見える。5枚目の疑問②への答えでもある。gpt-4o-mini の知識は2023年10月まで、評価は2024年4月から</dd></dl></div></div><div class="slide"><div class="no">8<small>1分30秒</small></div><div><h4>結果①：LLM の予想<span class="part r">結果</span></h4><p class="claim">予想は楽観的で、どの銘柄が上がるかは、ほとんど当たっていない</p><dl><dt>載せるもの</dt><dd>ノート8章のグラフ2つ：予想と実際の平均（+0.18% と +0.02%）、月ごとの順位相関（平均 +0.05、プラスは30か月中14か月）</dd><dt>話すこと</dt><dd>入力が1か月分の値動きだけなので、不自然ではない。「この予想を、どれだけ信じる設定になっているか」が次の話</dd></dl></div></div><div class="slide"><div class="no">9<small>2分</small></div><div><h4>結果②：正しく計算すると<span class="part r">結果</span></h4><p class="claim">比率は1〜2銘柄に集中し、「S&amp;P500 の調整」にならない</p><dl><dt>載せるもの</dt><dd>ノート5章のグラフ（実質的な銘柄数の推移）。横に2025年6月末の例：元の S&amp;P500 は NVDA 7.0%、MSFT 6.7%…、計算結果は SMCI 35%、MU 26%、ORCL 20%、COIN 19%</dd><dt>話すこと</dt><dd>前振りに平均分散の話：「過去の平均で最適化すると、PLTR にほぼ全額。最適化は入力の誤差に全力で賭ける」。LLM の予想でも同じことが起きた</dd></dl></div></div><div class="slide"><div class="no">10<small>1分30秒</small></div><div><h4>結果③：元の設定が良く見えた理由<span class="part r">結果</span></h4><p class="claim">元の計算は、最適な答えに届く前に止まっていた</p><dl><dt>載せるもの</dt><dd>表：元の計算の結果は実質 6.7〜8.3 銘柄、同じ式を正しく解くと 3.6〜4.5 銘柄。ノート7章の比較表から1〜2か月分</dd><dt>話すこと</dt><dd>分散されて見えたのは、計算が途中で止まったため。20日分のデータでは、連動の情報が実質18〜20次元しかないことも添える</dd></dl></div></div><div class="slide"><div class="no">11<small>1分30秒</small></div><div><h4>考察<span class="part r">考察</span></h4><p class="claim">回答のばらつきは「答えのぶれ」であり、「予想が当たる度合い」ではない</p><dl><dt>載せるもの</dt><dd>左右の対比：LLM の回答のばらつき ⟷ 実際の予測誤差の目安。前者は後者の 1/10〜1/20</dd><dt>話すこと</dt><dd>3枚目で強調した前提が成り立たない。ほとんど当たらない予想を、強く信じる設定になっている。これが集中の原因</dd></dl></div></div><div class="slide"><div class="no">12<small>1分</small></div><div><h4>今後の課題<span class="part n">今後</span></h4><p class="claim">予想の信じ方を直し、入力を増やして、もう一度比べる</p><dl><dt>載せるもの</dt><dd>3段階の図：① 指数からのずれに上限を付ける／当たり具合に合わせて予想を縮める ② セクター単位の予想、入力の追加（財務、金利、VIX、レポート） ③ 結果へのフィードバック。最終発表までの予定</dd><dt>話すこと</dt><dd>最終的に示したいのは「漏れをふさいだ設計で、LLM が何を足せるか」。成績の勝ち負けを結論にしないことも一言</dd></dl></div></div>
+</section>
+
+<section id="paper"><h2><span class="num">5</span>元論文の説明のコツ</h2>
+<p>難しく感じるのは、論文を全部説明しようとするからです。<b>後半の発見に必要な部品だけ</b>を説明すれば足ります。</p>
+<div class="table-wrap"><table>
+<tr><th>説明すること</th><th>なぜ必要か</th><th>言い方の例</th></tr>
+<tr><td>30個の回答の平均を「予想」に、ばらつきを「自信の度合い」に使う</td><td>11枚目の考察は、この前提を問い直す話だから</td><td>「同じ質問を30回して、答えがそろっていれば自信がある、ばらばらなら自信がない、とみなします」</td></tr>
+<tr><td>自信が強いほど、予想どおりに比率を動かす</td><td>9枚目の集中の理由になるから</td><td>「市場の比率が出発点で、自信のある予想があるところだけ、そこから動かします」</td></tr>
+<tr><td>予想がなければ、市場の比率のまま</td><td>「S&amp;P500 の調整」という言い方の根拠になるから</td><td>「何も予想しなければ、S&amp;P500 と同じ比率になります」</td></tr>
+</table></div>
+<h3>説明しなくてよいこと</h3>
+<ul>
+<li><b>式（τ、Ω、P、行列の計算）：</b>本編では出しません。質問用の補足スライドに1枚だけ用意します。</li>
+<li><b>論文が比べた複数の LLM：</b>今回は扱っていないので、「論文は4つのモデルを比べている」と一言で済ませます。</li>
+<li><b>最適化の細かい条件：</b>「空売りなし、合計100%」だけで十分です。</li>
+</ul>
+<h3>たとえを使うなら</h3>
+<div class="quote"><div class="t">Black-Litterman のたとえ</div>「天気予報にたとえると、市場の比率は『平年の天気』です。自分の予想は『明日は雨だと思う』です。自信があれば傘を持ち、自信がなければ平年どおりに行動します。Black-Litterman は、この混ぜ方を決める方法です。」</div>
+<div class="quote"><div class="t">考察のたとえ（11枚目で回収する）</div>「元論文は、30回聞いて答えがそろっていれば自信がある、とみなしました。しかし、いつも同じ答えを言う人が、いつも当たるとは限りません。」</div>
+</section>
+
+<section id="diff"><h2><span class="num">6</span>最初の案から変えた点</h2>
+<div class="table-wrap"><table>
+<tr><th>最初の案</th><th>この案</th><th>理由</th></tr>
+<tr><td>タイトル → 元論文 → 背景</td><td>タイトル → <b>問い（背景）</b> → 元論文</td><td>先に問いがあると、論文の説明が「その問いへの1つの答え」として聞ける</td></tr>
+<tr><td>元論文の解説（3枚）</td><td>3枚のまま。ただし3枚目を「結果と、気になった点」にする</td><td>疑問で終えると、「だから作り直した」と自然につながる</td></tr>
+<tr><td>全体アーキテクチャ図 → 工夫したポイント</td><td>全体像 → <b>設計の方針（漏らさない）</b></td><td>工夫の一覧は印象に残らない。1つの方針として見せ、5枚目の疑問への答えにする</td></tr>
+<tr><td>結果（1つ）</td><td><b>結果①②③</b>（予想は弱い／集中する／元はそれが隠れていた）</td><td>3つが1本の鎖になる。発見が一番伝わる順</td></tr>
+<tr><td>考察</td><td>考察（1枚、主張を1つ）</td><td>3枚目で強調した前提を、ここで問い直す</td></tr>
+<tr><td>今後の課題</td><td>今後（3段階と予定）</td><td>考察で見つけた原因への対処から始める</td></tr>
+</table></div>
+</section>
+
+<section id="figs"><h2><span class="num">7</span>使う図と数字</h2>
+<div class="table-wrap"><table>
+<tr><th>スライド</th><th>図・表</th><th>出どころ</th><th>状態</th></tr>
+<tr><td>3</td><td>元論文の流れの図</td><td>新しく描く。<code>LLM-BLM_元コード/figure/model.png</code> が元論文の図</td><td><span class="st idea">作る</span></td></tr>
+<tr><td>4</td><td>Black-Litterman の概念図</td><td>新しく描く</td><td><span class="st idea">作る</span></td></tr>
+<tr><td>5</td><td>元論文の結果の図</td><td><code>LLM-BLM_元コード/figure/cumulative_returns2.png</code></td><td><span class="st done">ある</span></td></tr>
+<tr><td>6</td><td>アーキテクチャ図</td><td>新しく描く。構成は <code>LLM-BLM/README.md</code> と <a href="LLM-BLM_DB設計.html">DB設計</a> の関係図</td><td><span class="st idea">作る</span></td></tr>
+<tr><td>7</td><td>漏れる経路の表</td><td><a href="LLM-BLM_今後の計画.html">今後の計画</a> 7章（上の4行）</td><td><span class="st done">ある</span></td></tr>
+<tr><td>8</td><td>予想と実際の平均、順位相関</td><td>ノート 8章のグラフ2つ</td><td><span class="st done">ある</span></td></tr>
+<tr><td>9</td><td>実質的な銘柄数の推移、ある判断日の比率</td><td>ノート 5章、6章</td><td><span class="st done">ある</span></td></tr>
+<tr><td>10</td><td>元の計算と、正しい解の比較</td><td><a href="LLM-BLM_段階1の結果.html">段階1の結果</a> 6章、ノート 7章</td><td><span class="st done">ある</span></td></tr>
+<tr><td>11</td><td>ばらつきと予測誤差の対比</td><td><a href="LLM-BLM_段階1の結果.html">段階1の結果</a> 5章の表</td><td><span class="st done">数字はある</span></td></tr>
+<tr><td>12</td><td>3段階の図</td><td><a href="LLM-BLM_今後の計画.html">今後の計画</a> 3章</td><td><span class="st done">ある</span></td></tr>
+</table></div>
+<h3>発表で使う数字</h3>
+<div class="table-wrap"><table>
+<tr><th>数字</th><th>値</th><th>使うスライド</th></tr>
+<tr><td>対象の期間</td><td>予想は2024年4月〜2026年9月の30か月</td><td>6</td></tr>
+<tr><td>データの規模</td><td>568銘柄、約3年半の日次株価。LLM の回答は約44万個</td><td>6</td></tr>
+<tr><td>作った指数と、実際の S&amp;P500 の一致</td><td>日次リターンの相関 0.9997</td><td>6 か 7（データが正しいことの根拠）</td></tr>
+<tr><td>LLM の予想と実際の平均</td><td>1日 +0.18% と +0.02%</td><td>8</td></tr>
+<tr><td>予想と実際の順位相関</td><td>平均 +0.05。プラスの月は 14 / 30</td><td>8</td></tr>
+<tr><td>実質的な銘柄数</td><td>直した設定 1.7、元の設定 9.9、元の S&amp;P500 51.5</td><td>9、10</td></tr>
+<tr><td>元の計算と正しい解</td><td>6.7〜8.3 銘柄 と 3.6〜4.5 銘柄</td><td>10</td></tr>
+<tr><td>ばらつき ÷ 予測誤差の目安</td><td>1/10〜1/20</td><td>11</td></tr>
+</table></div>
+</section>
+
+<section id="time"><h2><span class="num">8</span>時間配分</h2>
+<div class="table-wrap"><table>
+<tr><th>部分</th><th>スライド</th><th>15分の場合</th><th>10分の場合</th><th>10分のときの縮め方</th></tr>
+<tr><td>導入</td><td>1〜2</td><td>1分30秒</td><td>1分</td><td>―</td></tr>
+<tr><td>元論文</td><td>3〜5</td><td>4分</td><td>2分30秒</td><td>5枚目の疑問は口頭で1つだけ言い、3・4枚目を中心にする</td></tr>
+<tr><td>作ったもの</td><td>6〜7</td><td>3分</td><td>1分30秒</td><td>7枚目を6枚目に吸収し、「未来の情報を入れない設計」と一言添える</td></tr>
+<tr><td>結果と考察</td><td>8〜11</td><td>6分30秒</td><td>4分</td><td>10枚目を9枚目の下半分にまとめる</td></tr>
+<tr><td>今後</td><td>12</td><td>1分</td><td>1分</td><td>―</td></tr>
+</table></div>
+<p><b>時間をかけるのは、結果と考察です。</b>元論文の説明が長くなりやすいので、4分を超えないように練習で計ります。</p>
+</section>
+
+<section id="qa"><h2><span class="num">9</span>想定される質問</h2>
+<div class="table-wrap"><table>
+<tr><th>質問</th><th>答えの方向</th></tr>
+<tr><td>結局、LLM は役に立たないということか</td><td>「1か月分の値動きだけを渡した場合は、ほとんど当たらない」が今回の結果。入力を増やした場合は、これから確かめる。役に立つかどうかを、漏れのない形で測れる仕組みができた、という段階</td></tr>
+<tr><td>元論文は間違っているのか</td><td>「間違い」とは言わない。同じ式を正しく解くと結果が変わる、と事実を述べる。モデルも期間も違うので、論文の数字そのものを否定はできない</td></tr>
+<tr><td>なぜ gpt-4o-mini なのか</td><td>知識が2023年10月までで、評価期間（2024年4月〜）を知らないから。料金も30か月分で数ドル</td></tr>
+<tr><td>集中するなら、上限を付ければよいのでは</td><td>その通りで、次にやる。指数からのずれに上限を付ける。ただし上限の値は、成績を見ずに決める</td></tr>
+<tr><td>平均分散の成績が一番良いが</td><td>PLTR などの1銘柄にほぼ全額を入れた結果。-47% の月もある。戦略として評価できる数字ではない</td></tr>
+<tr><td>30か月で何が言えるのか</td><td>成績の優劣は言えない。今回言っているのは、比率の形（集中）と予想の性質で、これは期間の長さに左右されにくい</td></tr>
+<tr><td>除外した銘柄の影響は</td><td>568銘柄のうち28銘柄を除外。破綻・買収された銘柄を含むので、生存者バイアスがある。全戦略に同じ除外を適用しているので、戦略同士の比較は公平</td></tr>
+<tr><td>Black-Litterman の式は</td><td>補足スライドを見せる。修正後の期待リターン ＝ 均衡 ＋（予想 − 均衡）× 信じる度合い</td></tr>
+</table></div>
+</section>
+
+<section id="care"><h2><span class="num">10</span>気をつけること</h2>
+<ul>
+<li><b>平均分散の +149% を、成績として見せません。</b>9枚目の前振りで、「最適化は、入力の誤差に全力で賭ける」ことの例として使います。つかみとしても効きます。</li>
+<li><b>「勝てなかった」ではなく、「元の結果の理由が分かった」と言います。</b>中間発表では、うまくいかなかった原因を数字で特定できていることが強みです。</li>
+<li><b>各スライドの見出しを、主張の文にします。</b>「結果」ではなく、「正しく計算すると、比率は1〜2銘柄に集中する」と書きます。見出しだけ追っても話が通ります。</li>
+<li><b>1枚に、言いたいことは1つ。</b>表を丸ごと貼らず、見せたい行だけを残します。</li>
+<li><b>元論文への言い方に気をつけます。</b>「バグ」「誤り」ではなく、「計算が途中で止まる」「単位が合っていない」と、確認した事実で述べます。</li>
+<li><b>累積リターンのグラフ（ノート2章）は、本編では使わない方が安全です。</b>線の上下に目が行き、「どれが勝ったか」の話になります。使うなら補足にします。</li>
+</ul>
+</section>
+
+<section id="todo"><h2><span class="num">11</span>発表までにやること</h2>
+<div class="steps">
+<div class="card"><h4>図を3枚描く</h4><p>元論文の流れ（3枚目）、Black-Litterman の概念図（4枚目）、アーキテクチャ図（6枚目）。</p></div>
+<div class="card"><h4>ノートのグラフを書き出す</h4><p>5・6・7・8章。スライド用に、文字を大きくして保存する。</p></div>
+<div class="card"><h4>補足スライドを作る</h4><p>式、成績表、累積リターン、データの確認（相関 0.9997）、除外した銘柄。</p></div>
+<div class="card"><h4>時間を計って通す</h4><p>元論文の3枚が4分を超えないか、結果の4枚に十分な時間が残るかを確認する。</p></div>
+</div>
+<p class="muted">余裕があれば、案 A（指数からのずれに上限を付ける）を先に計算しておくと、12枚目で「上限を付けるとこうなる」と1枚足せます。必須ではありません。</p>
+</section>
+
+<footer>2026-10-10 作成。数字は段階1の最初の結果（portfolio_id 1〜5）のものです。</footer>
+</main></div></body></html>

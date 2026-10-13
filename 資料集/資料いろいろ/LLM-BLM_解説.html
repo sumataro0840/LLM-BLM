@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM-BLM コード解説</title>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --border: #dedad0;
+  --accent: #2f6fb3;
+  --accent-soft: #e4eef9;
+  --green: #2e7d4f;
+  --green-soft: #e3f3e9;
+  --orange: #b4621a;
+  --orange-soft: #fbeedf;
+  --purple: #6a4bb0;
+  --purple-soft: #eee8fa;
+  --red: #b23a3a;
+  --red-soft: #fbe6e6;
+  --code-bg: #f3f1ea;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1d2024;
+    --surface-2: #24282d;
+    --text: #e6e8eb;
+    --muted: #9aa1ab;
+    --border: #33383f;
+    --accent: #7cb2ec;
+    --accent-soft: #1f3248;
+    --green: #74c79a;
+    --green-soft: #1d3428;
+    --orange: #e9a462;
+    --orange-soft: #3a2a1a;
+    --purple: #b39cf0;
+    --purple-soft: #2c2440;
+    --red: #ec8a8a;
+    --red-soft: #3c2222;
+    --code-bg: #24282d;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --surface-2: #24282d; --text: #e6e8eb;
+  --muted: #9aa1ab; --border: #33383f; --accent: #7cb2ec; --accent-soft: #1f3248;
+  --green: #74c79a; --green-soft: #1d3428; --orange: #e9a462; --orange-soft: #3a2a1a;
+  --purple: #b39cf0; --purple-soft: #2c2440; --red: #ec8a8a; --red-soft: #3c2222;
+  --code-bg: #24282d; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15.5px;
+}
+code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+pre {
+  background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.55; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+nav.toc .label { font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .08em; margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--border); }
+nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+header.hero { margin-bottom: 36px; }
+header.hero .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; }
+header.hero h1 { font-size: 30px; line-height: 1.35; margin: 6px 0 12px; }
+header.hero p { color: var(--muted); margin: 0; max-width: 760px; }
+
+section { margin-bottom: 56px; scroll-margin-top: 20px; }
+h2 { font-size: 22px; margin: 0 0 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: var(--surface); border-radius: 6px; font-size: 14px; padding: 1px 9px; }
+h3 { font-size: 17px; margin: 26px 0 10px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.idea { position: relative; padding-top: 44px; }
+.idea .badge { position: absolute; top: 16px; left: 22px; font-weight: 700; font-size: 13px; color: var(--accent); }
+.idea h4 { margin: 0 0 6px; font-size: 16px; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+
+/* directory tree */
+.tree { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.9; }
+.tree .row { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 12px; border-bottom: 1px dashed var(--border); }
+.tree .row:last-child { border-bottom: none; }
+.tree .name { white-space: pre; overflow-x: auto; }
+.tree .desc { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; font-family: "Hiragino Sans", sans-serif; }
+.t-script { background: var(--accent-soft); color: var(--accent); }
+.t-data { background: var(--green-soft); color: var(--green); }
+.t-out { background: var(--orange-soft); color: var(--orange); }
+.t-nb { background: var(--purple-soft); color: var(--purple); }
+
+/* flow */
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.stage { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.stage .step-label { text-align: right; padding-top: 16px; font-weight: 700; color: var(--muted); font-size: 13px; }
+.lane { display: flex; gap: 12px; flex-wrap: wrap; }
+.node { flex: 1 1 200px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid; background: var(--surface); }
+.node .title { font-weight: 700; font-size: 14.5px; }
+.node .sub { font-size: 12.5px; color: var(--muted); }
+.node.script { border-color: var(--accent); background: var(--accent-soft); }
+.node.data { border-color: var(--green); background: var(--green-soft); }
+.node.out { border-color: var(--orange); background: var(--orange-soft); }
+.node.nb { border-color: var(--purple); background: var(--purple-soft); }
+.node.ext { border-style: dashed; border-color: var(--muted); }
+.arrow { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; }
+.arrow span { grid-column: 2; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.6; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid; }
+
+/* timeline */
+.timeline { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0 6px; }
+.tl-head { font-size: 12.5px; text-align: center; color: var(--muted); font-weight: 700; }
+.tl-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.tl-train { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.tl-test { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange); }
+.tl-empty { background: transparent; }
+
+/* step details */
+.step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.step .circle { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.step .card h3 { margin-top: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.step .card h3 code { font-size: 14px; }
+.io { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 6px 0 12px; }
+.io .in, .io .outp { border-radius: 6px; padding: 2px 10px; }
+.io .in { background: var(--green-soft); color: var(--green); }
+.io .outp { background: var(--orange-soft); color: var(--orange); }
+.step ul, .step ol { padding-left: 1.3em; margin: 8px 0; }
+.step li { margin: 3px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.formula { background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 10px; padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+.formula .cm { color: var(--muted); font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+
+.callout { border-left: 4px solid var(--orange); background: var(--orange-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14.5px; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-soft); }
+
+.issues { display: grid; gap: 12px; }
+.issue { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: start; }
+.sev { font-size: 12px; font-weight: 700; text-align: center; border-radius: 6px; padding: 3px 0; }
+.sev.high { background: var(--red-soft); color: var(--red); }
+.sev.mid { background: var(--orange-soft); color: var(--orange); }
+.sev.low { background: var(--surface-2); color: var(--muted); }
+.issue p { margin: 0; }
+.issue .where { font-size: 12.5px; color: var(--muted); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 20px 16px 60px; }
+  nav.toc { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .stage, .arrow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .stage .step-label { text-align: left; padding-top: 0; }
+  .arrow span { grid-column: 1; }
+  .tree .row { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 0; }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .issue { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sev { width: 88px; }
+  .timeline { gap: 3px; }
+  .tl-cell { font-size: 10.5px; }
+  header.hero h1 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="toc">
+    <div class="label">目次</div>
+    <a href="#overview">1. 概要</a>
+    <a href="#structure">2. ディレクトリ構成</a>
+    <a href="#flow">3. シナリオフロー</a>
+    <a href="#timeline">4. 時間の扱い</a>
+    <a href="#steps">5. 各ステップ詳細</a>
+    <a href="#bl">6. Black-Litterman の中身</a>
+    <a href="#run">7. 実行手順</a>
+    <a href="#issues">8. 注意点</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">LLM-BLM リポジトリ解説</div>
+      <h1>LLM の「見通し」を Black-Litterman モデルに入れてポートフォリオを組む</h1>
+      <p>論文 <em>Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model</em>（arXiv 2504.14345、ICLR 2025 Workshop）の公式実装について、コードの構成と処理の流れをまとめたページです。</p>
+    </header>
+
+    <!-- 1 -->
+    <section id="overview">
+      <h2><span class="num">1</span>概要</h2>
+      <div class="grid-3">
+        <div class="card idea">
+          <div class="badge">STEP A</div>
+          <h4>LLMに予想させる</h4>
+          <p>各銘柄の「先月の日次リターン」と「会社情報」を渡し、来月の平均日次リターンを1つの数値で答えさせます。</p>
+        </div>
+        <div class="card idea">
+          <div class="badge">STEP B</div>
+          <h4>30回聞いて自信を測る</h4>
+          <p>同じ質問を30回繰り返します。回答の<b>平均</b>を見通し（ビュー）、<b>分散</b>を自信のなさとして扱います。</p>
+        </div>
+        <div class="card idea">
+          <div class="badge">STEP C</div>
+          <h4>BLMで混ぜて最適化</h4>
+          <p>市場均衡リターンとLLMのビューをBlack-Littermanモデルで合成し、平均分散最適化で配分を決めます。</p>
+        </div>
+      </div>
+      <div class="chips">
+        <span class="chip">対象：S&amp;P500 約500銘柄（共通497銘柄）</span>
+        <span class="chip">LLM：Llama-3.1-8B / Gemma-7B / Qwen2-7B</span>
+        <span class="chip">期間：2024年6月〜12月</span>
+        <span class="chip">比較対象：S&amp;P500指数・等ウェイト・MVO</span>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section id="structure">
+      <h2><span class="num">2</span>ディレクトリ構成</h2>
+      <div class="legend">
+        <span><i style="border-color:var(--accent);background:var(--accent-soft)"></i>スクリプト</span>
+        <span><i style="border-color:var(--green);background:var(--green-soft)"></i>入力データ</span>
+        <span><i style="border-color:var(--orange);background:var(--orange-soft)"></i>出力結果</span>
+        <span><i style="border-color:var(--purple);background:var(--purple-soft)"></i>ノートブック</span>
+      </div>
+      <div class="card tree">
+        <div class="row"><div class="name">LLM-BLM/</div><div class="desc"></div></div>
+        <div class="row"><div class="name">├── <span class="tag t-script">①</span>run.py</div><div class="desc">株価を取得し、LLMに銘柄ごとのリターン予想を30回ずつ聞く</div></div>
+        <div class="row"><div class="name">├── responses/</div><div class="desc">LLMの回答置き場</div></div>
+        <div class="row"><div class="name">│   ├── <span class="tag t-out">出力</span>{model}_{月初}_{月末}.json</div><div class="desc">銘柄ごとの会社情報、先月リターン、30個の予想値</div></div>
+        <div class="row"><div class="name">│   ├── <span class="tag t-script">②</span>get_common_stocks.py</div><div class="desc">すべてのJSONに共通して出てくる銘柄を抽出する</div></div>
+        <div class="row"><div class="name">│   └── <span class="tag t-data">データ</span>common_stocks.json</div><div class="desc">共通銘柄リスト（497銘柄）</div></div>
+        <div class="row"><div class="name">├── <span class="tag t-data">データ</span>market_caps.json</div><div class="desc">銘柄ごとの時価総額（497銘柄）。<b>生成スクリプトは未収録</b></div></div>
+        <div class="row"><div class="name">├── <span class="tag t-script">③</span>baselines.py</div><div class="desc">比較用ポートフォリオ（等ウェイト EW / 平均分散最適化 MVO）を作る</div></div>
+        <div class="row"><div class="name">├── responses_portfolios/</div><div class="desc">ベースラインの結果置き場</div></div>
+        <div class="row"><div class="name">│   ├── <span class="tag t-out">出力</span>*_portfolio_{月}.csv</div><div class="desc">月別の日次リターン</div></div>
+        <div class="row"><div class="name">│   ├── <span class="tag t-script">④</span>combine_portfolio.py</div><div class="desc">月別CSVを1本に連結する</div></div>
+        <div class="row"><div class="name">│   └── <span class="tag t-out">出力</span>*_portfolio.csv</div><div class="desc">全期間を連結したEW / MVOの日次リターン</div></div>
+        <div class="row"><div class="name">├── <span class="tag t-script">⑤</span>evaluate_multiple.py</div><div class="desc"><b>本体。</b>Black-LittermanでLLMポートフォリオのウェイトを計算する</div></div>
+        <div class="row"><div class="name">├── <span class="tag t-script">⑥</span>calculate_llm_returns.py</div><div class="desc">⑤のウェイトを翌月の実リターンに掛けて日次リターンを出す</div></div>
+        <div class="row"><div class="name">├── results/</div><div class="desc">LLMポートフォリオの結果置き場</div></div>
+        <div class="row"><div class="name">│   ├── <span class="tag t-out">出力</span>{model}_..._weights_tau_0.025.csv</div><div class="desc">月 × 銘柄のウェイト（7行）</div></div>
+        <div class="row"><div class="name">│   └── <span class="tag t-out">出力</span>{model}_..._returns_tau_0.025.csv</div><div class="desc">日次ポートフォリオリターン（約118営業日）</div></div>
+        <div class="row"><div class="name">├── <span class="tag t-nb">⑦</span>portfolio_weight_plot.ipynb</div><div class="desc">評価指標の計算とグラフ作成（コメントは韓国語）</div></div>
+        <div class="row"><div class="name">├── yfinance/</div><div class="desc">株価データ</div></div>
+        <div class="row"><div class="name">│   ├── <span class="tag t-data">データ</span>data_{月}.csv</div><div class="desc">終値</div></div>
+        <div class="row"><div class="name">│   ├── <span class="tag t-data">データ</span>returns_{月}.csv</div><div class="desc">日次リターン（終値の変化率）</div></div>
+        <div class="row"><div class="name">│   └── <span class="tag t-data">データ</span>sp500_*.csv</div><div class="desc">S&amp;P500指数（ノートブックで作成）</div></div>
+        <div class="row"><div class="name">└── figure/</div><div class="desc">論文用の図（モデル図、累積リターン、箱ひげ図、ウェイト比較）</div></div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="flow">
+      <h2><span class="num">3</span>シナリオフロー（全体像）</h2>
+      <div class="legend">
+        <span><i style="border-color:var(--accent);background:var(--accent-soft)"></i>スクリプト</span>
+        <span><i style="border-color:var(--green);background:var(--green-soft)"></i>データ</span>
+        <span><i style="border-color:var(--orange);background:var(--orange-soft)"></i>結果</span>
+        <span><i style="border-color:var(--purple);background:var(--purple-soft)"></i>評価</span>
+        <span><i style="border-color:var(--muted);border-style:dashed"></i>外部・手作業</span>
+      </div>
+      <div class="card flow">
+        <div class="stage">
+          <div class="step-label">外部ソース</div>
+          <div class="lane">
+            <div class="node ext"><div class="title">Wikipedia</div><div class="sub">S&amp;P500 銘柄一覧・GICSセクター</div></div>
+            <div class="node ext"><div class="title">yfinance</div><div class="sub">各銘柄の終値</div></div>
+            <div class="node ext"><div class="title">LLM API（OpenAI互換）</div><div class="sub">Llama / Gemma / Qwen</div></div>
+          </div>
+        </div>
+        <div class="arrow"><span>↓</span></div>
+        <div class="stage">
+          <div class="step-label">① 収集</div>
+          <div class="lane">
+            <div class="node script"><div class="title">run.py --model_name X</div><div class="sub">月 × 銘柄 × 30回 LLMに質問</div></div>
+          </div>
+        </div>
+        <div class="arrow"><span>↓</span></div>
+        <div class="stage">
+          <div class="step-label">生成データ</div>
+          <div class="lane">
+            <div class="node data"><div class="title">yfinance/returns_*.csv</div><div class="sub">月別の日次リターン</div></div>
+            <div class="node data"><div class="title">responses/X_*.json</div><div class="sub">LLMの予想30個 × 銘柄</div></div>
+            <div class="node data ext"><div class="title">market_caps.json</div><div class="sub">時価総額（手作業で用意）</div></div>
+          </div>
+        </div>
+        <div class="arrow"><span>↓</span></div>
+        <div class="stage">
+          <div class="step-label">② 銘柄の統一</div>
+          <div class="lane">
+            <div class="node script"><div class="title">get_common_stocks.py</div><div class="sub">→ common_stocks.json</div></div>
+          </div>
+        </div>
+        <div class="arrow"><span>↓</span></div>
+        <div class="stage">
+          <div class="step-label">③〜⑥ 構築</div>
+          <div class="lane">
+            <div class="node script"><div class="title">③ baselines.py → ④ combine</div><div class="sub">EW・MVO の日次リターン</div></div>
+            <div class="node script"><div class="title">⑤ evaluate_multiple.py → ⑥ calculate_llm_returns.py</div><div class="sub">BLMでウェイト → 翌月の日次リターン</div></div>
+          </div>
+        </div>
+        <div class="arrow"><span>↓</span></div>
+        <div class="stage">
+          <div class="step-label">結果</div>
+          <div class="lane">
+            <div class="node out"><div class="title">responses_portfolios/*.csv</div><div class="sub">EW / MVO</div></div>
+            <div class="node out"><div class="title">results/*_returns_tau_0.025.csv</div><div class="sub">BLM-Llama / Gemma / Qwen</div></div>
+          </div>
+        </div>
+        <div class="arrow"><span>↓</span></div>
+        <div class="stage">
+          <div class="step-label">⑦ 評価</div>
+          <div class="lane">
+            <div class="node nb"><div class="title">portfolio_weight_plot.ipynb</div><div class="sub">S&amp;P500指数を加えた6戦略を比較：累積リターン・Sharpe・MDD・グラフ</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section id="timeline">
+      <h2><span class="num">4</span>時間の扱い：t月で判断し、t+1月で評価する</h2>
+      <p>すべてのスクリプトがこのルールに従います。先読み（未来のデータを使うこと）を避けるためです。</p>
+      <div class="card">
+        <div class="timeline">
+          <div class="tl-head">6月</div><div class="tl-head">7月</div><div class="tl-head">8月</div><div class="tl-head">9月</div><div class="tl-head">10月</div><div class="tl-head">11月</div><div class="tl-head">12月</div>
+          <div class="tl-cell tl-train">判断</div><div class="tl-cell tl-test">評価</div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div>
+          <div class="tl-cell tl-empty"></div><div class="tl-cell tl-train">判断</div><div class="tl-cell tl-test">評価</div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div>
+          <div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-train">判断</div><div class="tl-cell tl-test">評価</div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div>
+          <div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-train">判断</div><div class="tl-cell tl-test">評価</div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div>
+          <div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-train">判断</div><div class="tl-cell tl-test">評価</div><div class="tl-cell tl-empty"></div>
+          <div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-empty"></div><div class="tl-cell tl-train">判断</div><div class="tl-cell tl-test">評価</div>
+        </div>
+        <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+          <b style="color:var(--accent)">判断</b>：その月のリターンとLLMの予想からウェイトを決める。
+          <b style="color:var(--orange)">評価</b>：翌月の実際の日次リターンにウェイトを掛ける。
+          評価期間は 2024年7月〜12月（約118営業日）です。12月分のウェイトも計算されますが、2025年1月のデータがないため評価には使われません。
+        </p>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section id="steps">
+      <h2><span class="num">5</span>各ステップの詳細</h2>
+
+      <div class="step">
+        <div class="circle">1</div>
+        <div class="card">
+          <h3>データ取得とLLMビューの収集 <code>run.py</code></h3>
+          <div class="io"><span class="in">入力：Wikipedia / yfinance / LLM API</span><span class="outp">出力：yfinance/*.csv, responses/*.json</span></div>
+          <ol>
+            <li>Wikipediaから S&amp;P500 の銘柄一覧（Symbol・社名・GICSセクター・サブ業種）を取得します。</li>
+            <li>2024-06〜12 の各月について、yfinanceで終値を取得し <code>data_*.csv</code> に、<code>pct_change()</code> で求めた日次リターンを <code>returns_*.csv</code> に保存します。</li>
+            <li>銘柄ごとに、会社情報と先月の日次リターン列をプロンプトに入れてLLMに質問します。</li>
+            <li><b>1銘柄につき30回</b>呼び出します。<code>guided_json</code> で出力を <code>{"expected_return": float}</code> の形に固定しています。</li>
+            <li>Gemmaはシステムプロンプトに対応していないので、ユーザープロンプトの先頭に連結します。パースに失敗した回はスキップします。</li>
+          </ol>
+          <h3>保存されるJSONの例（1銘柄分）</h3>
+<pre><code>"A": {
+  "ticker": "A",
+  "Security": "Agilent Technologies",
+  "GICS Sector": "Health Care",
+  "GICS Sub-Industry": "Life Sciences Tools &amp; Services",
+  "pct_change":      [ -0.0109, 0.0028, ... ],   // 先月の日次リターン（約20日分）
+  "expected_return": [ -0.0005, 0.0088, ... ]    // LLMの予想 30個
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="circle">2</div>
+        <div class="card">
+          <h3>共通銘柄の抽出 <code>responses/get_common_stocks.py</code></h3>
+          <div class="io"><span class="in">入力：responses/*.json</span><span class="outp">出力：common_stocks.json</span></div>
+          <p>すべてのJSONファイルに共通して出てくる銘柄を抽出します。月による銘柄の入れ替えやデータ欠損の影響を除くための処理です。</p>
+          <div class="callout"><code>os.listdir('.')</code> を使っているため、<b><code>responses/</code> に移動してから実行</b>する必要があります。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="circle">3</div>
+        <div class="card">
+          <h3>比較用ポートフォリオ <code>baselines.py</code></h3>
+          <div class="io"><span class="in">入力：returns_*.csv, market_caps.json, common_stocks.json</span><span class="outp">出力：responses_portfolios/*_{月}.csv</span></div>
+          <p>前処理として、時価総額データと共通銘柄で銘柄を絞り込み、NaNのある列を除きます。<code>J</code> と <code>TSCO</code> は明示的に除外しています。</p>
+          <div class="table-wrap">
+          <table>
+            <tr><th>戦略</th><th>ウェイトの決め方</th></tr>
+            <tr><td><b>EW</b>（等ウェイト）</td><td>全銘柄に 1/N ずつ配分</td></tr>
+            <tr><td><b>MVO</b>（平均分散最適化）</td><td><code>wᵀΣw − 0.1·μᵀw</code> を最小化します。μ と Σ はt月の標本平均と標本共分散です。制約は「ウェイトの合計が1」と「0 ≤ w ≤ 1（空売りなし）」で、SLSQPで解きます。</td></tr>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="circle">4</div>
+        <div class="card">
+          <h3>月別結果の連結 <code>responses_portfolios/combine_portfolio.py</code></h3>
+          <div class="io"><span class="in">入力：*_portfolio_{月}.csv</span><span class="outp">出力：equal_weighted_portfolio.csv / optimized_portfolio.csv</span></div>
+          <p>月別のCSVをファイル名順に縦に連結し、全期間の日次リターンを1本のファイルにします。</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="circle">5</div>
+        <div class="card">
+          <h3>Black-Litterman でウェイトを計算 <code>evaluate_multiple.py</code></h3>
+          <div class="io"><span class="in">入力：returns_*.csv, responses/*.json, market_caps.json</span><span class="outp">出力：results/*_weights_tau_0.025.csv</span></div>
+          <p>このリポジトリの中心です。<code>process_period()</code> が月ごとに次の処理をします（計算の中身は<a href="#bl">6章</a>）。</p>
+          <ol>
+            <li>時価総額の比率で重み付けした市場リターンとベータから、<b>市場均衡リターン Π</b> を作る</li>
+            <li>LLMの30個の予想から <b>Q（平均）</b> と <b>Ω（分散）</b> を作る</li>
+            <li>Black-Litterman の式で<b>事後リターン μ<sub>BL</sub></b> を求める</li>
+            <li>MVOと同じ目的関数と制約で最適化し、ウェイトを求める</li>
+          </ol>
+          <div class="callout">現状のコードでは <b>Gemma だけが有効</b>で、Llama と Qwen の行はコメントアウトされています。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="circle">6</div>
+        <div class="card">
+          <h3>LLMポートフォリオのリターン計算 <code>calculate_llm_returns.py</code></h3>
+          <div class="io"><span class="in">入力：results/*_weights_*.csv, returns_*.csv</span><span class="outp">出力：results/*_returns_tau_0.025.csv</span></div>
+          <p>6〜11月のウェイトを、それぞれ<b>翌月</b>の日次リターンに掛けてポートフォリオの日次リターンを求めます。3モデル分を連結して保存します。</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="circle">7</div>
+        <div class="card">
+          <h3>評価と可視化 <code>portfolio_weight_plot.ipynb</code></h3>
+          <div class="io"><span class="in">入力：上記の全リターンCSV</span><span class="outp">出力：統計表、累積リターンの図</span></div>
+          <ul>
+            <li>S&amp;P500指数（^GSPC）の日次リターンを作ります。</li>
+            <li>次の6戦略を比較します：<b>S&amp;P500 / EW / MVO / BLM-Llama / BLM-Gemma / BLM-Qwen</b></li>
+            <li>指標：年率換算の累積リターン、年率平均、年率標準偏差、Sharpe比（無リスク金利2%）、MDD</li>
+            <li>累積リターンのグラフ、LLMビューの平均・分散の分析、時価総額順のウェイト比較を作ります（<code>figure/</code> の図に対応）。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section id="bl">
+      <h2><span class="num">6</span>Black-Litterman の中身</h2>
+      <div class="card">
+        <h3 style="margin-top:0">(a) 事前分布：市場均衡リターン Π</h3>
+<div class="formula">R_m = Σ (時価総額ウェイト_i × R_i)          <span class="cm">… 時価総額で重み付けした市場リターン</span><br>
+β_i = Cov(R_i, R_m) / Var(R_m)            <span class="cm">… 各銘柄のベータ</span><br>
+Π   = β × mean(R_m − 0.02)                <span class="cm">… 市場均衡リターン</span></div>
+
+        <h3>(b) LLMのビュー</h3>
+        <div class="table-wrap">
+        <table>
+          <tr><th style="width:90px">記号</th><th>中身</th><th>意味</th></tr>
+          <tr><td><b>Q</b></td><td>30個の予想の<b>平均</b>（銘柄ごと）</td><td>LLMが考える来月のリターン</td></tr>
+          <tr><td><b>P</b></td><td>単位行列</td><td>「銘柄iのリターンはQ<sub>i</sub>」という絶対ビューを全銘柄に置く</td></tr>
+          <tr><td><b>Ω</b></td><td>対角成分が30個の予想の<b>分散</b></td><td>回答がばらつく銘柄ほど、ビューを弱く扱う</td></tr>
+          <tr><td><b>Σ</b></td><td>t月の標本共分散行列</td><td>銘柄間のリスク構造</td></tr>
+          <tr><td><b>τ</b></td><td>0.025</td><td>事前分布の不確実性の大きさ（ハイパーパラメータ）</td></tr>
+        </table>
+        </div>
+
+        <h3>(c) 事後リターン</h3>
+<div class="formula">M     = [ (τΣ)⁻¹ + Pᵀ Ω⁻¹ P ]⁻¹<br>
+μ_BL  = M · [ (τΣ)⁻¹ Π + Pᵀ Ω⁻¹ Q ]<br>
+<span class="cm">逆行列には、特異行列でも計算できる np.linalg.pinv を使用</span></div>
+
+        <h3>(d) 最適化</h3>
+<div class="formula">minimize   wᵀΣw − 0.1 · wᵀμ_BL<br>
+subject to Σw = 1,  0 ≤ w ≤ 1</div>
+
+        <div class="callout info"><b>直感的には：</b>LLMの回答が毎回ほぼ同じ（分散が小さい）銘柄では、そのビューが事後リターンに強く反映されます。回答がばらつく銘柄では市場均衡 Π に近い値になります。</div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section id="run">
+      <h2><span class="num">7</span>実行手順</h2>
+<pre><code># ① LLMの予想を集める（モデルごとに実行）
+python run.py --model_name llama
+python run.py --model_name gemma
+python run.py --model_name qwen
+
+# ② 共通銘柄を抽出（responses/ に移動して実行）
+cd responses &amp;&amp; python get_common_stocks.py &amp;&amp; cd ..
+
+# ③④ ベースライン
+python baselines.py
+python responses_portfolios/combine_portfolio.py
+
+# ⑤⑥ LLM + Black-Litterman（必ずこの順）
+python evaluate_multiple.py
+python calculate_llm_returns.py
+
+# ⑦ portfolio_weight_plot.ipynb を実行</code></pre>
+      <div class="callout">READMEでは <code>calculate_llm_returns.py</code> が先に書かれていますが、<b>実際には ⑤ → ⑥ の順でないと動きません</b>。⑥は⑤が出力するウェイトCSVを読み込むためです。</div>
+    </section>
+
+    <!-- 8 -->
+    <section id="issues">
+      <h2><span class="num">8</span>コードを読んで気づいた注意点</h2>
+      <div class="issues">
+        <div class="card issue">
+          <span class="sev high">動かない</span>
+          <div><p><code>{YOUR_API_ENDPOINT}</code> が未定義の変数のため、<code>run.py</code> はそのままでは実行できません。READMEにある <code>gpt</code> の分岐も実装されていません。</p><div class="where">run.py</div></div>
+        </div>
+        <div class="card issue">
+          <span class="sev high">動かない</span>
+          <div><p>12月の回でエラーになります。評価用の <code>returns_2025-01-*.csv</code> がないためです。保存済みの結果も6〜11月分だけです。</p><div class="where">baselines.py</div></div>
+        </div>
+        <div class="card issue">
+          <span class="sev mid">要確認</span>
+          <div><p>Llama と Qwen の処理がコメントアウトされていて、Gemma しか計算されません。3モデル分を作るにはコメントを外す必要があります。</p><div class="where">evaluate_multiple.py</div></div>
+        </div>
+        <div class="card issue">
+          <span class="sev mid">要確認</span>
+          <div><p>市場均衡リターンを計算するとき、<b>日次リターンから年率の 0.02 をそのまま引いています</b>。日次に直すなら 0.02/252 です。Π がほぼ一様に大きな負の値になるので、論文の記述と照らし合わせて確認したほうがよいです。</p><div class="where">evaluate_multiple.py</div></div>
+        </div>
+        <div class="card issue">
+          <span class="sev mid">要確認</span>
+          <div><p>MDD に <code>× √252</code> の年率換算をかけています。最大ドローダウンには通常この換算をしません。</p><div class="where">portfolio_weight_plot.ipynb</div></div>
+        </div>
+        <div class="card issue">
+          <span class="sev low">補足</span>
+          <div><p><code>market_caps.json</code> を作るスクリプトが含まれておらず、時価総額をいつ時点で取得したかも分かりません。</p><div class="where">market_caps.json</div></div>
+        </div>
+        <div class="card issue">
+          <span class="sev low">補足</span>
+          <div><p><code>results/</code> に τ の付かない古い <code>*_returns.csv</code> が残っています。現行のパイプラインでは使われません。</p><div class="where">results/</div></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>LLM-BLM リポジトリ（commit 1b770a9 時点）のソースコードを読んで作成しました。</footer>
+  </main>
+</div>
+</body>
+</html>
