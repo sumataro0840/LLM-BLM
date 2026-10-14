@@ -13,12 +13,23 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 OPENAI_MODEL = os.environ["OPENAI_MODEL"]
 
+# Where the question is answered: 'openai' (API) or 'local' (a Hugging Face model on this machine's GPU)
+LLM_BACKEND = os.environ["LLM_BACKEND"]
+if LLM_BACKEND not in ("openai", "local"):
+    raise ValueError(f"LLM_BACKEND must be 'openai' or 'local': {LLM_BACKEND}")
+LOCAL_MODEL = os.environ["LOCAL_MODEL"]
+# The model of the run (stored in llm_runs.model)
+MODEL = LOCAL_MODEL if LLM_BACKEND == "local" else OPENAI_MODEL
+
 # Number of answers per ticker (the variance is used as the confidence of the view)
 N_SAMPLES = int(os.environ["N_SAMPLES"])
 # Sampling temperature (must stay above 0, otherwise the answers do not vary)
 TEMPERATURE = float(os.environ["TEMPERATURE"])
 # Tickers asked at the same time
 MAX_WORKERS = int(os.environ["MAX_WORKERS"])
+if LLM_BACKEND == "local":
+    # one GPU: the tickers are answered one after another
+    MAX_WORKERS = 1
 
 # Empty = start a new run, a number = continue that run (answered tickers are skipped)
 RUN_ID = int(os.environ["RUN_ID"]) if os.environ["RUN_ID"] else None
