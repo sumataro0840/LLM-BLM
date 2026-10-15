@@ -33,6 +33,11 @@ PREVIOUS_CIKS = {
     'BG': [1144519],    # Bunge Ltd before Bunge Global SA (2023-11)
     'FERG': [1832433],  # Ferguson plc before Ferguson Enterprises Inc. (2024-08)
     'SKYD': [813828],   # Paramount Global before Paramount Skydance / Skydance Corp (2025-08)
+    'GOOGL': [1288776], # Google Inc. before Alphabet Inc. (2015-10)
+    'GOOG': [1288776],
+    # yfinance continues the prices of the earlier company under the new ticker, so its statements are needed too
+    'VTRS': [69499, 1623613],   # Mylan Inc., Mylan N.V. before Viatris (2020-11)
+    'SW': [1636023, 1732845],   # WestRock (2015-07 .. 2018-11, 2018-11 .. 2024-07) before Smurfit Westrock
 }
 # Same company as another ticker in the table: not fetched twice
 SAME_COMPANY = {'CDAY': 'DAY'}

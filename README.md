@@ -18,6 +18,7 @@
 │   ├── transform/  加工（在籍期間、株式分割の調整）
 │   ├── db/         テーブル定義と読み書き
 │   ├── build_db.py             株価・銘柄・発行済株式数・セクターETF を DB に入れる
+│   │                           （株数は yfinance。2015年秋より前は EDGAR の財務諸表の株数で埋める）
 │   ├── build_fundamentals.py   財務諸表を DB に入れる
 │   ├── build_sector_metrics.py セクターごとの指標（モメンタムなど）を計算する
 │   └── build_stock_metrics.py  銘柄ごとの指標（値動き、ファンダ）を計算する
@@ -52,8 +53,8 @@ pip install -r requirements-local.txt
 ## 使い方
 
 ```bash
-python marketdb/build_db.py             # DB を作る（取得済みのテーブルはスキップ）
-python marketdb/build_fundamentals.py   # 財務諸表を追加する
+python marketdb/build_db.py             # DB を作る（取得済みのテーブルはスキップ。財務諸表もここで取得する）
+python marketdb/build_fundamentals.py   # 財務諸表を追加する（銘柄を足したときなど）
 python marketdb/build_sector_metrics.py # セクターごとの指標を計算する
 python marketdb/build_stock_metrics.py  # 銘柄ごとの指標を計算する
 python run_llm.py                       # LLM に聞く（回答は DB に保存）

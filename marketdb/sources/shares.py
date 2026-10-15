@@ -1,19 +1,38 @@
 """
 Shares outstanding and split history from yfinance.
 """
+import time
+
 import pandas as pd
 import yfinance as yf
 
 
-def download_shares_and_splits(symbol, start, end):
-    """Raw reported shares (may hold several values per day) and the split history."""
-    ticker = yf.Ticker(symbol)
-    shares = ticker.get_shares_full(start=start, end=end)
-    splits = ticker.splits
+def download_shares(symbol, start, end, attempts=5, wait=30):
+    """Raw reported shares (may hold several values per day); yfinance has them from about late 2015.
+    yfinance refuses requests for a while after many in a row, so a failed request is tried again later."""
+    for attempt in range(attempts):
+        try:
+            shares = yf.Ticker(symbol).get_shares_full(start=start, end=end)
+            break
+        except Exception:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(wait * (attempt + 1))
     shares = pd.Series(dtype=float) if shares is None else shares
     shares.index = pd.to_datetime(shares.index).strftime('%Y-%m-%d')
+    return shares
+
+
+def download_splits(symbol):
+    """Split history (split date -> ratio); empty when yfinance does not know the ticker."""
+    try:
+        splits = yf.Ticker(symbol).splits
+    except Exception:
+        splits = None
+    if splits is None or splits.empty:
+        return pd.Series(dtype=float, index=pd.Index([], dtype=object))
     splits.index = pd.to_datetime(splits.index).strftime('%Y-%m-%d')
-    return shares, splits
+    return splits
 
 
 def class_ratios(symbols):

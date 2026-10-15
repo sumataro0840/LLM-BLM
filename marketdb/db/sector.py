@@ -27,14 +27,6 @@ def load_member_caps(conn, date):
         "WHERE w.date = ?", conn, params=(date,), index_col='symbol')
 
 
-def load_filed_quarters(conn, date):
-    """Quarters of the last two years that were filed by `date`."""
-    since = (pd.Timestamp(date) - pd.DateOffset(years=2)).strftime('%Y-%m-%d')
-    return pd.read_sql(
-        "SELECT symbol, period_end, revenue, net_income, total_equity FROM fundamentals_quarterly "
-        "WHERE filed_date <= ? AND period_end >= ?", conn, params=(date, since))
-
-
 def save_sector_metrics(conn, as_of_date, metrics):
     """metrics: rows = sectors, columns = metric names (missing values are not stored). Replaces the date."""
     computed_at = now_utc()

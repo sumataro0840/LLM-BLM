@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from marketdb import config
-from marketdb.transform.stock import YEAR_DAYS, fundamental_metrics, price_metrics
+from marketdb.transform.stock import MONTH_DAYS, YEAR_DAYS, fundamental_metrics, price_metrics
 from marketdb.db.connection import connect, init_db
 from marketdb.db.market import last_trading_days, load_prices
 from marketdb.db.sector import load_member_caps, load_month_ends, load_sector_etfs
@@ -30,9 +30,14 @@ def main():
         members = load_member_caps(conn, date)
         # one day more than a year of returns
         days = last_trading_days(conn, date, YEAR_DAYS + 1)
+        if len(days) <= MONTH_DAYS:
+            # the first month of the database: not a month of returns yet
+            print(f"{date}: skipped (only {len(days)} trading days of prices)")
+            continue
         prices = load_prices(conn, [*members.index, *etfs, '^GSPC'], days[0], date)
         metrics = price_metrics(prices[prices.columns.intersection(members.index)], prices['^GSPC'],
-                                prices[list(etfs)].rename(columns=etfs), members['gics_sector'])
+                                # XLRE (2015-10) and XLC (2018-06) did not trade before: their sectors get NaN
+                                prices.reindex(columns=list(etfs)).rename(columns=etfs), members['gics_sector'])
         metrics = metrics.join(fundamental_metrics(quarters, members['market_cap'], members['gics_sub_industry'], date,
                                                    config.FUNDAMENTALS_MAX_AGE_DAYS))
         save_stock_metrics(conn, date, metrics)

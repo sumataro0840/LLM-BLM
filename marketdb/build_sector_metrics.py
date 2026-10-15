@@ -17,8 +17,8 @@ from marketdb import config
 from marketdb.transform.sector import MOMENTUM_MONTHS, momentum, trailing_year, valuation, volatility
 from marketdb.db.connection import connect, init_db
 from marketdb.db.market import load_prices
-from marketdb.db.sector import (load_filed_quarters, load_member_caps, load_month_ends, load_sector_etfs,
-                                save_sector_metrics)
+from marketdb.db.sector import load_member_caps, load_month_ends, load_sector_etfs, save_sector_metrics
+from marketdb.db.stock import load_quarters
 
 
 def main():
@@ -27,14 +27,17 @@ def main():
     etfs = load_sector_etfs(conn)
     prices = load_prices(conn, list(etfs), config.ETF_START_DATE, config.DB_END_DATE).rename(columns=etfs)
     month_end_prices = prices.groupby(prices.index.to_period('M')).tail(1)
+    # read once: the view is rebuilt from all financial facts on every query
+    quarters = load_quarters(conn)
 
     for date in load_month_ends(conn):
         until = pd.Timestamp(date)
         metrics = pd.DataFrame({f'momentum_{m}m': momentum(month_end_prices.loc[:until], m) for m in MOMENTUM_MONTHS})
         metrics['volatility_30d'] = volatility(prices.loc[:until])
         members = load_member_caps(conn, date)
-        metrics = metrics.join(valuation(members['market_cap'], members['gics_sector'],
-                                         trailing_year(load_filed_quarters(conn, date))))
+        # quarters of the last two years that were filed by the date
+        filed = quarters[(quarters['filed_date'] <= until) & (quarters['period_end'] >= until - pd.DateOffset(years=2))]
+        metrics = metrics.join(valuation(members['market_cap'], members['gics_sector'], trailing_year(filed)))
         save_sector_metrics(conn, date, metrics)
         print(f"{date}: {metrics.notna().sum().to_dict()}")
 

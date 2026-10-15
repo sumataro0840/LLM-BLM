@@ -46,6 +46,8 @@ def load_sp500_table_at(date):
     pages = json.loads(_get(f'{WIKIPEDIA_API_URL}?{query}'))['query']['pages']
     revid = next(iter(pages.values()))['revisions'][0]['revid']
     table = pd.read_html(io.BytesIO(_get(WIKIPEDIA_REVISION_URL.format(revid=revid))))[0]
+    # older revisions (before about 2021) name two of the columns differently
+    table = table.rename(columns={'Ticker symbol': 'Symbol', 'GICS Sub Industry': 'GICS Sub-Industry'})
     return table[['Symbol', 'Security', 'GICS Sector', 'GICS Sub-Industry']]
 
 

@@ -8,6 +8,8 @@ Steps (each one is skipped when its table already has rows, so stored data is ne
   2. membership periods and tickers                  -> index_membership, tickers
   3. daily prices of every member and ^GSPC          -> prices  (no data -> tickers.excluded_reason)
   4. shares outstanding on the current split basis   -> shares_outstanding
+     yfinance has them from about late 2015; earlier dates (and tickers yfinance does not know) come from
+     the financial statements on SEC EDGAR, which are fetched first (marketdb/build_fundamentals.py)
   5-6. members without prices or shares for most of their membership are excluded
      (tickers.excluded_reason) and their prices / shares are deleted
   7. sector of stocks that left the index (old Wikipedia revisions) -> tickers.gics_*
@@ -26,18 +28,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pandas as pd
 
 from marketdb import config
+from marketdb.build_fundamentals import SAME_COMPANY, step_ciks, step_facts
 from marketdb.sources.prices import download_prices
-from marketdb.sources.shares import class_ratios, download_shares_and_splits
+from marketdb.sources.shares import class_ratios, download_shares, download_splits
 from marketdb.sources.universe import load_index_changes, load_sp500_table, load_sp500_table_at, to_yf_symbol
 from marketdb.transform.membership import build_membership
-from marketdb.transform.shares import clip_to_period, to_current_split_basis
+from marketdb.transform.shares import clip_to_period, extend_back, to_current_split_basis
 from marketdb.db.connection import connect, init_db
+from marketdb.db.fundamentals import ensure_ticker_columns, load_reported_shares
 from marketdb.db.index import save_index_changes, save_membership
 from marketdb.db.market import fill_gics, mark_excluded, missing_tickers, save_prices, save_shares, save_tickers
 
 # Tickers that changed after the change was recorded on Wikipedia (old -> latest)
 TICKER_ALIASES = {
     'SATS': 'ECHO',  # EchoStar: added on 2026-03-23 as SATS, now listed as ECHO
+    'FLT': 'CPAY',   # Corpay: added on 2018-06-20 as FleetCor (FLT), renamed in 2024
+    'RE': 'EG',      # Everest Group: added on 2017-06-19 as Everest Re (RE), renamed in 2023
 }
 INDEX_TICKERS = [
     ('^GSPC', 'S&P 500 Index'),
@@ -55,6 +61,8 @@ SECTOR_ETFS = [
 # Companies with several share classes in the index: yfinance reports the company-wide share count
 # for each class, so it is split by the current class ratio (otherwise the company is counted twice)
 MULTI_CLASS = [('GOOGL', 'GOOG'), ('FOXA', 'FOX'), ('NWSA', 'NWS')]
+# EDGAR gives about one value per quarter: the outlier check compares a value with those of the next quarters
+EDGAR_WINDOW_DAYS = 100
 
 START, END = config.DB_START_DATE, config.DB_END_DATE
 
@@ -107,32 +115,56 @@ def step_prices(conn):
 
 
 def step_shares(conn):
+    # the financial statements first: their share counts fill the dates yfinance does not have
+    ensure_ticker_columns(conn)
+    step_ciks(conn)
+    step_facts(conn)
+
     symbols = [r[0] for r in conn.execute(
         "SELECT symbol FROM tickers WHERE excluded_reason IS NULL AND symbol IN (SELECT symbol FROM index_membership) ORDER BY symbol")]
     # one year before START so that a value exists on the first day
     since = (pd.Timestamp(START) - pd.DateOffset(years=1)).strftime('%Y-%m-%d')
     until = (pd.Timestamp(END) + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
+    reported = load_reported_shares(conn, since)
+    ratio = {s: r for classes in MULTI_CLASS for s, r in class_ratios(classes).items()}
 
     def fetch(symbol):
+        splits = download_splits(symbol)
         try:
-            shares = to_current_split_basis(*download_shares_and_splits(symbol, since, until))
-            return symbol, clip_to_period(shares, START, END), None
-        except Exception as e:
-            return symbol, None, str(e)[:80]
+            yahoo = to_current_split_basis(download_shares(symbol, since, until), splits)
+        except Exception:
+            yahoo = pd.Series(dtype='int64')
+        edgar = to_current_split_basis(reported.get(SAME_COMPANY.get(symbol, symbol), pd.Series(dtype=float)),
+                                       splits, window_days=EDGAR_WINDOW_DAYS)
+        if symbol in ratio:
+            yahoo, edgar = [(s * ratio[symbol]).round().astype('int64') for s in (yahoo, edgar)]
+        return symbol, yahoo, edgar
 
-    ratio = {s: r for classes in MULTI_CLASS for s, r in class_ratios(classes).items()}
-    failed = []
+    sources = {'yfinance': [], 'yfinance + EDGAR before it': [], 'EDGAR only': [], 'none': []}
+    results = []
     with ThreadPoolExecutor(max_workers=4) as pool:
-        for i, (symbol, shares, error) in enumerate(pool.map(fetch, symbols), 1):
-            if shares is None or shares.empty:
-                failed.append((symbol, error or 'no data'))
+        for i, (symbol, yahoo, edgar) in enumerate(pool.map(fetch, symbols), 1):
+            shares = clip_to_period(extend_back(yahoo, edgar), START, END)
+            if shares.empty:
+                source = 'none'
+            elif yahoo.empty:
+                source = 'EDGAR only'
             else:
-                save_shares(conn, symbol, (shares * ratio[symbol]).round().astype('int64') if symbol in ratio else shares)
+                source = 'yfinance' if shares.index[0] >= yahoo.index[0] else 'yfinance + EDGAR before it'
+            sources[source].append(symbol)
+            results.append((symbol, shares))
             if i % 100 == 0:
                 print(f"    {i}/{len(symbols)}")
+    # saved only when every ticker is done: a run that stops halfway leaves the table empty, so the next run
+    # does this step again (otherwise the next steps would exclude the tickers that were not reached)
+    for symbol, shares in results:
+        if not shares.empty:
+            save_shares(conn, symbol, shares)
     print(f"    share classes split by: { {k: round(v, 3) for k, v in ratio.items()} }")
-    print(f"[4] shares_outstanding: {len(symbols) - len(failed)} tickers, "
-          f"{conn.execute('SELECT COUNT(*) FROM shares_outstanding').fetchone()[0]} rows | no shares data: {failed}")
+    print(f"[4] shares_outstanding: {conn.execute('SELECT COUNT(*) FROM shares_outstanding').fetchone()[0]} rows | "
+          + ' | '.join(f"{k}: {len(v)}" for k, v in sources.items()))
+    print(f"    EDGAR only: {sources['EDGAR only']}")
+    print(f"    none: {sources['none']}")
 
 
 def _exclude(conn, symbols, reason):
@@ -146,19 +178,27 @@ def _exclude(conn, symbols, reason):
 
 
 def exclude_without_member_prices(conn, min_coverage=0.5):
-    """Exclude members whose prices cover less than min_coverage of their membership days.
-    A delisted ticker can be reused by another security, so prices may exist only outside the membership."""
+    """Drop membership periods whose prices cover less than min_coverage of their days, and exclude members
+    left without any period. A delisted ticker can be reused by another security (FOXA: 21st Century Fox
+    until 2019, then Fox Corp), so prices may exist only for the later company's period."""
     rows = conn.execute("""
-        SELECT m.symbol,
+        SELECT m.membership_id, m.symbol,
                (SELECT COUNT(*) FROM prices p WHERE p.symbol = m.symbol
                   AND (m.start_date IS NULL OR p.date >= m.start_date) AND (m.end_date IS NULL OR p.date < m.end_date)) AS n,
                (SELECT COUNT(*) FROM prices g WHERE g.symbol = '^GSPC'
                   AND (m.start_date IS NULL OR g.date >= m.start_date) AND (m.end_date IS NULL OR g.date < m.end_date)) AS days
         FROM index_membership m JOIN tickers t USING (symbol)
         WHERE t.excluded_reason IS NULL""").fetchall()
-    symbols = [s for s, n, days in rows if days and n < days * min_coverage]
+    uncovered = [(i, s) for i, s, n, days in rows if days and n < days * min_coverage]
+    covered = {s for i, s, n, days in rows if (i, s) not in uncovered}
+    symbols = sorted({s for _, s in uncovered} - covered)
+    dropped = sorted({s for _, s in uncovered} & covered)
+    conn.executemany("DELETE FROM index_membership WHERE membership_id = ?",
+                     [(i,) for i, s in uncovered if s in covered])
+    conn.commit()
     _exclude(conn, symbols, 'no price data during membership (ticker reused by another security)')
     print(f"[5] excluded (no prices during membership): {symbols}")
+    print(f"    periods without prices dropped (ticker reused, the later company is kept): {dropped}")
 
 
 def exclude_without_shares(conn, max_missing=0.5):
@@ -174,7 +214,7 @@ def exclude_without_shares(conn, max_missing=0.5):
         WHERE t.excluded_reason IS NULL
         GROUP BY m.symbol""").fetchall()
     symbols = [s for s, missing, days in rows if missing > days * max_missing]
-    _exclude(conn, symbols, 'no shares history on yfinance (ticker changed)')
+    _exclude(conn, symbols, 'no shares history on yfinance or EDGAR')
     print(f"[6] excluded (no shares history): {symbols}")
 
 
