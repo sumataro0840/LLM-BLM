@@ -1,0 +1,56 @@
+% ============================================================
+\chapter{論文の一覧}\label{app:papers}
+
+この資料で扱った主な論文を、ビュー $Q$ と不確かさ $\Omega$ の作り方の観点で一覧にする。「確認」の列は、この資料で読んだ範囲（本文、要旨、ほかの文献での紹介）である。
+
+\begin{longtable}{p{2.8cm}p{3.7cm}p{4.0cm}p{0.9cm}p{0.8cm}}
+\toprule
+論文 & $Q$ の作り方 & $\Omega$・$\tau$ の作り方 & 章 & 確認 \\
+\midrule
+\endfirsthead
+\toprule
+論文 & $Q$ の作り方 & $\Omega$・$\tau$ の作り方 & 章 & 確認 \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\multicolumn{5}{l}{\textbf{BL の基礎と $\Omega$・$\tau$}}\\
+Black and Litterman（1992） & 投資家のビュー & $\tau$ は 0 に近い値 & \ref{ch:overview} & 紹介 \\
+He and Litterman（1999） & 例のビュー & $\Omega=\tau\diag(P\Sigma P\T)$、$\tau=0.05$ & \ref{ch:hlmeucci} & 本文\textsuperscript{*} \\
+Satchell and Scowcroft（2000） & 相対ビューは等しい重み & $\tau=1$ がよく使われる。$\tau$ を確率変数にするモデル & \ref{ch:tau} & 紹介 \\
+Idzorek（2007） & 8 資産の 3 つのビュー、時価総額の重み & 確信度 0〜100\% から逆算 & \ref{ch:idzorek} & 本文 \\
+Walters（2014） & --- & Idzorek の方法の閉じた式、$\tau$ の整理 & \ref{ch:tau} & 紹介 \\
+Meucci（2010） & 言葉のビューを $\eta\sqrt{P\Sigma P\T}$ で数字に & $\Omega=\frac1cP\Sigma P\T$、市場版の BL（$\tau$ なし） & \ref{ch:hlmeucci} & 本文 \\
+Kolm and Ritter（2017） & ファクターのプレミアムへのビュー（APT） & ベイズ回帰との対応、仮定の整理 & \ref{ch:derive}、\ref{ch:shape} & 紹介 \\
+Spears, Zohren and Roberts（2023） & 機械学習の予想（BL--APT） & 予想モデルの不確かさ、複数のビューの融合 & \ref{ch:text} & 本文 \\
+O'Toole（2017）、Allaj（2013） & --- & $\tau$ をアクティブリスクで決める、回帰で推定する & \ref{ch:tau} & 紹介 \\
+\multicolumn{5}{l}{\textbf{政治・テキスト・LLM}}\\
+Caldara and Iacoviello（2022） & 地政学リスク指数 & --- & \ref{ch:politics} & 本文 \\
+Baker, Bloom and Davis（2016） & 経済政策不確実性指数 & --- & \ref{ch:politics} & 本文 \\
+Hassan ほか（2019） & 企業ごとの政治リスク & --- & \ref{ch:politics} & 本文\textsuperscript{†} \\
+Han and Li（2023） & --- & GEPU に基づくボラティリティ（GARCH-MIDAS）をビューの不確かさに & \ref{ch:politics} & 要旨 \\
+Colasanto ほか（2022） & FT の記事のセンチメント → 価格のシミュレーション & --- & \ref{ch:text} & 要旨 \\
+Sun, Fu and Liu（2026） & 掲示板のセンチメント → LSTM & 単位行列と記載 & \ref{ch:text} & 本文 \\
+Mantshimuli and Muteba Mwamba（2025） & 3 つの LLM のセンチメントを LSTM でまとめる & --- & \ref{ch:text} & 要旨 \\
+Lee ほか（2025） & LLM の 100 回の回答の平均 & 回答の分散、$\tau$ は検証期間で選ぶ & \ref{ch:text}、\ref{ch:project} & 本文 \\
+Florencio（2026） & 強気・中立・弱気の確率 & 分布のエントロピー & \ref{ch:text} & 本文 \\
+\multicolumn{5}{l}{\textbf{マクロ・財務・ESG・モメンタム}}\\
+Beach and Orlov（2007） & EGARCH-M の予想 & （調査メモによれば条件付き分散） & \ref{ch:macro} & 要旨 \\
+Duqi, Franci and Torluccio（2014） & EGARCH-M のボラティリティの予想から & --- & \ref{ch:macro} & 要旨 \\
+Sun, Wu and De（2023） & --- & VARMA-GARCH の時変の共分散（TVC-BL） & \ref{ch:macro} & 要旨 \\
+Alpern and Rachev（2025） & ESG を縮小推定の目標に & リスクは NIG の CVaR & \ref{ch:esg} & 本文 \\
+Fabozzi, Focardi and Kolm（2006） & 取引戦略をビューに & --- & \ref{ch:momentum} & 書誌 \\
+Bessler, Opfer and Wolff（2017） & 標本に基づくビュー & --- & \ref{ch:momentum} & 要旨 \\
+Barroso and Santa-Clara（2015） & --- & （モメンタムのボラティリティで規模を調整） & \ref{ch:momentum} & 紹介\textsuperscript{‡} \\
+Daniel and Moskowitz（2016） & --- & （急落の局面） & \ref{ch:momentum} & 紹介 \\
+\multicolumn{5}{l}{\textbf{正規分布を越える拡張と最適化}}\\
+Meucci（2006） & ビューを分布で（COP） & 確信度で分布を混ぜる & \ref{ch:cop} & 紹介 \\
+Meucci（2008） & 平均以外のビュー（エントロピー・プーリング） & 確信度で確率を混ぜる & \ref{ch:ep} & 紹介 \\
+Teplova ほか（2023） & ARMA-GARCH-コピュラの期待リターン & $\tau$ を変えて検証、リスクは CVaR & \ref{ch:cop} & 要旨 \\
+Giacometti ほか（2007） & 安定分布の市場 & --- & \ref{ch:cop} & 紹介 \\
+Rockafellar and Uryasev（2000） & --- & CVaR の最小化 & \ref{ch:cvar} & 紹介 \\
+Roll（1992）、Jorion（2003） & --- & TE の最適化と、その注意 & \ref{ch:te} & 紹介 \\
+Grinold（1994）、Grinold and Kahn（1999） & $\alpha=\IC\cdot\sigma\cdot z$ & 基本法則 & \ref{ch:accuracy} & 紹介 \\
+\end{longtable}
+
+\noindent{\small *『BLM解説』で扱った。\quad †NBER の版。\quad ‡数値は Kenneth French のデータで再計算した。}

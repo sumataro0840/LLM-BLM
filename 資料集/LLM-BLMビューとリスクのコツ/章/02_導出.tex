@@ -1,0 +1,188 @@
+% ============================================================
+\chapter{公式の 3 通りの導き方}\label{ch:derive}
+
+BL の公式は、少なくとも 3 通りに導ける。混合推定（一般化最小二乗）、ベイズの定理、罰則つきの最小二乗である。どれも同じ答えになるが、見え方が違う。$\Omega$ や $\tau$ の意味を考えるとき、どの見方で考えているかを意識すると混乱が減る。
+
+\section{設定：2 段の確率モデル}
+
+真の期待リターン $\mu$（$N$ 次元）は分からないので、確率変数として扱う。BL は 2 つの情報源を持つ。
+
+\begin{description}[leftmargin=2em,style=nextline]
+\item[均衡（事前の情報）] $\mu$ は均衡リターン $\Pi$ のまわりに散らばる。
+\begin{equation}
+\mu=\Pi+\eta,\qquad \eta\sim\mathcal N(0,\tau\Sigma)
+\label{eq:prior}
+\end{equation}
+\item[ビュー（追加の情報）] $\mu$ のいくつかの組み合わせについて、値の見込みがある。
+\begin{equation}
+P\mu=Q+\varepsilon,\qquad \varepsilon\sim\mathcal N(0,\Omega)
+\label{eq:view}
+\end{equation}
+\end{description}
+
+$P$ は $K\times N$ の行列で、$k$ 行目 $p_k$ が $k$ 番目のビューの組み合わせを表す。$\eta$ と $\varepsilon$ は独立とする。$\Omega$ は多くの場合対角で、ビューどうしの誤差は独立と仮定される。この仮定は、ビューが多いときに大きな問題になる（\chapref{ch:accuracy}、\chapref{ch:project}）。
+
+ここで扱っているのは $\mu$、つまり「期待リターン」である。実現するリターン $r$ そのものではない。$r$ は $\mu$ のまわりに $\Sigma$ で散らばる。
+\begin{equation}
+r=\mu+u,\qquad u\sim\mathcal N(0,\Sigma)
+\label{eq:return}
+\end{equation}
+ビューが「期待リターンについての見込み」なのか、「来期に実現するリターンについての予想」なのかで、$\Omega$ の意味が変わる。この違いは \chapref{ch:hlmeucci} で Meucci の市場版として扱う。
+
+\section{導き方 1：混合推定（一般化最小二乗）}
+
+Black と Litterman の元の説明に近いのは、Theil と Goldberger（1961）の混合推定である。式~\eqref{eq:prior} と式~\eqref{eq:view} を、$\mu$ についての 2 組の「観測」とみて縦に並べる。
+\begin{equation}
+\underbrace{\begin{pmatrix}\Pi\\ Q\end{pmatrix}}_{y}
+=\underbrace{\begin{pmatrix}I\\ P\end{pmatrix}}_{X}\mu
++\begin{pmatrix}-\eta\\ -\varepsilon\end{pmatrix},
+\qquad
+\Var\begin{pmatrix}\eta\\ \varepsilon\end{pmatrix}
+=\underbrace{\begin{pmatrix}\tau\Sigma&0\\0&\Omega\end{pmatrix}}_{V}
+\label{eq:gls-setup}
+\end{equation}
+これは誤差の分散が分かっている回帰なので、一般化最小二乗（GLS）で $\mu$ を推定できる。
+\begin{equation}
+\hat\mu=(X\T V^{-1}X)^{-1}X\T V^{-1}y
+=\bigl[(\tau\Sigma)^{-1}+P\T\Omega^{-1}P\bigr]^{-1}\bigl[(\tau\Sigma)^{-1}\Pi+P\T\Omega^{-1}Q\bigr]
+\label{eq:bl-info}
+\end{equation}
+推定値の分散は
+\begin{equation}
+M=(X\T V^{-1}X)^{-1}=\bigl[(\tau\Sigma)^{-1}+P\T\Omega^{-1}P\bigr]^{-1}
+\label{eq:bl-M}
+\end{equation}
+である。式~\eqref{eq:bl-info} が BL の公式である。対象論文（Lee ほか 2025）も、この形（$y=X\mu+\varepsilon$、$V=\diag(\tau\Sigma,\Omega)$）で BL を説明している。
+
+この見方では、$\tau\Sigma$ と $\Omega$ は「2 組の観測の誤差の分散」である。GLS は、誤差の分散の逆数で重みを付けて観測を平均する。だから、どちらの分散を小さく置くかで、どちらに寄るかが決まる。$\tau$ と $\Omega$ を同じ倍率で大きくしても、重みの比は変わらず、$\hat\mu$ は変わらない（変わるのは $M$ だけ）。この性質が、$\tau$ が「消える」理由である（\chapref{ch:tau}）。
+
+\section{導き方 2：ベイズの定理}
+
+式~\eqref{eq:prior} を事前分布 $\mu\sim\mathcal N(\Pi,\tau\Sigma)$、式~\eqref{eq:view} を尤度 $Q\mid\mu\sim\mathcal N(P\mu,\Omega)$ と読む。事後分布の密度は、両者の積に比例する。
+\begin{equation}
+f(\mu\mid Q)\propto\exp\Bigl\{-\tfrac12(\mu-\Pi)\T(\tau\Sigma)^{-1}(\mu-\Pi)-\tfrac12(P\mu-Q)\T\Omega^{-1}(P\mu-Q)\Bigr\}
+\label{eq:posterior-density}
+\end{equation}
+指数の中を $\mu$ について整理する。$\mu$ の 2 次の項と 1 次の項を集めると
+\begin{equation}
+-\tfrac12\mu\T\underbrace{\bigl[(\tau\Sigma)^{-1}+P\T\Omega^{-1}P\bigr]}_{H}\mu
++\mu\T\underbrace{\bigl[(\tau\Sigma)^{-1}\Pi+P\T\Omega^{-1}Q\bigr]}_{h}+(\mu\text{ によらない項})
+\end{equation}
+となる。平方完成すると $-\frac12(\mu-H^{-1}h)\T H(\mu-H^{-1}h)$ の形になるので（\appref{app:formulas}）、事後分布は正規分布で、
+\begin{equation}
+\mu\mid Q\sim\mathcal N\bigl(H^{-1}h,\;H^{-1}\bigr)
+\end{equation}
+である。平均 $H^{-1}h$ は式~\eqref{eq:bl-info}、分散 $H^{-1}$ は式~\eqref{eq:bl-M} と同じである。
+
+この見方では、$\tau\Sigma$ は事前の不確かさ、$\Omega$ はビューの不確かさで、事後の精度（分散の逆数）は 2 つの精度の和 $H=(\tau\Sigma)^{-1}+P\T\Omega^{-1}P$ になる。情報が足し算で増える、という読み方ができる。
+
+ただし、Meucci（2010）が指摘するように、BL の「ベイズ」は標準的なベイズ推定とは少し違う。過去のリターンのデータで $\mu$ を更新するわけではない。事前分布は均衡の理屈から決め、尤度はビューから決めている。どちらも、データから推定した分布ではない。
+
+\section{導き方 3：罰則つき最小二乗}
+
+事後分布の平均は、事後の密度を最大にする点でもある。式~\eqref{eq:posterior-density} の指数の符号を変えると、次の最小化問題になる。
+\begin{equation}
+\muBL=\arg\min_\mu\;\Bigl\{(\mu-\Pi)\T(\tau\Sigma)^{-1}(\mu-\Pi)+(P\mu-Q)\T\Omega^{-1}(P\mu-Q)\Bigr\}
+\label{eq:penalized}
+\end{equation}
+第 1 項は「均衡から離れることへの罰則」、第 2 項は「ビューに合わないことへの罰則」である。リッジ回帰の罰則の付け方と同じ構造で、$\tau$ と $\Omega$ はそれぞれの罰則の強さを決める。
+
+Kolm と Ritter（2017）は、BL の最適化とベイズ回帰の対応を正確に書き、仮定をすべて並べたうえで、もっとも一般的な形を示した。彼らの整理の利点は、「何に対して事前分布を置き、何を観測とみるか」を自由に選べることである。$\mu$ の代わりにファクターのリスクプレミアムに事前分布を置けば、ファクター版の BL になる（\chapref{ch:shape}）。実現ボラティリティに対するビュー（分散スワップの例）も同じ枠組みで扱える、と述べている。
+
+\section{2 つの形：情報形と更新形}\label{sec:forms}
+
+式~\eqref{eq:bl-info} は、$N\times N$ の逆行列を 2 回使う。行列の公式（Woodbury の公式、\appref{app:formulas}）を使うと、次の形に書き換えられる。
+\begin{align}
+\muBL&=\Pi+\tau\Sigma P\T\bigl(P\tau\Sigma P\T+\Omega\bigr)^{-1}(Q-P\Pi)\label{eq:bl-update}\\
+M&=\tau\Sigma-\tau\Sigma P\T\bigl(P\tau\Sigma P\T+\Omega\bigr)^{-1}P\tau\Sigma\label{eq:M-update}
+\end{align}
+この資料では、式~\eqref{eq:bl-info} を「情報形」、式~\eqref{eq:bl-update} を「更新形」と呼ぶ。
+
+更新形の利点は 3 つある。
+
+\begin{enumerate}
+\item 逆行列は $K\times K$ の 1 つだけで済む。ビューの数が資産の数より少なければ速い。
+\item $(\tau\Sigma)^{-1}$ を使わないので、$\Sigma$ が逆行列を持たない（データが足りない）場合でも計算できる。
+\item $\Omega=0$（100\% の確信）でも計算できる。情報形は $\Omega^{-1}$ を使うので、$\Omega=0$ では使えない。
+\end{enumerate}
+
+本プロジェクトのコード（\code{blm/black\_litterman.py}）は、$P=I$ の更新形 $\Pi+\tau\Sigma(\tau\Sigma+\Omega)^{-1}(Q-\Pi)$ を使っている。元の実装は、情報形を疑似逆行列で計算していた。
+
+\begin{exbox}[3 つの形が同じ値になることの確認]
+Idzorek の 8 資産の例（\chapref{ch:idzorek}）で、情報形・更新形・混合推定の 3 通りで事後の期待リターンを計算すると、差は最大 \V{idz.formdiff}（計算の丸めの範囲）だった。
+\end{exbox}
+
+\section{更新形の読み方：ビューの「驚き」が相関を通じて広がる}
+
+更新形~\eqref{eq:bl-update} は、次のように読める。
+
+\begin{enumerate}
+\item $Q-P\Pi$ は、ビューが均衡からどれだけずれているか（驚き）である。均衡がすでにビューと同じことを言っていれば、驚きは 0 で、何も変わらない。
+\item $(P\tau\Sigma P\T+\Omega)^{-1}$ は、驚きを「どれだけ信じるか」で割り引く。$\Omega$ が大きければ割引が大きい。
+\item $\tau\Sigma P\T$ は、割り引いた驚きを、すべての資産に配る。ビューの組み合わせ $p_k$ と相関の高い資産ほど大きく動く。
+\end{enumerate}
+
+3 番目のため、ビューに含まれない資産の期待リターンも動く。Idzorek の例では、ビューは 8 資産のうち 7 資産にしか触れていないが、事後の期待リターンは 8 資産すべてで変わる（新興国株式も均衡から動く）。
+
+\begin{exbox}[2 資産で手計算する]
+資産 1（年率の標準偏差 20\%）と資産 2（15\%）、相関 0.5、時価総額の比率 60\% と 40\%、$\delta=2.5$、$\tau=0.05$ とする。均衡リターンは $\Pi=\delta\Sigma\wmkt$ から、資産 1 が \V{two.pi1}\%、資産 2 が \V{two.pi2}\% である。
+
+資産 1 だけに「均衡より 2\% 高い \V{two.q}\%」という絶対ビューを置き、He--Litterman の $\omega=\tau\sigma_1^2$ とする。更新形で計算すると、資産 1 の期待リターンは \V{two.mu1}\%（均衡とビューのちょうど中間、採用率 50\%）になる。資産 2 にはビューがないが、期待リターンは \V{two.mu2}\% に上がる。上がった幅 \V{two.shift2}\% は、資産 1 の上がった幅 1\% に、資産 2 の資産 1 への回帰の係数 $\Sigma_{21}/\Sigma_{11}=\V{two.beta21}$ を掛けたものである。
+
+比率は、資産 1 が \V{two.w1}\%（60\% から増えた）、資産 2 は \V{two.w2}\% のまま動かない。資産 2 の期待リターンは上がったのに比率が動かないのは、その上がり方が「資産 1 と相関しているから上がった分」だけで、資産 2 自身の魅力が増えたわけではないからである（次の節）。
+\end{exbox}
+
+\section{比率が動くのはビューのある資産だけ}\label{sec:hl-property}
+
+期待リターンはすべての資産で動くのに、制約のない最適化の比率は、ビューのある資産でしか動かない。これは He と Litterman（1999）の主結果の 1 つである。確かめる。共分散 $\Sigma$ で最適化すると（$\Sigma+M$ を使う場合は『BLM解説』第 5 章）、
+\begin{align}
+w^*&=(\delta\Sigma)^{-1}\muBL
+=(\delta\Sigma)^{-1}\Pi+(\delta\Sigma)^{-1}\tau\Sigma P\T(P\tau\Sigma P\T+\Omega)^{-1}(Q-P\Pi)\notag\\
+&=\wmkt+P\T\Lambda,\qquad \Lambda=\frac{\tau}{\delta}\bigl(P\tau\Sigma P\T+\Omega\bigr)^{-1}(Q-P\Pi)
+\label{eq:hl-weights}
+\end{align}
+となる。$\Sigma^{-1}$ と $\Sigma$ が打ち消し合い、比率の変化は $P$ の行の重み付きの和 $P\T\Lambda$ になる。ビューに含まれない資産の列は $P$ でゼロなので、その比率は動かない。$\Lambda_k$ は、$k$ 番目のビューのポートフォリオをどれだけ足すかを表す。
+
+\begin{exbox}[Idzorek の例での $\Lambda$]
+He--Litterman の $\Omega$ で計算すると、$\Lambda=(\V{idz.lam1},\ \V{idz.lam2},\ \V{idz.lam3})$ である。$\wmkt+P\T\Lambda$ は、最適化で得た比率と最大 \V{idz.hldiff} の差で一致する。2 番目のビュー（外国債券 $-$ 米国債券）の $\Lambda_2$ が負なのは、ビューの値 0.25\% が、均衡の差 0.58\% より小さいからである。「外国債券が米国債券を上回る」というビューなのに、比率は米国債券のほうへ動く。
+\end{exbox}
+
+この性質は、制約（空売りなし、全額投資）を入れると崩れる。また、ビューがないのに比率を動かしたい資産（ビューのある資産と相関が高い資産）があるなら、その資産についてもビューを明示するべきだ、と Idzorek は述べている。
+
+\section{事後の不確かさと、予測の共分散}\label{sec:posterior-cov}
+
+最適化に使う共分散には 2 つの選び方がある。
+
+\begin{itemize}
+\item $\Sigma$：リターンの散らばりだけを使う。
+\item $\Sigma+M$：期待リターンの不確かさ $M$ を足す。来期のリターンの予測分布は、$\mu$ の不確かさを含めて $r\sim\mathcal N(\muBL,\Sigma+M)$ になるからである。
+\end{itemize}
+
+ビューがまったくないとき（$\Omega\to\infty$）、$M=\tau\Sigma$ なので、予測の共分散は $(1+\tau)\Sigma$ になる。$\Sigma+M$ で最適化すると、比率は $\wmkt/(1+\tau)$ になり、全額は投資しない。He と Litterman はこの形で結果を示している。$\tau$ が小さければ違いは小さいが、$\tau=1$ のような値を使うと大きく効く（\chapref{ch:tau}）。
+
+\section{極端な場合}
+
+\begin{center}
+\small
+\begin{tabular}{p{3.0cm}p{5.1cm}p{5.1cm}}
+\toprule
+場合 & 事後の期待リターン $\muBL$ & 事後の不確かさ $M$ \\
+\midrule
+$\Omega\to\infty$（ビューを信じない） & $\Pi$（均衡のまま） & $\tau\Sigma$ \\
+$\Omega\to0$（100\% 信じる） & $\Pi+\Sigma P\T(P\Sigma P\T)^{-1}(Q-P\Pi)$。ビューの組み合わせについては $P\muBL=Q$ & ビューの方向だけ 0 になる。$\tau\Sigma-\tau\Sigma P\T(P\Sigma P\T)^{-1}P\Sigma$ \\
+$\tau\to0$（均衡を完全に信じる） & $\Pi$ & 0 \\
+$\Omega=\tau P\Sigma P\T$（He--Litterman） & $\tau$ によらない & $\tau$ に比例 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$\Omega\to0$ のときの式は、$\tau$ を含まない。100\% 信じるビューは、$\tau$ にかかわらず満たされる。これは、正規分布の条件付き期待値（$P\mu=Q$ という条件を付けたときの $\mu$ の期待値）と同じ形である。Meucci はこの形を「シナリオ分析」と呼ぶ（\chapref{ch:hlmeucci}）。
+
+\begin{keybox}[この章のまとめ]
+\begin{itemize}
+\item BL の公式は、混合推定（GLS）、ベイズの定理、罰則つき最小二乗の 3 通りに導け、どれも同じ答えになる。
+\item どの見方でも、$\tau\Sigma$ と $\Omega$ は「均衡とビューの誤差の分散」で、その比が結果を決める。
+\item 更新形 $\Pi+\tau\Sigma P\T(P\tau\Sigma P\T+\Omega)^{-1}(Q-P\Pi)$ は、逆行列が小さく、$\Omega=0$ でも使える。
+\item 期待リターンは相関を通じてすべての資産で動くが、制約のない最適化の比率は、ビューのある資産でしか動かない（$w^*=\wmkt+P\T\Lambda$）。
+\end{itemize}
+\end{keybox}

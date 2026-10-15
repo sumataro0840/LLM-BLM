@@ -1,0 +1,90 @@
+% ============================================================
+\chapter{ビューとリスクのコツ（一覧）}\label{ch:tips}
+
+この章は、ここまでのコツを、使う順に並べたものである。各項目の末尾の括弧は、詳しく扱った章である。
+
+\section{始める前に}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em]
+\item \textbf{採用率で考える。} BL の結果を決めるのは、$\Omega$ と $\tau\Sigma$ の比である。1 資産・1 ビューなら、均衡からビューへ動く割合は $s=\tau\sigma^2/(\tau\sigma^2+\omega)$。どの設定でも、まず $s$ がいくつになっているかを計算する（\ref{ch:overview}）。
+\item \textbf{単位をそろえる。} $\Sigma$、$\Pi$、$Q$、$\Omega$ は、同じ期間（日次・月次・年率）の、同じ種類（超過リターン）の量で書く。無リスク金利の単位にも注意する（\ref{ch:prior}）。
+\item \textbf{予想と結果の記録を残す。} $\Omega$ を決める唯一の確かな材料は、過去の予想と実際の結果の比較である。BL を動かす前から、記録を残す仕組みを作る（\ref{ch:accuracy}、\ref{ch:project}）。
+\end{enumerate}
+
+\section{事前分布（均衡・リスク回避度・共分散）}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,resume]
+\item \textbf{均衡と最適化で同じ $\Sigma$ と $\delta$ を使う。} そうすれば、ビューがないときの比率は必ず時価総額の比率になる。ビューがないのに比率が動いていたら、どこかが食い違っている（\ref{ch:prior}）。
+\item \textbf{$\delta$ は市場のリスクプレミアム ÷ 市場の分散。} 2.5〜3 程度がよく使われ、期間によらない（\ref{ch:prior}）。
+\item \textbf{$\Sigma$ は推定できる形で作る。} 銘柄がデータの日数より多いなら、縮小推定かファクターモデルを使う。数週間のデータで数百銘柄の共分散を作らない（\ref{ch:prior}）。
+\item \textbf{「市場」が何かを決める。} 時価総額の比率、浮動株調整後、ベンチマーク、等金額のどれを出発点にするかで、BL の意味が変わる（\ref{ch:prior}）。
+\end{enumerate}
+
+\section{$\tau$}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,resume]
+\item \textbf{$\Omega$ が $\tau$ に比例するなら、$\tau$ は何でもよい。} He--Litterman や Idzorek の方法では、事後の期待リターンから $\tau$ が消える（\ref{ch:tau}）。
+\item \textbf{$\Omega$ を外から決めるなら、$\tau$ は採用率の係数。} 回答の分散やモデルの分散を $\Omega$ にするなら、$\tau$ を変えると採用率が直接変わる。$\tau$ を決めることは、確信の度合いを決めることである（\ref{ch:tau}）。
+\item \textbf{$\tau\approx1/T$ で大きさの感覚をつかむ。} 年率の $\Sigma$ で $\tau=0.025$ は、期待リターンの不確かさが年率で約 ±3\%（市場の標準偏差 20\% のとき）（\ref{ch:tau}）。
+\item \textbf{少ない期間の成績で $\tau$ を選ばない。} 数か月の検証で $\tau$ を選ぶと、偶然に合わせてしまう（\ref{ch:tau}）。
+\end{enumerate}
+
+\section{ビューの値 $Q$}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,resume]
+\item \textbf{ビューは均衡と比べて効く。} 言葉で「上回る」でも、均衡が示す差より小さければ、比率は逆に動く。$Q_k$ と $p_k\Pi$ を並べる（\ref{ch:idzorek}）。
+\item \textbf{予想は当たり具合で縮める。} Grinold の式 $\alpha=\IC\cdot\sigma\cdot z$。生の予想の大きさのまま使うと、$1/\IC^2$ 倍の自信過剰になる（\ref{ch:accuracy}）。
+\item \textbf{モデルの平均の式は、係数が有意か確かめる。} EGARCH-M のリスクの見返りのように有意でない係数で作ったビューは、危機のときに極端な値になる（\ref{ch:macro}）。
+\item \textbf{順位しか信じられないなら、順位を点数に直す。} 正規分布の点数にして、順位の IC で大きさを決める（\ref{ch:shape}）。
+\end{enumerate}
+
+\section{ビューの不確かさ $\Omega$}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,resume]
+\item \textbf{測れるなら測る。} 過去の記録があるなら、較正の傾き $b$（または $\IC^2$）を採用率にする。市場版なら $\omega=\sigma^2(1/\IC^2-1)$、元の BL なら $\omega=\tau\sigma^2(1/\IC^2-1)$（\ref{ch:accuracy}）。
+\item \textbf{ビューが多いときは、$\Omega$ を対角にしない。} 外れの共通の部分を無視すると、ビューの数だけ確信が積み上がる。$\Omega\propto P\Sigma P\T$ にするか、共通の部分をビューから外す。本プロジェクトでは、対角の $\Omega$ で採用率が \V{bt.calib.adopt}\% に積み上がった（\ref{ch:omega}、\ref{ch:project}）。
+\item \textbf{道具が出す不確かさは、そのまま使わない。} LLM の回答のばらつき、分布のエントロピー、モデルの予測分散は、外れやすさの順番の手がかりにはなりうるが、大きさは当たり具合で較正する。本プロジェクトでは、回答の分散は外れの約 8 分の 1 だった（\ref{ch:text}、\ref{ch:project}）。
+\item \textbf{Idzorek の確信度は、ビュー 1 つのときの採用率。} 閉じた式 $\omega_k=\tau p_k\Sigma p_k\T(1-C_k)/C_k$ で計算できる。ビューが複数あると確信度どおりには動かない（\ref{ch:idzorek}）。
+\item \textbf{言葉の確信度は、当たり具合と照らし合わせる。} 来月のリターンの予想なら、当たり具合に見合う確信度は 1\% 前後で、言葉で選ぶ 25〜65\% より 2 桁小さい（\ref{ch:idzorek}、\ref{ch:accuracy}）。
+\item \textbf{ボラティリティで $\Omega$ を動かすなら、$\Sigma$ との速さの違いに注意する。} $\Omega$ だけを速く動かすと、危機の直後にビューをいちばん強く信じることになる（\ref{ch:macro}）。
+\item \textbf{複数の予想をまとめるときは、外れの相関を考える。} 同じ実現値と比べる予想の外れは強く相関する。独立を仮定した精度加重は確信を過大にする（\ref{ch:text}）。
+\end{enumerate}
+
+\section{ビューの形}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,resume]
+\item \textbf{全体の水準と銘柄間の差を分ける。} LLM の楽観・悲観の癖は全体の水準の部分である。銘柄間の差は相対ビューに、全体の水準は市場への 1 つのビューにする。$\Omega$ が対角だと、全体の水準の癖は高ベータ・低ベータの銘柄への傾きとして比率に入り込む（\ref{ch:shape}、\ref{ch:project}）。
+\item \textbf{相対ビューの重みは時価総額で付ける。} 等しい重みは小さい資産を大きく動かす（\ref{ch:idzorek}）。
+\item \textbf{資産が多いなら、ファクターへのビューを考える。} 数が少なく、相関が自然に入り、当たり具合も長いデータで測れる。ただし、事前分布を全データで信じすぎると、ビューはほとんど効かない（\ref{ch:shape}、\ref{ch:esg}）。
+\item \textbf{外部の変数へのビューは、シナリオとして使う。} 地政学リスクやマクロの変数への条件付けは、市場版の BL で計算できる。ストレステストとして使い、確実なビューとしては入れない（\ref{ch:politics}）。
+\end{enumerate}
+
+\section{ファクターごとの注意}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,resume]
+\item \textbf{政治：} 指数そのものより、シナリオと長い期間の不確かさに使う。短い期間の不確かさは、市場のボラティリティ（直近の実現値、VIX）のほうが強い（\ref{ch:politics}）。
+\item \textbf{テキスト・LLM：} 成績の数字は、期間・銘柄の数・費用・$\Omega$ の大きさを確かめてから読む。温度や質問を変えたら較正し直す（\ref{ch:text}）。
+\item \textbf{マクロ：} 景気の局面のビューは、局面の数の少なさと、判定の先読みに注意する（\ref{ch:macro}）。
+\item \textbf{財務・ESG：} 指標は IC を測ってから点数にする。ESG を共分散で表すなら、均衡と最適化のどちらに入れるかを決める。両方に入れると効かず、$\Omega$ を固定していると低 ESG の銘柄のビューを強く信じる方向に働く（\ref{ch:esg}）。
+\item \textbf{モメンタム：} 12--1 か月で順位を付け、モメンタム自身のボラティリティが高いときは確信度を下げる。直近 1 か月の写しは、個別株の短期の反転と逆の向きの賭けである（\ref{ch:momentum}）。
+\end{enumerate}
+
+\section{最適化}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,resume]
+\item \textbf{ビューの中身と、ずれの大きさを分ける。} $\Omega$ は当たり具合で、TE は制約で決める。$\tau$ で TE を合わせない（\ref{ch:te}）。
+\item \textbf{能動運用では TE の上限を置く。} 正しく縮めた期待リターンでも、$\delta=2.5$ の平均分散最適化は個別の銘柄に大きく賭ける（\ref{ch:project}）。
+\item \textbf{事前の TE は実績より小さく出る。} 実績を見て、事前の目標を調整する（\ref{ch:te}、\ref{ch:project}）。
+\item \textbf{TE だけで最適化すると、ベータと総リスクが増えることがある。} ベータのずれと総リスクも確かめる（\ref{ch:te}）。
+\item \textbf{裾のリスクを気にするなら、期待リターンは BL、リスクは裾の厚いシナリオで。} 楕円分布なら CVaR は分散と同じ答えになる（\ref{ch:cvar}）。
+\item \textbf{平均以外のビューは、エントロピー・プーリングで。} 順位、ボラティリティ、下落の確率、相関のビューを入れられる。平均だけなら BL で十分（\ref{ch:ep}）。
+\end{enumerate}
+
+\section{確かめ方}
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,resume]
+\item \textbf{黙示の確信度を計算する。} 100\% 信じたときの傾きに対して、実際に何割傾いたかを見る（\ref{ch:idzorek}）。
+\item \textbf{事前の IR が 1 を大きく超えたら疑う。} ビューを信じすぎているか、対角の $\Omega$ で確信を積み上げている（\ref{ch:te}）。
+\item \textbf{比率の性質を記録する。} 採用率、実質銘柄数、指数との差、TE、回転率を毎回記録する。成績だけで方法を選ばない（\ref{ch:project}）。
+\item \textbf{成績の差の $t$ 値を見る。} 数年分の月次データでは、IC 0.05 程度の予想の価値は確かめられない（\ref{ch:accuracy}、\ref{ch:project}）。
+\end{enumerate}

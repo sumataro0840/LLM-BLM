@@ -1,0 +1,176 @@
+% ============================================================
+% Black-Litterman のビューとリスクのコツ（勉強用）
+% コンパイル：tectonic BLMビューとリスクのコツ.tex   （XeTeX 系。2 回目以降は目次と参照がそろう）
+% 数値・表・図は ビューとリスクのコツ_計算.py が 生成/ に作る。先にそれを実行すること:
+%   （リポジトリの直下で）.venv\Scripts\python.exe 資料集\LLM-BLMビューとリスクのコツ\ビューとリスクのコツ_計算.py
+% 本文は 章/ の下のファイルに分けてある。
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,11pt,openany]{bxjsreport}
+\setpagelayout*{left=22mm,right=22mm,top=22mm,bottom=25mm,footskip=11mm}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,multirow,longtable}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+% しおり（PDF の目次）では数式を使えないので、見出しの記号を文字に置き換える
+\pdfstringdefDisableCommands{\def\Omega{Ω}\def\tau{τ}\def\Sigma{Σ}\def\Pi{Π}\def\mu{μ}\def\delta{δ}\def\lambda{λ}%
+  \def\propto{∝}\def\CVaR{CVaR}\def\TE{TE}\def\IR{IR}\def\IC{IC}\def\T{ᵀ}}
+
+\graphicspath{{生成/}}
+
+% ---- 色（総合報告書・BLM解説と同じ）
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{c2}{HTML}{EB6834}
+\definecolor{c3}{HTML}{1BAF7A}
+\definecolor{c4}{HTML}{EDA100}
+\definecolor{c7}{HTML}{6250D6}
+\definecolor{ink2}{HTML}{52514E}
+\definecolor{soft1}{HTML}{E4EEF9}
+\definecolor{soft2}{HTML}{FBEEDF}
+\definecolor{soft3}{HTML}{E3F3E9}
+\definecolor{soft4}{HTML}{EEE8FA}
+\definecolor{soft5}{HTML}{FDF3DA}
+
+% ---- 計算で作った数値（\V{名前}）
+\input{生成/values.tex}
+\newcommand{\V}[1]{\ifcsname v@#1\endcsname\csname v@#1\endcsname\else\textbf{??#1??}\fi}
+\newcommand{\tabin}[1]{\adjustbox{max width=\linewidth}{\input{生成/tab_#1.tex}}}
+
+% ---- よく使う表記
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\SP}{S\&P500}
+\newcommand{\T}{^{\top}}
+\newcommand{\muBL}{\mu_{\mathrm{BL}}}
+\newcommand{\wmkt}{w_{\mathrm{mkt}}}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\IC}{\mathrm{IC}}
+\newcommand{\IR}{\mathrm{IR}}
+\newcommand{\TE}{\mathrm{TE}}
+\newcommand{\CVaR}{\mathrm{CVaR}}
+\newcommand{\VaR}{\mathrm{VaR}}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\tr}{tr}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\newcommand{\chapref}[1]{第~\ref{#1}~章}
+\newcommand{\secref}[1]{\ref{#1}~節}
+\newcommand{\appref}[1]{付録~\ref{#1}}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+
+% ---- 図表の置き方（余白を減らす）
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{totalnumber}{4}
+
+% ---- 章の見出しを小さくする
+\makeatletter
+\def\@makechapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \ifnum\c@secnumdepth>\m@ne\if@mainmatter{\Large\headfont\@chapapp\thechapter\@chappos}\par\nobreak\vskip0.4\Cvs\fi\fi
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\def\@makeschapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\makeatother
+
+% ---- コード
+\renewcommand{\lstlistingname}{リスト}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,keepspaces=true,
+  showstringspaces=false,frame=single,framerule=0.3pt,rulecolor=\color{black!25},backgroundcolor=\color{black!3},
+  xleftmargin=3pt,xrightmargin=3pt,aboveskip=8pt,belowskip=8pt,captionpos=t,
+  commentstyle=\color{ink2},keywordstyle=\color{c1},stringstyle=\color{c2!80!black}}
+
+% ---- 囲み
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{notebox}[1][注意]{enhanced,breakable,colback=soft2,colframe=c2,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{exbox}[1][計算例]{enhanced,breakable,colback=soft3,colframe=c3,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{thmbox}[1][結果]{enhanced,breakable,colback=soft4,colframe=c7,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{tipbox}[1][コツ]{enhanced,breakable,colback=soft5,colframe=c4!85!black,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{paperbox}[1][論文]{enhanced,breakable,colback=white,colframe=ink2,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+% ---- 図の部品
+\tikzset{
+  box/.style={draw=#1,fill=#1!8,rounded corners=2pt,align=center,font=\footnotesize,inner sep=4pt,
+              minimum height=11mm,text width=27mm},
+  arr/.style={-{Stealth[length=2mm]},color=ink2,line width=0.6pt},
+  lab/.style={font=\scriptsize,color=ink2},
+}
+
+\title{Black-Litterman のビューとリスクのコツ\\[6pt]
+  \large ビュー $Q$・その不確かさ $\Omega$・$\tau$ の決め方を論文から整理し、\\
+  本プロジェクト（LLM-BLM）のデータで確かめる}
+\author{勉強用資料}
+\date{2026 年 10 月}
+
+\begin{document}
+\maketitle
+\setcounter{tocdepth}{1}
+{\small\tableofcontents}
+
+\input{章/00_はじめに}
+
+\part{基礎}
+\input{章/01_全体像}
+\input{章/02_導出}
+\input{章/03_事前分布}
+\input{章/04_tau}
+
+\part{ビューの不確かさ $\Omega$ の決め方}
+\input{章/05_Omega全体像}
+\input{章/06_Idzorek}
+\input{章/07_HeLitterman_Meucci}
+\input{章/08_当たり具合}
+\input{章/08b_積み上がり}
+\input{章/09_ビューの形}
+
+\part{ファクターごとの数値化}
+\input{章/10_政治}
+\input{章/11_テキストとLLM}
+\input{章/12_マクロ}
+\input{章/13_財務ESG}
+\input{章/14_モメンタム}
+
+\part{正規分布を越える拡張と、最適化での使い方}
+\input{章/15_エントロピー}
+\input{章/16_コピュラ}
+\input{章/17_CVaR}
+\input{章/18_トラッキングエラー}
+
+\part{本プロジェクトへの当てはめ}
+\input{章/19_本プロジェクト}
+\input{章/19b_質問の設計}
+\input{章/20_コツ}
+\input{章/21_まとめ}
+
+\appendix
+\input{章/A_公式}
+\input{章/B_確認表}
+\input{章/C_論文一覧}
+\input{章/D_作り直し}
+\input{章/F_実装例}
+\input{章/G_用語集}
+\input{章/H_練習問題}
+\input{章/E_参考文献}
+
+\end{document}

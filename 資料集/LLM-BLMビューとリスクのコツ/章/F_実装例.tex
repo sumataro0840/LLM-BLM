@@ -1,0 +1,198 @@
+% ============================================================
+\chapter{Python での実装例}\label{app:code}
+
+本文の方法を、短い関数にまとめる。どれも \code{numpy}、\code{scipy}、\code{cvxpy} だけで動く。本文の数値は \code{ビューとリスクのコツ\_計算.py} で計算しており、ここに載せたのは、その中の考え方を取り出したものである。変数名は本文の記号に合わせた（\code{S} は $\Sigma$、\code{Pi} は $\Pi$、\code{Om} は $\Omega$）。
+
+\section{BL の事後（元の BL と市場版）}
+
+\begin{lstlisting}[language=Python,caption={元の BL（更新形）と、Meucci の市場版}]
+import numpy as np
+
+def bl(Pi, S, P, Q, Om, tau):
+    """Original BL: views on the expected return mu.
+    Returns the posterior mean and the uncertainty M of the mean."""
+    tS = tau * S
+    A = P @ tS @ P.T + Om                 # K x K, the only inverse needed
+    K = tS @ P.T @ np.linalg.inv(A)
+    mu = Pi + K @ (Q - P @ Pi)
+    M = tS - K @ P @ tS
+    return mu, M                          # predictive covariance: S + M
+
+def bl_market(pi, S, P, v, Om):
+    """Market version (Meucci): views on the realized return X.
+    No tau; the posterior covariance replaces S."""
+    A = P @ S @ P.T + Om
+    K = S @ P.T @ np.linalg.inv(A)
+    return pi + K @ (v - P @ pi), S - K @ P @ S
+\end{lstlisting}
+
+\section{$\Omega$ の決め方}
+
+\begin{lstlisting}[language=Python,caption={He--Litterman、Meucci、Idzorek（閉じた式）、IC から}]
+def omega_he_litterman(P, S, tau):
+    """Omega = tau * diag(P S P'): adoption 50% for a single view."""
+    return np.diag(tau * np.einsum('ij,jk,ik->i', P, S, P))
+
+def omega_meucci(P, S, c=1.0, u=None):
+    """Omega = (1/c) diag(u) P S P' diag(u): keeps the correlation of the views."""
+    D = np.diag(u) if u is not None else np.eye(P.shape[0])
+    return D @ P @ S @ P.T @ D / c
+
+def omega_idzorek(P, S, tau, conf):
+    """Closed form of Idzorek's method: omega_k = tau p_k S p_k' (1 - C_k) / C_k.
+    conf: confidences in (0, 1]; C_k is the adoption of view k when it is alone."""
+    conf = np.asarray(conf, float)
+    pSp = np.einsum('ij,jk,ik->i', P, S, P)
+    return np.diag(tau * pSp * (1 - conf) / conf)
+
+def omega_from_ic(sig2, ic, tau=None):
+    """omega that makes the adoption IC^2 (market version if tau is None)."""
+    base = sig2 if tau is None else tau * sig2
+    return base * (1 / ic ** 2 - 1)
+\end{lstlisting}
+
+\section{当たり具合の測り方と、$\Omega\propto\Sigma$}
+
+\begin{lstlisting}[language=Python,caption={過去の予想と結果から較正の傾きを測り、採用率にする}]
+import pandas as pd
+
+def calibration_slope(df):
+    """df: columns date, q (forecast), r (realized), one row per asset and date.
+    The mean of each date is removed (only cross-sectional differences are used),
+    then realized is regressed on forecast over all dates (pooled slope)."""
+    qd = df.q - df.groupby('date').q.transform('mean')
+    rd = df.r - df.groupby('date').r.transform('mean')
+    return float((qd * rd).sum() / (qd ** 2).sum())
+
+def slope_before(df, date):
+    """Only dates whose outcome is known on `date`; 0 until there is data."""
+    past = df[df.date < date]
+    if past.empty:
+        return 0.0
+    return float(np.clip(calibration_slope(past), 0.0, 1.0))
+
+def posterior_proportional(Pi, Q, s):
+    """Omega = tau (1/s - 1) S with P = I: every asset moves by the same share s."""
+    return Pi + s * (Q - Pi)
+
+def grinold_alpha(ic, sigma, score):
+    """alpha = IC * sigma * z, with z the cross-sectional z-score of the score."""
+    z = (score - score.mean()) / score.std()
+    return ic * sigma * z
+\end{lstlisting}
+
+\section{エントロピー・プーリング}
+
+\begin{lstlisting}[language=Python,caption={相対エントロピーの最小化を双対で解く}]
+from scipy import optimize
+
+def entropy_pooling(p, Aeq, beq, Ain=None, bin_=None):
+    """min sum q log(q/p)  s.t.  Aeq q = beq  (include a row of ones for sum q = 1),
+                                 Ain q <= bin_.
+    Rows are scaled to similar sizes before solving the dual."""
+    A = Aeq if Ain is None else np.vstack([Aeq, Ain])
+    b = beq if Ain is None else np.concatenate([beq, bin_])
+    ne = len(beq)
+    sc = np.maximum(A.std(axis=1), 1e-12)
+    sc[np.all(A == A[:, :1], axis=1)] = 1.0     # constant rows (sum q = 1)
+    A, b = A / sc[:, None], b / sc
+    logp = np.log(p)
+
+    def neg_dual(lam):
+        q = np.exp(np.minimum(logp - 1 - A.T @ lam, 700))
+        return q.sum() + lam @ b, b - A @ q     # value and gradient
+
+    bounds = [(None, None)] * ne + [(0, None)] * (len(b) - ne)
+    res = optimize.minimize(neg_dual, np.zeros(len(b)), jac=True,
+                            method='L-BFGS-B', bounds=bounds)
+    q = np.exp(logp - 1 - A.T @ res.x)
+    return q / q.sum()
+
+# example of views on scenarios X (J x N) with prior probabilities p:
+#   mean:      Aeq row X[:, i],                 beq = target mean
+#   ranking:   Ain row -(X[:, i] - X[:, j]),    bin = -min_spread
+#   volatility (mean fixed): rows X[:, i] and X[:, i]**2
+#   tail:      Aeq row (X[:, i] <= -0.10),      beq = target probability
+#   confidence c: p_c = (1 - c) * p + c * q
+\end{lstlisting}
+
+\section{コピュラ・オピニオン・プーリング}
+
+\begin{lstlisting}[language=Python,caption={1 つのビューの分布を混ぜ、コピュラを保って戻す}]
+from scipy import stats
+from scipy.linalg import null_space
+
+def cop_one_view(X, p_row, view_cdf, c):
+    """X: J x N scenarios; p_row: the view portfolio (N,);
+    view_cdf: callable, the subjective CDF of the view variable; c: confidence."""
+    J = X.shape[0]
+    Pbar = np.vstack([p_row, null_space(p_row[None, :]).T])   # invertible
+    V = X @ Pbar.T
+    v = V[:, 0]
+    u = stats.rankdata(v) / (J + 1)                 # grades: the copula is kept
+    grid = np.linspace(v.min() * 1.5, v.max() * 1.5, 20001)
+    F_emp = np.searchsorted(np.sort(v), grid, side='right') / J
+    F_mix = (1 - c) * F_emp + c * view_cdf(grid)
+    F_mix = np.maximum.accumulate(F_mix + np.linspace(0, 1e-12, len(grid)))
+    V[:, 0] = np.interp(u, F_mix, grid)             # new quantiles, same ranks
+    return V @ np.linalg.inv(Pbar.T)
+\end{lstlisting}
+
+\section{CVaR の最小化}
+
+\begin{lstlisting}[language=Python,caption={Rockafellar と Uryasev の線形計画}]
+import cvxpy as cp
+
+def min_cvar(X, q, mu, target, cap=1.0, beta=0.95):
+    """Minimize the CVaR of the scenarios X (J x N, probabilities q)
+    subject to an expected return of at least `target`, long only."""
+    J, N = X.shape
+    w, zeta, u = cp.Variable(N), cp.Variable(), cp.Variable(J)
+    cvar = zeta + (q @ u) / (1 - beta)
+    cons = [cp.sum(w) == 1, w >= 0, w <= cap, mu @ w >= target,
+            u >= 0, u >= -X @ w - zeta]
+    cp.Problem(cp.Minimize(cvar), cons).solve()
+    return w.value
+\end{lstlisting}
+
+\section{トラッキングエラーの上限つきの最適化}
+
+\begin{lstlisting}[language=Python,caption={本プロジェクトの最適化に TE の上限を足したもの}]
+def optimize_te(mu, S, delta, wb, te):
+    """max mu'w - delta/2 w'Sw  s.t.  sum w = 1, w >= 0,
+    (w - wb)' S (w - wb) <= te^2   (te in the same period as S)."""
+    n = len(mu)
+    w = cp.Variable(n)
+    Sv = cp.psd_wrap(S)
+    obj = mu @ w - delta / 2 * cp.quad_form(w, Sv)
+    cons = [cp.sum(w) == 1, w >= 0, cp.quad_form(w - wb, Sv) <= te ** 2]
+    cp.Problem(cp.Maximize(1e4 * obj), cons).solve(solver=cp.CLARABEL)
+    x = np.clip(w.value, 0, None)
+    return x / x.sum()
+
+def max_information_ratio(alpha, S, B=None):
+    """Best ex-ante IR of active weights with B w_a = 0 (default: sum w_a = 0)."""
+    Si = np.linalg.inv(S)
+    B = np.ones((1, len(alpha))) if B is None else B
+    c = B @ Si @ alpha
+    return np.sqrt(alpha @ Si @ alpha - c @ np.linalg.solve(B @ Si @ B.T, c))
+\end{lstlisting}
+
+\section{確かめるための計算}
+
+\begin{lstlisting}[language=Python,caption={黙示の確信度と、採用率の確認}]
+def implied_confidence(Pi, S, P, Q, Om, tau, delta, wmkt):
+    """Tilt of each asset relative to the tilt at 100% confidence."""
+    mu, _ = bl(Pi, S, P, Q, Om, tau)
+    w = np.linalg.solve(delta * S, mu)
+    tS = tau * S
+    mu100 = Pi + tS @ P.T @ np.linalg.solve(P @ tS @ P.T, Q - P @ Pi)
+    w100 = np.linalg.solve(delta * S, mu100)
+    d = w100 - wmkt
+    return np.where(np.abs(d) > 1e-12, (w - wmkt) / d, np.nan)
+
+def adoption(mu_post, Pi, Q):
+    """Share of the way from the equilibrium to the view, per asset (P = I)."""
+    gap = Q - Pi
+    return np.where(np.abs(gap) > 1e-12, (mu_post - Pi) / gap, np.nan)
+\end{lstlisting}

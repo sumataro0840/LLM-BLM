@@ -1,0 +1,118 @@
+% ============================================================
+\chapter{$\Omega$ の決め方の全体像}\label{ch:omega}
+
+$\Omega$ は、BL でいちばん抽象的で、いちばん結果を左右する入力である。Idzorek は、$\Omega$ の決め方には「誰にでも通じる答え」がない、という Litterman（2003）の言葉を引いている。Herold（2003）は、ビューごとに確率分布を決めなければならないことが BL の最大の難しさで、そのため BL は計量的な運用者にしか使えない、と述べている。
+
+この章では、$\Omega$ の決め方を一覧にし、どれを選ぶときにも確かめるべき 3 つの点をまとめる。個々の方法は次の章から詳しく見る。
+
+\section{$\Omega$ が表すもの}
+
+$\Omega$ は、ビューの式 $P\mu=Q+\varepsilon$ の誤差 $\varepsilon$ の共分散である。言葉にすると「ビューの値 $Q$ が、本当の値 $P\mu$ からどれくらい外れうるか」である。対角成分 $\omega_k$ は $k$ 番目のビューの外れの大きさ（分散）、非対角成分は 2 つのビューの外れが同じ向きに出やすいかどうかを表す。
+
+ここで「本当の値」が何を指すかで、$\Omega$ の大きさの意味が変わる。
+
+\begin{itemize}
+\item \textbf{元の BL}：ビューは期待リターン $\mu$ についてのもの。$\omega_k$ は「期待リターンの見込みの外れ」で、来期の実際のリターンの外れより小さい。
+\item \textbf{Meucci の市場版}：ビューは来期に実現するリターン $r$ についてのもの。$\omega_k$ は「来期のリターンの予想の外れ」で、実現するリターンの散らばりまで含む（\chapref{ch:hlmeucci}）。
+\end{itemize}
+
+LLM や統計モデルの「来月のリターンの予想」は、ふつう後者である。予想の誤差を実際の結果と比べて測るなら、測れるのは後者の外れである。元の BL の式に入れるなら、実現値の散らばりの分を差し引いて考える必要がある（\chapref{ch:accuracy}）。
+
+\section{決め方の一覧}
+
+\begin{table}[htbp]
+\centering
+\caption{$\Omega$ の決め方。「$\tau$」の列は、その方法で $\tau$ が事後の期待リターンに効くかどうか。}
+\label{tab:omega-methods}
+\small
+\begin{tabular}{p{2.3cm}p{3.3cm}p{0.8cm}p{4.0cm}p{1.8cm}}
+\toprule
+方法 & 式 & $\tau$ & 考え方・特徴 & 章・文献 \\
+\midrule
+He--Litterman & $\omega_k=\tau\,p_k\Sigma p_k\T$ & 消える & ビューと均衡を同じ重みで扱う。ビュー 1 つなら採用率 50\% & \ref{ch:hlmeucci}、He and Litterman 1999 \\
+Meucci の確信度 & $\Omega=\frac1c P\Sigma P\T$ & --- & 市場版。ビューの誤差の相関を、ビューのポートフォリオの相関と同じとする & \ref{ch:hlmeucci}、Meucci 2010 \\
+Idzorek の確信度 & $\omega_k=\tau p_k\Sigma p_k\T\frac{1-C_k}{C_k}$ & 消える & 0〜100\% の確信度から逆算。閉じた式は Walters による & \ref{ch:idzorek}、Idzorek 2007 \\
+幅で決める & $\omega_k=(\text{幅の標準偏差})^2$ & 効く & 「$Q_k$ から ±$x$\% くらい外れうる」を分散に直す & \ref{ch:omega} \\
+当たり具合（IC） & $\omega=\sigma^2(1/\IC^2-1)$ & --- & 過去の予想の当たり具合から決める。Grinold の式と同じ & \ref{ch:accuracy}、Grinold 1994 \\
+誤差の分散 & $\omega=\Var(Q-r)-\text{実現値の散らばり}$ & 効く & 過去の予想の外れを直接測る & \ref{ch:accuracy} \\
+モデルの予測分散 & 回帰の残差分散、GARCH の条件付き分散 & 効く & モデルが出す不確かさをそのまま使う。モデルの当たり具合の確認が要る & \ref{ch:macro}、Beach and Orlov 2007、Han and Li 2023 \\
+回答のばらつき & 同じ質問への $N$ 個の回答の分散 & 効く & 対象論文の方法。当たり具合とは別物 & \ref{ch:text}、\ref{ch:project} \\
+分布のエントロピー & $\omega=\omega_{\min}+(\omega_{\max}-\omega_{\min})H/\log3$ & 効く & 強気・中立・弱気の確率から & \ref{ch:text}、Florencio 2026 \\
+複数の情報源の融合 & 精度加重、共分散の交差 & --- & 同じ資産への複数の予想をまとめる & \ref{ch:text}、Spears ほか 2023 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\tabref{tab:omega-methods} の方法は、大きく 3 つに分けられる。
+
+\begin{enumerate}
+\item \textbf{比べる相手に合わせる}（He--Litterman、Meucci、Idzorek）：$\Omega$ を、均衡の不確かさや市場のボラティリティを基準にした倍率で決める。倍率を確信度という言葉で表す。何かの当たり具合を測っているわけではない。
+\item \textbf{当たり具合を測る}（IC、誤差の分散）：過去の予想と実際の結果を比べて、外れの大きさを測る。データが必要だが、「どれだけ信じてよいか」に直接答える。
+\item \textbf{作り方から出てくる不確かさを使う}（モデルの予測分散、回答のばらつき、エントロピー）：予想を作る道具が出す不確かさを使う。自動で決まるので便利だが、その不確かさが実際の外れと合っているかは別に確かめる必要がある。
+\end{enumerate}
+
+3 番目は、調査メモが「不確かさの内生化」「客観的な較正」と高く評価している方法である。しかし、道具が出す不確かさと実際の外れが合っている保証はない。本プロジェクトの LLM では、回答の分散は実際の外れの約 8 分の 1 だった（\chapref{ch:project}）。3 番目の方法を使うときは、2 番目の方法で確かめ、必要なら倍率を直す、という 2 段の手順にするのがよい。
+
+\section{どの方法でも確かめる 3 つの点}
+
+\begin{description}[leftmargin=2em,style=nextline]
+\item[1. 単位] $\Omega$ と $\tau\Sigma$ は同じ単位（日次・月次・年率）で書かれているか。$Q$ が平均リターンなら、$\Omega$ も平均リターンの不確かさか。
+\item[2. 大きさの基準] 1 つのビューの採用率は $s=\tau p\Sigma p\T/(\tau p\Sigma p\T+\omega)$ である。その値は、予想の当たり具合に見合っているか。He--Litterman の 50\% は、当たり具合とは関係なく決まった値である。
+\item[3. 相関] $\Omega$ を対角にしてよいか。ビューの外れどうしに相関があるのに対角にすると、ビューの数だけ確信が積み上がる。
+\end{description}
+
+3 番目は見落とされやすい。次の節で例を挙げる。
+
+\section{対角の $\Omega$ が確信を積み上げる}\label{sec:diag-trap}
+
+同じ 1 つの情報源から、たくさんの資産についてのビューを作るとする。例えば、LLM に全銘柄の翌月のリターンを聞く。予想の外れには、銘柄ごとの部分と、全銘柄に共通する部分（「この月は全体に楽観的すぎた」）がある。共通する部分は、銘柄の数を増やしても平均で消えない。
+
+ところが $\Omega$ を対角にすると、BL は外れが銘柄ごとに独立だと扱う。独立な外れは平均すると小さくなるので、「全銘柄の平均的な水準」についての確信は、銘柄の数に比例して強くなる。$K$ 個のビューが同じ大きさの独立な外れ $\omega$ を持つとき、その平均の外れの分散は $\omega/K$ である。$K=500$ なら 500 分の 1 である。実際の外れに共通部分があれば、この確信は根拠がない。
+
+\begin{exbox}[本プロジェクトのデータでの例]
+本プロジェクトの LLM の予想を、過去の当たり具合で較正して、1 銘柄だけなら採用率が 5〜7\% になるように $\Omega$ を置く（\chapref{ch:project}）。この $\Omega$ を対角にすると、約 490 銘柄を同時に入れたときの採用率は中央値で \V{bt.calib.adopt}\% になった。$\Omega$ を $\Sigma$ に比例させる（外れが市場と同じ相関を持つとする）と、採用率は設定どおり \V{bt.full.adopt}\% になった。
+\end{exbox}
+
+どれだけ積み上がるかは、\chapref{ch:stacking} で式にして確かめる。対策は 2 つある。
+
+\begin{enumerate}
+\item \textbf{$\Omega$ に相関を入れる}：Meucci の $\Omega=\frac1c P\Sigma P\T$ のように、外れの相関をビューのポートフォリオの相関と同じにする。$P=I$ なら $\Omega\propto\Sigma$ で、事後の期待リターンは $\Pi+s(Q-\Pi)$ と、すべての銘柄で同じ割合だけ動く。
+\item \textbf{共通部分をビューから外す}：相対ビュー（銘柄どうしの差）や、平均を引いたビューにする。全体の水準についての見込みは、ビューに入れないか、別の 1 つのビューとして、それに見合った不確かさで入れる（\chapref{ch:shape}）。
+\end{enumerate}
+
+\section{選び方の流れ}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=5mm and 6mm,
+  q/.style={draw=c1,fill=c1!8,rounded corners=2pt,align=center,font=\footnotesize,inner sep=3pt,text width=36mm,minimum height=9mm},
+  a/.style={draw=c3,fill=c3!8,rounded corners=2pt,align=center,font=\footnotesize,inner sep=3pt,text width=38mm,minimum height=9mm}]
+\node[q] (q1) {過去の予想と結果の\\記録があるか};
+\node[a,right=16mm of q1] (a1) {IC・誤差の分散で較正\\（\chapref{ch:accuracy}）};
+\node[q,below=of q1] (q2) {予想はモデルや LLM が\\自動で出すか};
+\node[a,right=16mm of q2] (a2) {道具の不確かさを使い、\\記録がたまったら較正};
+\node[q,below=of q2] (q3) {人の見方で、確信度を\\言葉で言えるか};
+\node[a,right=16mm of q3] (a3) {Idzorek の確信度\\（\chapref{ch:idzorek}）};
+\node[a,below=of q3] (a4) {He--Litterman（採用率 50\%）\\か、Meucci の $c$ で控えめに};
+\node[q,right=16mm of a4,text width=44mm] (q4) {ビューが多いか（10 個以上）\\→ 相関を入れる、平均を外す};
+\draw[arr] (q1) -- node[lab,above]{ある} (a1);
+\draw[arr] (q1) -- node[lab,right]{ない} (q2);
+\draw[arr] (q2) -- node[lab,above]{はい} (a2);
+\draw[arr] (q2) -- node[lab,right]{いいえ} (q3);
+\draw[arr] (q3) -- node[lab,above]{はい} (a3);
+\draw[arr] (q3) -- node[lab,right]{いいえ} (a4);
+\draw[arr,dashed] (a1.east) -- ++(5mm,0) |- (q4.east);
+\end{tikzpicture}
+\caption{$\Omega$ の決め方の選び方。どの方法を選んでも、ビューが多いときは相関の扱いを確かめる。}
+\label{fig:omega-flow}
+\end{figure}
+
+\figref{fig:omega-flow} の考え方は、「測れるなら測る、測れないなら控えめに置く」である。確信度を言葉で決める方法は、測れないときの次善の策である。測れるデータがあるのに確信度を言葉で決めるのは、情報を捨てていることになる。
+
+\begin{keybox}[この章のまとめ]
+\begin{itemize}
+\item $\Omega$ の決め方は、比べる相手に合わせるもの、当たり具合を測るもの、道具が出す不確かさを使うもの、の 3 つに分けられる。
+\item どの方法でも、単位、大きさの基準（採用率）、相関の 3 点を確かめる。
+\item ビューが多いのに $\Omega$ を対角にすると、共通の外れが無視され、確信が銘柄の数だけ積み上がる。相関を入れるか、共通部分をビューから外す。
+\end{itemize}
+\end{keybox}

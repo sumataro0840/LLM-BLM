@@ -1,0 +1,62 @@
+% ============================================================
+\chapter{この資料の作り直し方}\label{app:rebuild}
+
+\section{手順}
+
+\begin{enumerate}
+\item リポジトリの直下で、数値・表・図を作る（約 1〜2 分）。
+\begin{quote}\small
+\code{.venv\textbackslash Scripts\textbackslash python.exe 資料集\textbackslash LLM-BLMビューとリスクのコツ\textbackslash ビューとリスクのコツ\_計算.py}
+\end{quote}
+節の名前（A、B、C、D、E、E2、F、G、H1、H2、I、J、K、L、M、N、O、P）を引数に付けると、その節だけを計算し直す（B は A に、I〜K は H2 に、L は A に依存する）。
+\item 資料のフォルダで、TeX をコンパイルする（tectonic は XeTeX 系の TeX で、必要なパッケージとフォントを自動で取ってくる）。
+\begin{quote}\small
+\code{tectonic BLMビューとリスクのコツ.tex}
+\end{quote}
+\end{enumerate}
+
+計算は \code{.env} の \code{DB\_PATH}（\code{data/blm\_2015.sqlite}）の DB を使う。LLM の回答は実行番号 1、BL の係数（$\tau$、$\delta$、共分散の期間）は \code{.env} の値である。乱数を使う節（D のシミュレーション、I のシナリオ）は、節ごとに種を固定している。
+
+\section{ファイル}
+
+\begin{center}
+\small
+\begin{tabular}{p{5.0cm}p{8.6cm}}
+\toprule
+ファイル & 内容 \\
+\midrule
+\code{BLMビューとリスクのコツ.tex} & 本体（プリアンブルと、章のファイルの読み込み） \\
+\code{章/} & 本文（章ごとのファイル） \\
+\code{ビューとリスクのコツ\_計算.py} & 数値・表・図を作るスクリプト \\
+\code{生成/} & スクリプトが作ったもの（\code{values.tex}、\code{tab\_*.tex}、\code{fig\_*.pdf}）。手で直さない \\
+\code{データ/} & 外部のデータ（下の表）を CSV に整えたもの \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{外部のデータ}
+
+\begin{center}
+\small
+\begin{tabular}{p{3.4cm}p{4.6cm}p{5.2cm}}
+\toprule
+ファイル & 中身 & 出どころ \\
+\midrule
+\code{ff\_factors\_\allowbreak monthly.csv} & Fama--French の 5 ファクターとモメンタム（月次、1963 年 7 月〜） & Kenneth French の Data Library（\code{F-F\_Research\_\allowbreak Data\_5\_\allowbreak Factors\_2x3}、\code{F-F\_Momentum\_\allowbreak Factor}） \\
+\code{mom\_monthly.csv} & モメンタム・ファクター（月次、1927 年〜） & 同上 \\
+\code{mom\_daily.csv} & モメンタム・ファクター（日次、1926 年 11 月〜） & 同上（\code{F-F\_Momentum\_\allowbreak Factor\_daily}） \\
+\code{epu\_monthly.csv} & 経済政策不確実性指数（新聞ベース、月次、1900 年〜） & policyuncertainty.com（\code{US\_Policy\_\allowbreak Uncertainty\_\allowbreak Data.xlsx}） \\
+\code{gpr\_monthly.csv} & 地政学リスク指数 GPR、GPRT、GPRA（月次、1985 年〜） & matteoiacoviello.com（\code{data\_gpr\_export.xls}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+いずれも 2026 年 10 月 15 日に取得した。Kenneth French のデータは 2026 年 8 月の CRSP に基づく版である。データは更新されることがあるので、取り直すと数値が少し変わりうる。
+
+\section{論文の数値例}
+
+\begin{itemize}
+\item Idzorek の 8 資産の例：論文（2004 年 7 月 20 日の版）の表 1（均衡リターン）、表 2（時価総額の比率）、表 5（共分散）、本文のビューと確信度。
+\item Meucci の 6 か国の例：論文（2010 年 10 月 12 日の版）の標準偏差、相関、時価総額の比率、ビュー、$\lambda=1.2$、$\tau=0.4$。
+\item 対象論文の誤差：第 2 版（2025 年 10 月 19 日）の表 5 の MSE。
+\end{itemize}

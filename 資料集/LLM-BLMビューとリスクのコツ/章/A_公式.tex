@@ -1,0 +1,107 @@
+% ============================================================
+\chapter{行列の公式と導出}\label{app:formulas}
+
+本文で使った公式と、省いた導出をまとめる。
+
+\section{平方完成}
+
+対称で正定値の行列 $H$ とベクトル $h$ について、
+\begin{equation}
+-\tfrac12\mu\T H\mu+\mu\T h=-\tfrac12(\mu-H^{-1}h)\T H(\mu-H^{-1}h)+\tfrac12h\T H^{-1}h
+\end{equation}
+が成り立つ。右辺を展開すれば確かめられる。密度が $\exp(-\frac12\mu\T H\mu+\mu\T h)$ に比例する分布は、平均 $H^{-1}h$、共分散 $H^{-1}$ の正規分布である。
+
+\section{Woodbury の公式}
+
+正則な $A$（$n\times n$）、$C$（$k\times k$）と、$U$（$n\times k$）、$V$（$k\times n$）について、
+\begin{equation}
+(A+UCV)^{-1}=A^{-1}-A^{-1}U\bigl(C^{-1}+VA^{-1}U\bigr)^{-1}VA^{-1}
+\end{equation}
+が成り立つ。
+
+\subsection*{情報形から更新形へ}
+
+$A=(\tau\Sigma)^{-1}$、$U=P\T$、$C=\Omega^{-1}$、$V=P$ とすると、事後の共分散は
+\begin{equation}
+M=\bigl[(\tau\Sigma)^{-1}+P\T\Omega^{-1}P\bigr]^{-1}=\tau\Sigma-\tau\Sigma P\T\bigl(\Omega+P\tau\Sigma P\T\bigr)^{-1}P\tau\Sigma
+\end{equation}
+である。事後の平均 $\muBL=M\bigl[(\tau\Sigma)^{-1}\Pi+P\T\Omega^{-1}Q\bigr]$ に代入する。$K=P\tau\Sigma P\T+\Omega$ と書くと、
+\begin{align}
+M(\tau\Sigma)^{-1}\Pi&=\Pi-\tau\Sigma P\T K^{-1}P\Pi,\\
+MP\T\Omega^{-1}Q&=\tau\Sigma P\T\Omega^{-1}Q-\tau\Sigma P\T K^{-1}P\tau\Sigma P\T\Omega^{-1}Q\notag\\
+&=\tau\Sigma P\T K^{-1}\bigl(K-P\tau\Sigma P\T\bigr)\Omega^{-1}Q=\tau\Sigma P\T K^{-1}Q
+\end{align}
+となり、足すと更新形 $\muBL=\Pi+\tau\Sigma P\T K^{-1}(Q-P\Pi)$ が得られる。
+
+\section{正規分布の条件付き分布}
+
+$(x,y)$ が同時に正規分布に従い、
+\begin{equation}
+\begin{pmatrix}x\\y\end{pmatrix}\sim\mathcal N\left(\begin{pmatrix}m_x\\m_y\end{pmatrix},
+\begin{pmatrix}S_{xx}&S_{xy}\\S_{yx}&S_{yy}\end{pmatrix}\right)
+\end{equation}
+なら、$y$ を観測したときの $x$ は
+\begin{equation}
+x\mid y\sim\mathcal N\bigl(m_x+S_{xy}S_{yy}^{-1}(y-m_y),\;S_{xx}-S_{xy}S_{yy}^{-1}S_{yx}\bigr)
+\end{equation}
+に従う。
+
+\subsection*{市場版の BL}
+
+$x\sim\mathcal N(\pi,\Sigma)$、$v=Px+\varepsilon$、$\varepsilon\sim\mathcal N(0,\Omega)$（$x$ と独立）なら、$\Cov(x,v)=\Sigma P\T$、$\Var(v)=P\Sigma P\T+\Omega$ なので、上の公式から
+\begin{equation}
+x\mid v\sim\mathcal N\bigl(\pi+\Sigma P\T(P\Sigma P\T+\Omega)^{-1}(v-P\pi),\;\Sigma-\Sigma P\T(P\Sigma P\T+\Omega)^{-1}P\Sigma\bigr)
+\end{equation}
+が得られる（式~\eqref{eq:mbl-mu}、\eqref{eq:mbl-sigma}）。元の BL は、$x$ を $\mu$ に、$\Sigma$ を $\tau\Sigma$ に置き換えたものである。
+
+\subsection*{外部の変数への条件付け}
+
+資産のリターン $X$ と外部の変数 $g$ の同時分布で、$g=v$ を条件にすると、$\E[X\mid g=v]=\pi_X+\Sigma_{Xg}\Sigma_{gg}^{-1}(v-\pi_g)$ である。$\Sigma_{Xg}\Sigma_{gg}^{-1}$ は、$X$ を $g$ に回帰したときの係数である。不確かさ $\Omega$ を付けるなら、$\Sigma_{gg}$ を $\Sigma_{gg}+\Omega$ に置き換える。
+
+\section{1 つのビューの傾きの比}
+
+1 つのビュー $p$（行ベクトル）について、制約のない最適化の傾きは、式~\eqref{eq:hl-weights} から
+\begin{equation}
+w(\omega)-\wmkt=p\T\,\frac{\tau}{\delta}\cdot\frac{Q-p\Pi}{\tau p\Sigma p\T+\omega}
+\end{equation}
+である。$\omega=0$ のときとの比は $\tau p\Sigma p\T/(\tau p\Sigma p\T+\omega)$ で、資産によらない。これを確信度 $C$ に等しくおけば、Idzorek の閉じた式 $\omega=\tau p\Sigma p\T(1-C)/C$ が得られる。
+
+\section{較正の傾きと IC}
+
+予想 $q$ と実際 $r$ の相関を $\IC$、標準偏差を $\sigma_q$、$\sigma_r$ とすると、実際を予想に回帰した傾きは
+\begin{equation}
+b=\frac{\Cov(q,r)}{\Var(q)}=\IC\cdot\frac{\sigma_r}{\sigma_q}
+\end{equation}
+である。$q=r+\varepsilon$（実際に雑音が乗ったもの）なら $\sigma_q^2=\sigma_r^2+\omega$、$\IC=\sigma_r/\sigma_q$ なので、$b=\IC^2=\sigma_r^2/(\sigma_r^2+\omega)$ になる。
+
+\section{エントロピー・プーリングの双対}
+
+条件を $Aq=b$（等式、$\one\T q=1$ を含む）と $Gq\le g$（不等式）とする。ラグランジュ関数
+\begin{equation}
+L(q,\lambda,\nu)=\sum_jq_j(\log q_j-\log p_j)+\lambda\T(Aq-b)+\nu\T(Gq-g),\qquad\nu\ge0
+\end{equation}
+を $q_j$ で微分して 0 とおくと、$q_j=p_j\exp(-1-a_j\T\lambda-g_j\T\nu)$（$a_j$、$g_j$ は $A$、$G$ の $j$ 列目）。これを戻した双対の関数
+\begin{equation}
+D(\lambda,\nu)=-\sum_jq_j(\lambda,\nu)-\lambda\T b-\nu\T g
+\end{equation}
+を、$\nu\ge0$ の範囲で最大にする。$-D$ は凸で、勾配は $(b-Aq,\ g-Gq)$ である。この資料の計算では、条件の行を標準化してから、準ニュートン法（L-BFGS-B）で解いた。
+
+\section{線形の制約つきの能動運用の最適化}
+
+能動的な比率 $w_a$ に線形の制約 $Bw_a=0$（$B$ は $m\times N$。例えば $\one\T$ と $(\Sigma w_b)\T$）を付けて、
+\begin{equation}
+\max_{w_a}\;w_a\T\alpha-\frac{\lambda_A}{2}w_a\T\Sigma w_a\quad\text{s.t.}\quad Bw_a=0
+\end{equation}
+を解く。ラグランジュ乗数 $\eta$ を使うと、$\alpha-\lambda_A\Sigma w_a-B\T\eta=0$ から $w_a=\frac{1}{\lambda_A}\Sigma^{-1}(\alpha-B\T\eta)$。制約に代入して $\eta=(B\Sigma^{-1}B\T)^{-1}B\Sigma^{-1}\alpha$ なので、
+\begin{equation}
+w_a^*=\frac{1}{\lambda_A}h,\qquad h=\Sigma^{-1}\alpha-\Sigma^{-1}B\T(B\Sigma^{-1}B\T)^{-1}B\Sigma^{-1}\alpha
+\end{equation}
+である。$h\T\Sigma h=h\T\alpha=\alpha\T\Sigma^{-1}\alpha-c\T(B\Sigma^{-1}B\T)^{-1}c$（$c=B\Sigma^{-1}\alpha$）で、これが最大の情報レシオの 2 乗になる。$B=\one\T$ なら本文の式~\eqref{eq:ir-star} である。
+
+\section{CVaR の最小化の式}
+
+$F(\zeta)=\zeta+\frac{1}{1-\beta}\E[(L-\zeta)^+]$ を $\zeta$ で微分すると、$1-\frac{1}{1-\beta}\Pr(L>\zeta)$ である。これが 0 になるのは $\Pr(L>\zeta)=1-\beta$、つまり $\zeta=\VaR_\beta$ のときで、そのときの値は
+\begin{equation}
+\VaR_\beta+\frac{1}{1-\beta}\E[(L-\VaR_\beta)^+]=\E[L\mid L\ge\VaR_\beta]=\CVaR_\beta
+\end{equation}
+である（連続な分布の場合）。$F$ は $\zeta$ と $w$ について凸なので、$\zeta$ と $w$ を一緒に最小化すればよい。シナリオで期待値を書けば、本文の線形計画~\eqref{eq:ru-lp} になる。

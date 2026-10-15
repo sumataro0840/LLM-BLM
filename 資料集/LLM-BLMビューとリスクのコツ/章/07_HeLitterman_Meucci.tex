@@ -1,0 +1,159 @@
+% ============================================================
+\chapter{He--Litterman の $\Omega$ と Meucci の流儀}\label{ch:hlmeucci}
+
+この章では、比べる相手に合わせて $\Omega$ を決める 2 つの流儀を扱う。He と Litterman（1999）の $\Omega=\tau\diag(P\Sigma P\T)$ と、Meucci（2005、2010）の $\Omega=\frac1c P\Sigma P\T$ である。後者は、ビューを「期待リターン」ではなく「実現するリターン」についてのものと読み替えた「市場版の BL」と組になっている。LLM や統計モデルの予想は実現するリターンの予想なので、市場版の考え方はこの資料の後半で何度も使う。
+
+\section{He--Litterman の $\Omega$}
+
+He と Litterman は、ビューの不確かさを、ビューのポートフォリオの分散に比例させた。
+\begin{equation}
+\Omega=\diag\bigl(P\,\tau\Sigma\,P\T\bigr),\qquad \omega_k=\tau\,p_k\Sigma p_k\T
+\label{eq:hl-omega}
+\end{equation}
+この置き方の意味は、「ビューの見込みの外れは、均衡の見込みの外れと同じくらい」である。ビューが 1 つなら採用率は 50\%、ビューと均衡のちょうど中間をとる。
+
+この置き方の利点は 3 つある。
+
+\begin{enumerate}
+\item $\tau$ が消える（\secref{sec:tau-cancel}）。
+\item ビューのポートフォリオのリスクが大きいほど、ビューの不確かさも大きくなる。ボラティリティの高い資産の 1\% と、低い資産の 1\% を同じ重みで扱わずに済む。
+\item 単位を気にしなくてよい。$\Sigma$ と同じ単位で $\Omega$ が決まる。
+\end{enumerate}
+
+欠点は、当たり具合とまったく関係がないことである。予想がほとんど当たらなくても、よく当たっても、採用率は 50\% になる。He と Litterman の論文の目的は、BL の比率の形を直感的に説明することで、$\Omega$ の値を正しく決めることではなかった。この置き方は、説明のための「中立な既定値」と考えるのがよい。
+
+\section{Meucci の確信度 $c$}
+
+Meucci は $\Omega$ を、ビューのポートフォリオの共分散全体に比例させた。
+\begin{equation}
+\Omega=\frac1c\,P\Sigma P\T
+\label{eq:meucci-omega}
+\end{equation}
+$c\in(0,\infty)$ は、ビュー全体への確信の度合いである。He--Litterman との違いは 2 つある。
+
+\begin{itemize}
+\item \textbf{非対角を残す}：$P\Sigma P\T$ の非対角成分（ビューのポートフォリオどうしの共分散）をそのまま使う。ビューの外れが、ビューのポートフォリオと同じように相関する、という仮定である。
+\item \textbf{$\tau$ を含まない}：市場版の BL（次の節）と組み合わせるので、比べる相手は $\tau\Sigma$ ではなく $\Sigma$ そのものである。$c=1$ なら「ビューの外れは、市場の 1 期分の散らばりと同じくらい」となる。
+\end{itemize}
+
+ビューごとに確信の度合いを変えたいときは、
+\begin{equation}
+\Omega=\frac1c\,\diag(u)\,P\Sigma P\T\,\diag(u)
+\label{eq:meucci-u}
+\end{equation}
+とする。$u_k$ が大きいビューほど不確かである。
+
+\subsection*{言葉のビューを数字に直す}
+
+Meucci は、「強気」「弱気」のような言葉だけのビューを数字に直す方法も示している。
+\begin{equation}
+v_k=(P\pi)_k+\eta_k\sqrt{(P\Sigma P\T)_{kk}},\qquad \eta_k\in\{-\beta,-\alpha,+\alpha,+\beta\}
+\label{eq:meucci-eta}
+\end{equation}
+$\eta_k$ は「とても弱気」「弱気」「強気」「とても強気」を表し、典型的には $\alpha=1$、$\beta=2$ である。つまり、ビューの値を「均衡から、ビューのポートフォリオの標準偏差の何倍ずれるか」で決める。
+
+この置き方は、ビューの大きさをボラティリティで測るので、資産によって大きさの感覚が変わらない。ただし、$\alpha=1$ は「1 標準偏差」で、1 年のリターンの予想としてはかなり大きい（年率 20\% の株式なら 20\%）。ビューの大きさは、当たり具合に合わせて小さく取るのが安全である（\chapref{ch:accuracy}）。
+
+\section{市場版の BL：ビューを実現値についてのものとみる}
+
+Meucci は、元の BL の事後分布に 2 つの「パズル」があると指摘した。
+
+\begin{enumerate}
+\item ビューをまったく信じないとき（$\Omega\to\infty$）、事後の予測分布は $\mathcal N(\pi,(1+\tau)\Sigma)$ になり、事前の市場のモデル $\mathcal N(\pi,\Sigma)$ に戻らない。
+\item ビューを 100\% 信じても（$\Omega\to0$）、事後の予測の共分散は $\Sigma$ の部分を残し、決して退化しない。ビューの方向にも散らばりが残る。
+\end{enumerate}
+
+どちらも、元の BL ではビューが期待値 $\mu$ についてのもので、実現値の散らばり $\Sigma$ には触れないことから来ている。理屈としては一貫しているが、実務家の直感とは合わない。
+
+Meucci は、ビューを市場の実現値 $X$ そのものについてのものとみる版を示した。$\mu$ を確率変数とせず $\mu=\pi$ とし、
+\begin{equation}
+X\sim\mathcal N(\pi,\Sigma),\qquad V\mid x\sim\mathcal N(Px,\Omega)
+\end{equation}
+とする。ビューの値 $v$ を観測したときの $X$ の事後分布は、正規分布の条件付けで求まる（\appref{app:formulas}）。
+\begin{align}
+\mu_{\mathrm{mBL}}&=\pi+\Sigma P\T\bigl(P\Sigma P\T+\Omega\bigr)^{-1}(v-P\pi)\label{eq:mbl-mu}\\
+\Sigma_{\mathrm{mBL}}&=\Sigma-\Sigma P\T\bigl(P\Sigma P\T+\Omega\bigr)^{-1}P\Sigma\label{eq:mbl-sigma}
+\end{align}
+元の BL の更新形と比べると、$\tau\Sigma$ が $\Sigma$ に置き換わっただけである。違いは次のとおりである。
+
+\begin{itemize}
+\item $\tau$ が出てこない。
+\item 事後の共分散に $\Sigma$ を足す必要がない。
+\item $\Omega\to\infty$ で事前 $\mathcal N(\pi,\Sigma)$ に戻り、$\Omega\to0$ で正規分布の条件付き分布（シナリオ分析）になる。
+\end{itemize}
+
+\section{Meucci の 6 か国の例}
+
+Meucci の論文の例は、6 か国の株価指数（イタリア、スペイン、スイス、カナダ、アメリカ、ドイツ）である。年率の標準偏差、相関、時価総額の比率が論文に載っている。$\lambda=1.2$ で $\pi=2\lambda\Sigma w$ を計算すると、$\pi=(\V{meu.pi})\%$ になる（論文は約 6、7、9、8、17、10\%。入力が丸められているため、スイスは少し違う）。論文は $\tau=0.4$ を使う。ビューは次の 2 つで、確信度は $c=1$（$\Omega=P\Sigma P\T$）である。
+
+\begin{enumerate}
+\item スペインの指数は年率 12\% 上がる（均衡は \V{meu.ppi1}\%）。
+\item アメリカとドイツの差は年率 $-10\%$ になる（均衡は \V{meu.ppi2}\%）。
+\end{enumerate}
+
+\begin{table}[htbp]
+\centering
+\caption{Meucci の 6 か国の例（年率 \%）。$\mu_{\mathrm{BL}}$、$\sigma_{\mathrm{BL}}$ は元の BL（$\tau=0.4$、共分散は $\Sigma+M$）、$\mu_{\mathrm{mBL}}$、$\sigma_{\mathrm{mBL}}$ は市場版。$w^*$ は空売りなし・全額投資で $w\T\mu-\lambda w\T\Sigma w$（$\lambda=1.2$）を最大にした比率。}
+\label{tab:meucci}
+\tabin{meucci}
+\end{table}
+
+\tabref{tab:meucci} から分かることを挙げる。
+
+\begin{itemize}
+\item スペインの期待リターンは、元の BL で \V{meu.blspain}\%、市場版で \V{meu.mspain}\% になる。同じ $\Omega$ でも、比べる相手が $\tau\Sigma$（元の BL）か $\Sigma$（市場版）かで、採用率が違う。$\tau=0.4<1$ なので元の BL のほうが均衡寄りである。
+\item 標準偏差は、元の BL では $\Sigma+M$ で大きくなり、市場版ではビューの分だけ小さくなる。
+\item 市場版の比率は、スペインとドイツが増え、アメリカが減る。Meucci の論文の図（スペインは低リスクの側で増え、ドイツはどのリスク回避度でも増え、アメリカは減る）と同じ向きである。
+\item 元の BL（共分散は $\Sigma+M$）では、アメリカが減った分がほかの国に広く分かれ、ドイツはほとんど変わらない。同じビューでも、比べる相手と最適化に使う共分散で、比率の動き方は変わる。
+\end{itemize}
+
+\subsection*{100\% 信じたとき}
+
+$\Omega\to0$ にすると、スペインの期待リターンは、元の BL でも市場版でも \V{meu.full.bl}\%（ビューの値そのもの）になる。違うのは標準偏差で、元の BL では \V{meu.full.blsd}\% のまま、市場版では \V{meu.full.msd}\%（スペインの値が確定する）になる。ビューをまったく信じないとき、元の BL のスペインの標準偏差は $\sqrt{1+\tau}$ 倍の \V{meu.unc.blsd}\% になり、事前の 24.0\% に戻らない。Meucci の言う 2 つのパズルが、数字で確かめられる。
+
+\subsection*{言葉のビュー}
+
+\begin{table}[htbp]
+\centering
+\caption{Meucci の式~\eqref{eq:meucci-eta} で、言葉のビューを数字に直したもの（年率 \%、$\alpha=1$、$\beta=2$）。}
+\label{tab:meucci-eta}
+\tabin{meucci_eta}
+\end{table}
+
+\tabref{tab:meucci-eta} のとおり、「強気」のスペインは $\V{meu.ppi1}+\V{meu.vsd1}$\% になる。1 標準偏差は、1 年の期待リターンのずれとしては大きい。このまま $c=1$ で入れると、ビューの影響はかなり強く出る。
+
+\section{どちらを使うか}
+
+\begin{center}
+\small
+\begin{tabular}{p{2.6cm}p{5.2cm}p{5.2cm}}
+\toprule
+ & 元の BL & 市場版の BL \\
+\midrule
+ビューの対象 & 期待リターン $\mu$ & 来期に実現するリターン $X$ \\
+比べる相手 & $\tau\Sigma$ & $\Sigma$ \\
+$\tau$ & 必要（$\Omega\propto\tau$ なら消える） & 不要 \\
+最適化の共分散 & $\Sigma$ または $\Sigma+M$ & $\Sigma_{\mathrm{mBL}}$ \\
+向いているビュー & 長い期間の期待リターンの見込み（「この 5 年の平均はこうだろう」） & 来期の予想（「来月はこうなるだろう」）、シナリオ \\
+$\Omega$ を測るには & 期待値の外れなので、実現値と比べるときは実現値の散らばりを差し引く & 実現値と比べた予想の外れをそのまま使える \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+LLM の「翌月の日次の平均リターン」の予想は、来期の実現値の予想である。過去の予想と実際の結果を比べて測った外れは、そのまま市場版の $\Omega$ になる。元の BL の式を使い続ける場合は、実現値の散らばりの分を差し引いてから $\Omega$ にするか、$\tau$ を「1 か月の平均の散らばり」に合わせて読み替える必要がある（\chapref{ch:accuracy}）。
+
+\begin{tipbox}[コツ：比べる相手を意識する]
+\begin{itemize}
+\item He--Litterman の $\Omega$ は採用率 50\% の既定値で、当たり具合とは関係がない。説明や比較の出発点として使い、運用の値としては見直す。
+\item 予想の外れを実際の結果で測るなら、ビューは実現値についてのもので、市場版の式（$\tau$ なし）が自然である。
+\item ビューが多いときは、Meucci の $\Omega=\frac1c P\Sigma P\T$ のように非対角を残すと、確信の積み上がりを防げる。
+\end{itemize}
+\end{tipbox}
+
+\begin{keybox}[この章のまとめ]
+\begin{itemize}
+\item He--Litterman の $\Omega=\tau\diag(P\Sigma P\T)$ は、ビュー 1 つなら採用率 50\% の中立な既定値である。
+\item Meucci の $\Omega=\frac1cP\Sigma P\T$ は、ビューの外れに相関を持たせ、市場版の BL と組になる。
+\item 市場版の BL は、ビューを来期の実現値についてのものとみる。$\tau$ が不要で、ビューを信じないときは事前に、100\% 信じるときは条件付き分布に、それぞれ一致する。
+\end{itemize}
+\end{keybox}
