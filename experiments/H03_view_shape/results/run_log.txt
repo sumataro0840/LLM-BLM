@@ -1,0 +1,44 @@
+absolute|calibrated_diagonal|te3 beta 0.053  eff 50.4
+relative|calibrated_diagonal|te3 beta 0.050  eff 45.0
+rank|calibrated_diagonal|te3 beta 0.053  eff 50.0
+C:\Users\sumat\Desktop\BLM\工房\LLM-BLM\blm\optimizer.py:53: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  problem.solve(solver=cp.CLARABEL)
+C:\Users\sumat\Desktop\BLM\工房\LLM-BLM\blm\optimizer.py:53: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  problem.solve(solver=cp.CLARABEL)
+absolute|proportional|te3 beta 0.014  eff 42.8
+C:\Users\sumat\Desktop\BLM\工房\LLM-BLM\blm\optimizer.py:53: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  problem.solve(solver=cp.CLARABEL)
+relative|proportional|te3 beta 0.014  eff 42.8
+C:\Users\sumat\Desktop\BLM\工房\LLM-BLM\blm\optimizer.py:53: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  problem.solve(solver=cp.CLARABEL)
+rank|proportional|te3 beta 0.014  eff 42.5
+absolute|calibrated_diagonal|no_te beta 0.571  eff 17.2
+relative|calibrated_diagonal|no_te beta 0.693  eff 17.1
+rank|calibrated_diagonal|no_te beta 0.579  eff 17.4
+absolute|proportional|no_te beta 0.199  eff 21.3
+relative|proportional|no_te beta 0.199  eff 21.3
+rank|proportional|no_te beta 0.128  eff 23.5
+{
+  "absolute_diag_te3_corr": {
+    "r": 0.7058195800796833,
+    "p": 1.3178305159230779e-05,
+    "n": 30
+  },
+  "relative_over_absolute_abs_beta": 0.935415966903458,
+  "verdict": "not supported (relative views do not halve the active beta)"
+}
+                                    annual_return  active_return  tracking_error  information_ratio  t_active  effective_n  abs_active_beta  turnover
+name                                                                                                                                                 
+absolute|calibrated_diagonal|te3            0.166         -0.007           0.042             -0.162    -0.256       50.397            0.053     0.396
+relative|calibrated_diagonal|te3            0.167         -0.006           0.040             -0.150    -0.237       44.984            0.050     0.357
+rank|calibrated_diagonal|te3                0.166         -0.007           0.042             -0.165    -0.260       50.023            0.053     0.400
+absolute|proportional|te3                   0.171         -0.004           0.051             -0.073    -0.115       42.801            0.014     0.542
+relative|proportional|te3                   0.171         -0.004           0.051             -0.073    -0.115       42.801            0.014     0.542
+rank|proportional|te3                       0.170         -0.004           0.048             -0.080    -0.126       42.474            0.014     0.552
+absolute|calibrated_diagonal|no_te          0.081          0.013           0.410              0.031     0.050       17.241            0.571     0.777
+relative|calibrated_diagonal|no_te          0.048         -0.039           0.373             -0.106    -0.167       17.062            0.693     0.779
+rank|calibrated_diagonal|no_te              0.021         -0.056           0.384             -0.145    -0.229       17.427            0.579     0.778
+absolute|proportional|no_te                 0.304          0.134           0.241              0.557     0.881       21.293            0.199     0.792
+relative|proportional|no_te                 0.304          0.134           0.241              0.557     0.881       21.293            0.199     0.792
+rank|proportional|no_te                     0.226          0.057           0.175              0.327     0.517       23.454            0.128     0.779
+market_cap                                  0.177          0.000           0.000                NaN       NaN       51.517            0.000     0.004

@@ -1,0 +1,16 @@
+{
+ "corr_level_vs_market_input_return": 0.90190928235485,
+ "corr_xs_Q_beta_vs_market_input_return": [
+  0.6410499686573864,
+  0.00013519004336395472
+ ],
+ "corr_xs_Q_beta_vs_level": [
+  0.6347839902961728,
+  0.00016466229640438917
+ ],
+ "mean_abs_xs_corr_Q_beta": 0.2563124159927966,
+ "corr_xs_input_beta_vs_market_input": [
+  0.699527249420351,
+  1.696294070610577e-05
+ ]
+}
