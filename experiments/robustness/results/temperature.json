@@ -1,0 +1,15 @@
+{
+  "requests": 60,
+  "max_abs_prob_diff_max": 0.22250241070106858,
+  "max_abs_prob_diff_median": 0.0021146614127361962,
+  "score_diff_abs_max": 0.43404151387739315,
+  "spending": {
+    "requests": 60,
+    "prompt_tokens": 11558,
+    "completion_tokens": 60,
+    "cost_usd": 0.0018,
+    "models": [
+      "gpt-4o-mini-2024-07-18"
+    ]
+  }
+}

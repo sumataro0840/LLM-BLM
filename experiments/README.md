@@ -18,7 +18,8 @@ experiments/
 ├── H04_omega_calibration/
 ├── H05_text_vs_numbers/
 ├── H06_earnings_text/      fetch.py → score.py → evaluate.py
-└── H07_feedback_llm/
+├── H07_feedback_llm/
+└── robustness/            結果を別のモデルに読ませた後の追加の確認（探索的）とレビューの記録
 ```
 
 各フォルダの `results/` に、条件と数値（`summary.json` など）と LLM の全回答（`*.jsonl`）を置きます。
@@ -38,9 +39,11 @@ python experiments/H06_earnings_text/score.py            # API を使う
 python experiments/H06_earnings_text/evaluate.py
 python experiments/H07_feedback_llm/run.py ask           # API を使う
 python experiments/H07_feedback_llm/run.py evaluate
+python experiments/robustness/run.py nw            # nw | temperature | feedback | placebo
+python 資料集/LLM-BLM_実験結果レポート_図/作成スクリプト/figs.py
 ```
 
 - DB は `.env` の `DB_PATH`（`data/blm_2015.sqlite`）を読み取り専用で開きます。実験は DB に書き込みません。
 - API キーは `.env` の `OPENAI_API_KEY` を使います。予想に使うモデルは gpt-4o-mini だけです（知識の期限が評価期間より前のため）。
 - LLM の回答は乱数を含むので、同じコマンドを実行しても同じ回答にはなりません。再現性は「保存した回答（`*.jsonl`）から同じ数値を計算し直せること」とします。`ask` は回答済みのリクエストを飛ばすので、途中で止まっても続きから再開できます。
-- 決算発表文の本文（`data/cache/edgar/`）は Git に入れていません。`fetch.py` で取り直せます。
+- 決算発表文の本文（`data/cache/edgar/`）は Git に入れていません。`fetch.py` で取り直せます。ただし、H06 の読み取りの記録（`H06_earnings_text/results/scores.jsonl`、91MB）には、LLM に送ったプロンプトとして本文の先頭 15,000 文字が入っていて、Git にコミット済みです（`experiment/H06-earnings-text` 以降）。

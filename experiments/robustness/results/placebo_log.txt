@@ -1,0 +1,19 @@
+sector placebo 10/100 (52s)
+sector placebo 20/100 (95s)
+sector placebo 30/100 (137s)
+sector placebo 40/100 (179s)
+sector placebo 50/100 (221s)
+sector placebo 60/100 (308s)
+sector placebo 70/100 (349s)
+sector placebo 80/100 (389s)
+sector placebo 90/100 (429s)
+sector placebo 100/100 (467s)
+{
+  "actual": 0.005333175371009056,
+  "mean": -0.0016959593534607695,
+  "p95": 0.025221154396269412,
+  "n": 100,
+  "p_one_sided": 0.37623762376237624,
+  "mean_turnover": 0.34546123069191614,
+  "mean_te": 0.02768360106530224
+}
