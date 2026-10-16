@@ -1,0 +1,3 @@
+528 symbols, 526 with a CIK
+6209 filings (189s)
+{'named': 4775, 'largest': 1327, 'none': 72, 'cached': 35} median chars 32829.0 (2132s)
