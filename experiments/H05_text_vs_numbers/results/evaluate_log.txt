@@ -1,0 +1,305 @@
+{
+  "G": {
+    "market_score_vs_sp_1m": {
+      "rho": 0.7655172413793103,
+      "p": 8.290297818565411e-07
+    },
+    "market_score_vs_vix": {
+      "rho": -0.585669796431087,
+      "p": 0.0006732859575742677
+    },
+    "sector_ic": {
+      "n": 30,
+      "mean": -0.12575757575757576,
+      "sd": 0.42098070667300136,
+      "t": -1.6361856951580473,
+      "p": 0.11260942420863089,
+      "ci_low": -0.2829543550860361,
+      "ci_high": 0.03143920357088459,
+      "positive": 14
+    },
+    "sector_score_sd_within_month": 0.7213470860985384,
+    "sector_score_sd_over_months": 0.6632743750347352,
+    "sector_score_mean": 2.2844903284320917,
+    "probability_mass_min": 0.9999997977058835,
+    "factors": {
+      "beta": {
+        "mean_score": 3.9989828042119293,
+        "sd_over_months": 0.6869039179931988,
+        "months_above_3": 26,
+        "months_realized_positive": 21,
+        "hit_rate": 0.5666666666666667,
+        "rank_corr_realized": -0.14527252502780869,
+        "rank_corr_sp_1m": 0.47141268075639603
+      },
+      "market": {
+        "mean_score": 3.8205828100922683,
+        "sd_over_months": 0.8351160634185131,
+        "months_above_3": 25,
+        "months_realized_positive": 17,
+        "hit_rate": 0.5333333333333333,
+        "rank_corr_realized": -0.1243604004449388,
+        "rank_corr_sp_1m": 0.7655172413793103
+      },
+      "momentum": {
+        "mean_score": 4.070202550644285,
+        "sd_over_months": 0.6218839833490957,
+        "months_above_3": 27,
+        "months_realized_positive": 16,
+        "hit_rate": 0.43333333333333335,
+        "rank_corr_realized": 0.05361512791991101,
+        "rank_corr_sp_1m": 0.578642936596218
+      },
+      "safety": {
+        "mean_score": 4.100536369564657,
+        "sd_over_months": 0.27028371699805603,
+        "months_above_3": 30,
+        "months_realized_positive": 17,
+        "hit_rate": 0.5666666666666667,
+        "rank_corr_realized": -0.1203559510567297,
+        "rank_corr_sp_1m": 0.4487208008898776
+      },
+      "size": {
+        "mean_score": 3.3045041427245465,
+        "sd_over_months": 0.7601952765829713,
+        "months_above_3": 20,
+        "months_realized_positive": 10,
+        "hit_rate": 0.5333333333333333,
+        "rank_corr_realized": 0.07630700778642936,
+        "rank_corr_sp_1m": 0.3388209121245828
+      },
+      "value": {
+        "mean_score": 3.7729828979585465,
+        "sd_over_months": 0.6270012810729233,
+        "months_above_3": 26,
+        "months_realized_positive": 17,
+        "hit_rate": 0.7,
+        "rank_corr_realized": -0.15595105672969967,
+        "rank_corr_sp_1m": 0.418020022246941
+      },
+      "volatility": {
+        "mean_score": 3.691104089656364,
+        "sd_over_months": 0.7041729550755625,
+        "months_above_3": 25,
+        "months_realized_positive": 17,
+        "hit_rate": 0.4,
+        "rank_corr_realized": -0.0460511679644049,
+        "rank_corr_sp_1m": 0.6173526140155728
+      }
+    }
+  },
+  "T": {
+    "market_score_vs_sp_1m": {
+      "rho": 0.05228031145717464,
+      "p": 0.783799446914433
+    },
+    "market_score_vs_vix": {
+      "rho": -0.27280819545004276,
+      "p": 0.14468288057575537
+    },
+    "sector_ic": {
+      "n": 30,
+      "mean": 0.06151515151515153,
+      "sd": 0.4656247443852529,
+      "t": 0.723613521821752,
+      "p": 0.4750999167759657,
+      "ci_low": -0.11235198546472361,
+      "ci_high": 0.23538228849502665,
+      "positive": 16
+    },
+    "sector_score_sd_within_month": 0.5696420714684598,
+    "sector_score_sd_over_months": 0.559480491427339,
+    "sector_score_mean": 2.9614513618521077,
+    "probability_mass_min": 0.999997988193886,
+    "factors": {
+      "beta": {
+        "mean_score": 3.962093701079958,
+        "sd_over_months": 0.6790022603605282,
+        "months_above_3": 27,
+        "months_realized_positive": 21,
+        "hit_rate": 0.6666666666666666,
+        "rank_corr_realized": -0.307230255839822,
+        "rank_corr_sp_1m": 0.10077864293659622
+      },
+      "market": {
+        "mean_score": 3.9329651469163918,
+        "sd_over_months": 0.7304098998303727,
+        "months_above_3": 26,
+        "months_realized_positive": 17,
+        "hit_rate": 0.43333333333333335,
+        "rank_corr_realized": -0.17374860956618463,
+        "rank_corr_sp_1m": 0.05228031145717464
+      },
+      "momentum": {
+        "mean_score": 3.9009566470556107,
+        "sd_over_months": 0.6247429423968862,
+        "months_above_3": 26,
+        "months_realized_positive": 16,
+        "hit_rate": 0.4666666666666667,
+        "rank_corr_realized": -0.05850945494994438,
+        "rank_corr_sp_1m": 0.0731924360400445
+      },
+      "safety": {
+        "mean_score": 4.015329159867262,
+        "sd_over_months": 0.2848671513473291,
+        "months_above_3": 30,
+        "months_realized_positive": 17,
+        "hit_rate": 0.5666666666666667,
+        "rank_corr_realized": 0.03937708565072302,
+        "rank_corr_sp_1m": 0.09232480533926585
+      },
+      "size": {
+        "mean_score": 3.3080270471155,
+        "sd_over_months": 0.7960271811261643,
+        "months_above_3": 21,
+        "months_realized_positive": 10,
+        "hit_rate": 0.5,
+        "rank_corr_realized": 0.07007786429365963,
+        "rank_corr_sp_1m": 0.15194660734149054
+      },
+      "value": {
+        "mean_score": 3.755903087784692,
+        "sd_over_months": 0.574769254601162,
+        "months_above_3": 27,
+        "months_realized_positive": 17,
+        "hit_rate": 0.6,
+        "rank_corr_realized": -0.023804226918798663,
+        "rank_corr_sp_1m": 0.007341490545050056
+      },
+      "volatility": {
+        "mean_score": 3.5834361208881584,
+        "sd_over_months": 0.7432613585946938,
+        "months_above_3": 23,
+        "months_realized_positive": 17,
+        "hit_rate": 0.4,
+        "rank_corr_realized": -0.3076751946607342,
+        "rank_corr_sp_1m": 0.08743047830923248
+      }
+    }
+  },
+  "N": {
+    "market_score_vs_sp_1m": {
+      "rho": 0.9692992213570634,
+      "p": 1.341389161408224e-18
+    },
+    "market_score_vs_vix": {
+      "rho": -0.5623053098713361,
+      "p": 0.0012200794960559574
+    },
+    "sector_ic": {
+      "n": 30,
+      "mean": -0.1281818181818182,
+      "sd": 0.41954493660751163,
+      "t": -1.6734339317241718,
+      "p": 0.10499670456267222,
+      "ci_low": -0.2848424721568511,
+      "ci_high": 0.028478835793214724,
+      "positive": 14
+    },
+    "sector_score_sd_within_month": 0.7767479567582521,
+    "sector_score_sd_over_months": 0.6940150114347259,
+    "sector_score_mean": 2.3707181060124825,
+    "probability_mass_min": 0.9999980212978039,
+    "factors": {
+      "beta": {
+        "mean_score": 3.957606355349925,
+        "sd_over_months": 0.7322271216727511,
+        "months_above_3": 26,
+        "months_realized_positive": 21,
+        "hit_rate": 0.5666666666666667,
+        "rank_corr_realized": 0.0037819799777530586,
+        "rank_corr_sp_1m": 0.9185761957730811
+      },
+      "market": {
+        "mean_score": 3.5702454717266234,
+        "sd_over_months": 1.1135377064790055,
+        "months_above_3": 21,
+        "months_realized_positive": 17,
+        "hit_rate": 0.6,
+        "rank_corr_realized": -0.14171301446051168,
+        "rank_corr_sp_1m": 0.9692992213570634
+      },
+      "momentum": {
+        "mean_score": 4.345752375082182,
+        "sd_over_months": 0.6792332237172461,
+        "months_above_3": 28,
+        "months_realized_positive": 16,
+        "hit_rate": 0.4666666666666667,
+        "rank_corr_realized": -0.06206896551724137,
+        "rank_corr_sp_1m": 0.8246941045606229
+      },
+      "safety": {
+        "mean_score": 4.3832503809810275,
+        "sd_over_months": 0.27037572821694916,
+        "months_above_3": 30,
+        "months_realized_positive": 17,
+        "hit_rate": 0.5666666666666667,
+        "rank_corr_realized": -0.1982202447163515,
+        "rank_corr_sp_1m": 0.7628476084538376
+      },
+      "size": {
+        "mean_score": 2.9545118289903076,
+        "sd_over_months": 0.6495396155066462,
+        "months_above_3": 16,
+        "months_realized_positive": 10,
+        "hit_rate": 0.4666666666666667,
+        "rank_corr_realized": -0.02202447163515017,
+        "rank_corr_sp_1m": 0.9208008898776417
+      },
+      "value": {
+        "mean_score": 3.703443213103188,
+        "sd_over_months": 0.4775360357151849,
+        "months_above_3": 27,
+        "months_realized_positive": 17,
+        "hit_rate": 0.6666666666666666,
+        "rank_corr_realized": -0.11768631813125695,
+        "rank_corr_sp_1m": 0.9381535038932147
+      },
+      "volatility": {
+        "mean_score": 3.32743112126836,
+        "sd_over_months": 0.8490332857305501,
+        "months_above_3": 21,
+        "months_realized_positive": 17,
+        "hit_rate": 0.4666666666666667,
+        "rank_corr_realized": -0.20266963292547271,
+        "rank_corr_sp_1m": 0.8638487208008899
+      }
+    }
+  },
+  "primary": {
+    "sector_ic_T": {
+      "n": 30,
+      "mean": 0.06151515151515153,
+      "sd": 0.4656247443852529,
+      "t": 0.723613521821752,
+      "p": 0.4750999167759657,
+      "ci_low": -0.11235198546472361,
+      "ci_high": 0.23538228849502665,
+      "positive": 16
+    },
+    "trace_T_vs_G_fisher_p": 0.0004372139429418942,
+    "trace_gone": true,
+    "verdict": "tracing gone, but hitting is not shown"
+  },
+  "spending": {
+    "T": {
+      "requests": 540,
+      "prompt_tokens": 103782,
+      "completion_tokens": 16200,
+      "cost_usd": 0.0253,
+      "models": [
+        "gpt-4o-mini-2024-07-18"
+      ]
+    },
+    "N": {
+      "requests": 540,
+      "prompt_tokens": 154508,
+      "completion_tokens": 16200,
+      "cost_usd": 0.0329,
+      "models": [
+        "gpt-4o-mini-2024-07-18"
+      ]
+    }
+  },
+  "deviation_from_design": "The design says \"temperature 0 (same as G)\"; G used temperature 1.0 with n = 30 and the probabilities of the first token. G was followed, as the design intended."
+}
