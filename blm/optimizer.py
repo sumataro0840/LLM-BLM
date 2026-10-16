@@ -36,3 +36,22 @@ def optimize_original(expected_returns, covariance, return_weight):
     )
     weights = np.clip(result.x, 0, None)
     return pd.Series(weights / weights.sum(), index=expected_returns.index)
+
+
+def optimize_with_tracking_error(expected_returns, covariance, risk_aversion, benchmark, max_tracking_error):
+    """optimize() with a limit on the ex-ante tracking error against the benchmark weights:
+    (w - b) Sigma (w - b) <= max_tracking_error^2 (in the unit of the covariance, e.g. daily).
+
+    Returns (weights, solver status); the status is kept so that a run can record whether every date was solved.
+    """
+    w = cp.Variable(len(expected_returns))
+    sigma = cp.psd_wrap(covariance.values)
+    objective = expected_returns.values @ w - risk_aversion / 2 * cp.quad_form(w, sigma)
+    constraints = [cp.sum(w) == 1, w >= 0,
+                   cp.quad_form(w - benchmark.reindex(expected_returns.index).values, sigma) <= max_tracking_error ** 2]
+    problem = cp.Problem(cp.Maximize(OBJECTIVE_SCALE * objective), constraints)
+    problem.solve(solver=cp.CLARABEL)
+    if problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
+        raise RuntimeError(f"optimization failed: {problem.status}")
+    weights = np.clip(w.value, 0, None)
+    return pd.Series(weights / weights.sum(), index=expected_returns.index), problem.status

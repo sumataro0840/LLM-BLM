@@ -5,3 +5,5 @@ __pycache__/
 # Monthly reports (copyrighted, kept locally)
 data/reports/*
 !data/reports/.gitkeep
+# Caches of the experiments (rebuilt from the database)
+data/cache/

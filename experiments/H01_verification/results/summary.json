@@ -1,0 +1,64 @@
+{
+  "months": 30,
+  "universe_mean": 488.7,
+  "check_forms_max_rel_diff": 9.610527738542383e-15,
+  "check_no_view_max_diff": 9.148439071046639e-06,
+  "check_cond_max": 1240.300775584725,
+  "check_solve_residual_max": 1.0745014905958384e-14,
+  "check_fixed_objective_gap_vs_osqp_min": -9.437871664741415e-11,
+  "check_fixed_vs_db_max_diff": 0.07533465119926297,
+  "check_original_vs_db_max_diff": 0.9999999999999916,
+  "check_optimize_original_same": 0.0,
+  "check_omega_is_population_variance_max_diff": 1.7279472123987727e-19,
+  "check_min_filing_age_days": 0.0,
+  "check_window_ends_on_date": true,
+  "check_month_returns_not_after_date": true,
+  "check_outcomes_after_date": true,
+  "check_universe_in_members": true,
+  "adoption_original_median": 0.9986142233585151,
+  "adoption_original_min": 0.9919636206422837,
+  "adoption_fixed_median": 0.9132445434584158,
+  "original_prior_mean_daily": [
+    -0.01936456746857057,
+    -0.0057203569192876575
+  ],
+  "original_cov_rank": [
+    18,
+    22
+  ],
+  "slsqp_success_all": true,
+  "slsqp_iterations": [
+    12,
+    54
+  ],
+  "slsqp_progress_mean": 0.9645992851113794,
+  "slsqp_progress_min": 0.8974489012508104,
+  "original_effective_n": 7.1156966911129,
+  "exact_effective_n": 3.1907964952379904,
+  "slsqp_vs_exact_overlap": 0.7202288013733191,
+  "fixed_effective_n": 1.6988530024716995,
+  "corr_forecast_input_mean": 0.893111265655992,
+  "ic_mean_daily_outcome": {
+    "n": 30,
+    "mean": 0.050668495741640805,
+    "sd": 0.18733464015529291,
+    "t": 1.4814279969548394,
+    "p": 0.14927741751654933,
+    "ci_low": -0.019283408519715974,
+    "ci_high": 0.12062040000299759,
+    "positive": 14
+  },
+  "ic_monthly_return_outcome": {
+    "n": 30,
+    "mean": 0.04988830238286411,
+    "sd": 0.1872163291389532,
+    "t": 1.459538743036279,
+    "p": 0.15516532495614105,
+    "ci_low": -0.020019423818945323,
+    "ci_high": 0.11979602858467354,
+    "positive": 14
+  },
+  "slope_pooled": 0.07343696324563094,
+  "variance_over_squared_error_median": 0.12351331914013634,
+  "share_positive_forecasts": 0.7584748652888617
+}
