@@ -1,0 +1,85 @@
+answer_variance: 24s
+he_litterman: 23s
+calibrated_diagonal: 61s
+calibrated_proportional: 86s
+calibrated_proportional_shrunk: 79s
+placebo 10/200 (426s)
+placebo 20/200 (830s)
+placebo 30/200 (1074s)
+placebo 40/200 (1145s)
+placebo 50/200 (1219s)
+placebo 60/200 (1223s)
+placebo 70/200 (1271s)
+placebo 80/200 (1446s)
+placebo 90/200 (1768s)
+placebo 100/200 (1823s)
+placebo 110/200 (1878s)
+placebo 120/200 (1887s)
+placebo 130/200 (1936s)
+placebo 140/200 (1990s)
+placebo 150/200 (2041s)
+placebo 160/200 (2092s)
+placebo 170/200 (2180s)
+placebo 180/200 (2193s)
+placebo 190/200 (2255s)
+placebo 200/200 (2378s)
+placebo: 2379s
+{
+  "primary_placebo": {
+    "actual_active_return": 0.005333175371009056,
+    "placebo_mean": -0.013932040177615708,
+    "placebo_p95": 0.011382911200804669,
+    "n_shuffles": 200,
+    "p_one_sided": 0.1044776119402985,
+    "p_two_sided_for_holm": 0.208955223880597,
+    "verdict": "supported (no information of the views detected)"
+  },
+  "answer_spread": {
+    "raw": {
+      "n": 30,
+      "mean": 0.2770695455135339,
+      "sd": 0.0787985844498378,
+      "t": 19.25887896781618,
+      "p": 4.5568210799830225e-18,
+      "ci_low": 0.2476456705121131,
+      "ci_high": 0.30649342051495476,
+      "positive": 30
+    },
+    "partial_on_volatility": {
+      "n": 30,
+      "mean": 0.1725684094490953,
+      "sd": 0.07327939891723466,
+      "t": 12.898524273488135,
+      "p": 1.5372611661251458e-13,
+      "ci_low": 0.145205432195455,
+      "ci_high": 0.19993138670273558,
+      "positive": 30
+    },
+    "sd_vs_vol": {
+      "n": 30,
+      "mean": 0.5918239442137261,
+      "sd": 0.06175780305937625,
+      "t": 52.488156679712496,
+      "p": 2.6679430372110038e-30,
+      "ci_low": 0.5687632015586568,
+      "ci_high": 0.6148846868687954,
+      "positive": 30
+    },
+    "verdict": "rejected"
+  },
+  "behaviour_of_main": {
+    "adoption_minus_b_max_abs": 4.996003610813204e-16,
+    "effective_n_mean": 47.22507648206605,
+    "realized_te": 0.042359212449341606,
+    "supported": true
+  }
+}
+                                               annual_return  active_return  tracking_error  information_ratio  t_active  effective_n  turnover  adoption_rel_median
+name                                                                                                                                                                
+answer_variance                                        0.172         -0.002           0.051             -0.047    -0.075       39.084     0.651                0.876
+he_litterman                                           0.182          0.007           0.049              0.134     0.212       39.512     0.613                0.737
+calibrated_diagonal                                    0.167         -0.006           0.040             -0.150    -0.237       44.984     0.357                0.282
+calibrated_proportional                                0.171         -0.004           0.051             -0.073    -0.115       42.801     0.542                0.053
+calibrated_proportional_shrunk                         0.182          0.005           0.042              0.126     0.199       47.225     0.308                0.000
+calibrated_proportional_shrunk|next_day_trade          0.178          0.003           0.038              0.069     0.109       47.225     0.313                  NaN
+market_cap                                             0.177          0.000           0.000                NaN       NaN       51.517     0.004                  NaN
