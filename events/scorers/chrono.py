@@ -43,7 +43,17 @@ class ChronoScorer(Scorer):
     def params(self):
         return {"model": self.model, "questions": QUESTIONS, "max_chars": MAX_CHARS, "calibration": self.chrono.CONTENT_FREE,
                 "vintage": f"end of the year before the acceptance date, at most {LATEST_VINTAGE}",
-                "chrono_py_sha256": texts.sha256_of(config.CHRONO_DIR / "chrono.py")}
+                "scoring_code_sha256": self.scoring_code_hash()}
+
+    def scoring_code_hash(self):
+        """Hash of the functions that decide the scores (prompt, cut, choice likelihoods, model pass, calibration),
+        so that changes elsewhere in chrono.py (e.g. memory handling) do not start a new run."""
+        import hashlib
+        import inspect
+        parts = [inspect.getsource(getattr(self.chrono, name)) for name in
+                 ("format_prompt", "fit", "score_choices", "_choice_probs", "final_hidden", "head")]
+        parts += [repr(self.chrono.SYSTEM), repr(self.chrono.CONTEXT), repr(self.chrono.CONTENT_FREE)]
+        return hashlib.sha256("\n".join(parts).encode()).hexdigest()
 
     def vintage(self, accepted_et):
         """The vintage depends on the date only (never on what happens to be downloaded), so a run is reproducible."""
@@ -54,7 +64,9 @@ class ChronoScorer(Scorer):
 
     def score(self, releases):
         releases = releases.assign(vintage=[self.vintage(t) for t in releases.accepted_et])
+        model = None
         for year, group in releases.groupby("vintage"):
+            model = None                     # drop the previous vintage before the next one is put on the GPU
             model, tok = self.chrono.load(year)
             for r in group.itertuples():
                 started = time.time()
