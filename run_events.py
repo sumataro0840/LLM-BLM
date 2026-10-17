@@ -133,6 +133,9 @@ def main():
     args = parser.parse_args()
 
     conn = connect(config.DB_PATH)
+    # several commands may run at once (e.g. scoring on the GPU while surprises are recomputed): wait for the
+    # other writer instead of failing after SQLite's default 5 seconds
+    conn.execute("PRAGMA busy_timeout = 60000")
     init_db(conn)
     {"import-h06": lambda c, a: import_h06(c), "fetch": cmd_fetch, "timing": cmd_timing, "surprise": cmd_surprise,
      "score": cmd_score, "status": cmd_status}[args.command](conn, args)
