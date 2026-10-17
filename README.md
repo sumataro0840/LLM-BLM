@@ -26,6 +26,8 @@
 ├── blm/            共分散、均衡リターン、Black-Litterman、最適化
 ├── run_reports.py  月次レポートを LLM に読ませ、見通しの数値と要約を取り出す
 ├── reports/        レポートの読み込み、取り出す項目の一覧、プロンプト、API 呼び出し
+├── run_events.py   決算発表文をイベントとして扱う（取得・時刻・数値の驚き・点数）。設計は 設計.md
+├── events/         EDGAR の決算発表、時刻の規則、SUE、反応の計算、評価、点数の付け方（scorers/）
 └── data/           SQLite の DB ファイル（Git には入れない）
     └── reports/    月次レポートの原本（macro/ と sector/。Git には入れない）
 ```
@@ -60,4 +62,5 @@ python marketdb/build_stock_metrics.py  # 銘柄ごとの指標を計算する
 python run_llm.py                       # LLM に聞く（回答は DB に保存）
 python run_blm.py                       # 比率を計算する（結果は DB に保存）
 python run_reports.py                   # 月次レポートを読ませる（結果は DB に保存）
+python run_events.py status             # 決算発表のイベント（使い方は run_events.py の先頭と 設計.md の 12 章）
 ```

@@ -6,3 +6,5 @@ torch==2.11.0
 transformers==5.19.0
 bitsandbytes==0.50.2
 accelerate==1.15.0
+# run_events.py score chrono（ChronoGPT のトークナイザ）
+tiktoken==0.14.0

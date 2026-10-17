@@ -337,8 +337,100 @@ CREATE TABLE IF NOT EXISTS report_values (
 ) WITHOUT ROWID;
 
 -- ============================================================
+-- Earnings releases as events (design: the design document at the repository root)
+-- ============================================================
+
+-- One earnings press release: an 8-K with Item 2.02 and its exhibit 99.1 (the text itself is a file under
+-- data/cache/edgar, outside Git)
+CREATE TABLE IF NOT EXISTS earnings_releases (
+    accession    TEXT PRIMARY KEY,              -- EDGAR accession number, e.g. '0000016918-24-000004'
+    symbol       TEXT NOT NULL REFERENCES tickers(symbol),
+    cik          INTEGER NOT NULL,              -- SEC EDGAR company id
+    filing_date  TEXT NOT NULL,                 -- EDGAR filing date
+    accepted_at  TEXT NOT NULL,                 -- acceptance time in UTC (EDGAR's acceptanceDateTime ends in Z)
+    accepted_et  TEXT NOT NULL,                 -- the same time in New York, 'YYYY-MM-DDTHH:MM:SS' (daylight saving applied)
+    session      TEXT NOT NULL CHECK (session IN ('pre', 'open', 'post', 'late')),
+                                                -- New York time: 'pre' before 9:30, 'open' 9:30-16:00,
+                                                -- 'post' 16:00-17:30, 'late' from 17:30 (EDGAR shows it the next business day)
+    event_date   TEXT,                          -- first trading day whose close can reflect the release
+                                                -- (NULL while the prices of that day are not in the database)
+    document     TEXT,                          -- file name of the exhibit used as the release
+    doc_type     TEXT,                          -- type written at the top of the exhibit, e.g. 'EX-99.1'
+    how_chosen   TEXT NOT NULL,                 -- how the exhibit was chosen: 'named', 'largest', 'refined', 'none', ...
+    text_path    TEXT,                          -- text file relative to the repository (NULL = no text)
+    text_sha256  TEXT,                          -- to notice a replaced text
+    n_chars      INTEGER,
+    fetched_at   TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_releases_symbol ON earnings_releases(symbol, event_date);
+CREATE INDEX IF NOT EXISTS idx_releases_event ON earnings_releases(event_date);
+
+-- One way of scoring the releases (LLM, ChronoGPT, dictionary, FinBERT, TF-IDF); changing anything that
+-- affects the scores starts a new run
+CREATE TABLE IF NOT EXISTS release_score_runs (
+    score_run_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    method        TEXT NOT NULL,                -- 'llm', 'chrono', 'dictionary', 'finbert', 'tfidf'
+    model         TEXT NOT NULL,                -- model or resource, e.g. 'gpt-4o-mini', 'LM-MasterDictionary-1993-2025'
+    params        TEXT NOT NULL,                -- JSON of everything needed to reproduce the scores (prompt, schema, limits, ...)
+    params_sha256 TEXT NOT NULL UNIQUE,         -- the same settings are registered once (quoted in the pre-registration)
+    uses_outcomes INTEGER NOT NULL CHECK (uses_outcomes IN (0, 1)),
+                                                -- 1 = trained on stock reactions of earlier releases
+    note          TEXT,
+    created_at    TEXT NOT NULL
+);
+
+-- A score of a release: one row per item
+CREATE TABLE IF NOT EXISTS release_scores (
+    score_run_id INTEGER NOT NULL REFERENCES release_score_runs(score_run_id),
+    accession    TEXT NOT NULL REFERENCES earnings_releases(accession),
+    item         TEXT NOT NULL,                 -- e.g. 'tone', 'guidance_change', 'net_tone'
+    value_num    REAL,
+    value_text   TEXT,                          -- text answers (risk_flags as a JSON list)
+    -- both NULL = answered, but the release says nothing about the item (e.g. no guidance)
+    CHECK (value_num IS NULL OR value_text IS NULL),
+    PRIMARY KEY (score_run_id, accession, item)
+) WITHOUT ROWID;
+
+-- One call of a model for a release: which version answered and what it cost (methods without a model,
+-- such as the dictionary, have no rows here)
+CREATE TABLE IF NOT EXISTS release_score_calls (
+    score_run_id      INTEGER NOT NULL REFERENCES release_score_runs(score_run_id),
+    accession         TEXT NOT NULL REFERENCES earnings_releases(accession),
+    model_version     TEXT,                     -- e.g. 'gpt-4o-mini-2024-07-18'; for ChronoGPT the vintage year used
+    raw_answer        TEXT,                     -- the answer as returned (never the release text)
+    prompt_tokens     INTEGER,
+    completion_tokens INTEGER,
+    cost_usd          REAL,
+    seconds           REAL,
+    answered_at       TEXT NOT NULL,
+    PRIMARY KEY (score_run_id, accession)
+) WITHOUT ROWID;
+
+-- Earnings surprise of a release from the financial statements (computed by events/surprise.py)
+-- The quarter's own numbers come from the 10-Q/10-K filed after the release, but they were made public by the
+-- release itself; the history used for the scale only includes quarters filed before the release
+CREATE TABLE IF NOT EXISTS release_surprises (
+    accession        TEXT PRIMARY KEY REFERENCES earnings_releases(accession),
+    period_end       TEXT,                      -- quarter the release reports (NULL = not found)
+    eps              REAL,                      -- diluted EPS of that quarter
+    eps_lag4         REAL,                      -- the same quarter a year earlier
+    sue              REAL,                      -- (eps - eps_lag4) / std of the seasonal differences of the past 8 quarters
+    revenue_growth   REAL,                      -- revenue / revenue a year earlier - 1
+    revenue_surprise REAL,                      -- revenue_growth - mean growth of the past 4 quarters
+    n_history        INTEGER,                   -- seasonal differences behind the std (NULL sue when fewer than 4)
+    computed_at      TEXT NOT NULL
+);
+
+-- ============================================================
 -- Views (computed when read; nothing is stored)
 -- ============================================================
+
+-- Trading days = days with an S&P500 index price; the running number counts trading days
+CREATE VIEW IF NOT EXISTS trading_days AS
+SELECT date, ROW_NUMBER() OVER (ORDER BY date) AS trading_day_no
+FROM prices
+WHERE symbol = '^GSPC';
 
 -- Market cap for every trading day, using the latest shares report on or before that day
 CREATE VIEW IF NOT EXISTS market_caps AS
