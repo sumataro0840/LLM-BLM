@@ -27,6 +27,7 @@ from scipy import stats
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 from experiments.common import data as D
+from marketdb.db.market import load_trading_days
 
 
 def _load(name, rel):
@@ -39,7 +40,7 @@ def _load(name, rel):
 e7 = _load('e7_run', 'experiments/E7_monthly_blm/run.py')
 x02 = e7.x02
 
-OUT = Path(__file__).resolve().parent / 'results'
+OUT = Path(__file__).resolve().parent / 'results' / (sys.argv[1] if len(sys.argv) > 1 else '')
 PANEL = REPO / 'experiments' / 'E2_event_reaction' / 'results' / 'panel.csv'
 PRED = REPO / 'experiments' / 'E5_chrono_embeddings' / 'results' / 'predictions.csv'
 FIRST, LAST = '2016-03', '2026-07'
@@ -48,6 +49,14 @@ TARGET = 0.03
 MIN_RATIO_MONTHS = 12          # the TE limit is calibrated once 12 past months of this strategy exist
 LOOKBACK = 36
 SPLIT = '2023-09'              # last decision month whose views are all from block B (secondary S2)
+
+
+def decision_dates(conn):
+    """Month ends from FIRST to the month after LAST (X02's own list starts only in 2017-01; fixed after the first run,
+    see results/findings.md)."""
+    days = pd.Series(pd.to_datetime(load_trading_days(conn, '2016-01-01', '2026-09-30')))
+    ends = days.groupby(days.dt.to_period('M')).max()
+    return [d.strftime('%Y-%m-%d') for d in ends if FIRST <= d.strftime('%Y-%m') <= '2026-08']
 
 
 def views_frame():
@@ -115,7 +124,7 @@ def main():
     conn = D.connect()
     commit = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True, cwd=REPO).stdout.strip()
     frame = views_frame()
-    dates = x02.decision_dates(conn)
+    dates = decision_dates(conn)
     jobs = [(d, n, frame) for d, n in zip(dates[:-1], dates[1:]) if FIRST <= d[:7] <= LAST]
     print(f'{len(jobs)} decision dates {jobs[0][0]} .. {jobs[-1][0]}', flush=True)
     with ProcessPoolExecutor(5) as pool:
