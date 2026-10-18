@@ -21,9 +21,12 @@ def frame(llm_extra, seed=5):
     rng = np.random.default_rng(seed)
     news = rng.normal(size=len(A))
     extra = rng.normal(size=len(A))
-    A['ft_pred'] = news + rng.normal(0, 0.3, len(A))              # the fine-tuned model sees the news
-    A['llm_composite'] = news + llm_extra * extra + rng.normal(0, 0.3, len(A))
-    A['abn_r_0_1'] = 0.003 * news + 0.003 * llm_extra * extra + rng.normal(0, 0.03, len(A))
+    # the fine-tuned model measures the news exactly; the LLM measures it with error, plus (or not) other information.
+    # (two equally noisy measures of the same news would both keep a coefficient: a surviving LLM coefficient alone
+    # does not prove extra information, which the report has to say)
+    A['ft_pred'] = news
+    A['llm_composite'] = news + llm_extra * extra + rng.normal(0, 0.5, len(A))
+    A['abn_r_0_1'] = 0.006 * news + 0.003 * llm_extra * extra + rng.normal(0, 0.03, len(A))
     d = e4.e3.prepare(A, 'llm_composite', 'abn_r_0_1')
     d['ft_pred'] = e4.e2.standardize(A['ft_pred'])
     return d
