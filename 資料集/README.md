@@ -42,6 +42,8 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | 実験 2 の事前登録と結果 | `experiments/E2_event_reaction/preregistration.md`、`results/findings.md` |
 | 実験 3 の事前登録と結果 | `experiments/E3_analyst_surprise/preregistration.md`、`results/findings.md` |
 | 実験 4 の事前登録と結果 | `experiments/E4_finbert_finetune/preregistration.md`、`results/findings.md` |
+| 共分散の窓・EWMA の比較（X02、実現の TE と QLIKE） | `experiments/X02_covariance_window/results/findings.md` |
+| 実験 5 の事前登録（ChronoGPT の埋め込み＋リッジ） | `experiments/E5_chrono_embeddings/preregistration.md` |
 | H01〜H07 の結果と、別のモデルによる確認 | `experiments/H0x_*/results/findings.md`、`experiments/robustness/results/` |
 
 `03_方針と文献調査/` の各フォルダにある `00_依頼.md` は、モデルに渡した依頼の文書。`<モデル名>/` が答え、`実行記録.jsonl` がモデル・トークン・時間の記録、`比較検討.md` が Claude による比較。
