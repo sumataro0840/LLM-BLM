@@ -47,6 +47,8 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | VIX で共分散の大きさを合わせる（X04） | `experiments/X04_vix_scaling/results/findings.md` |
 | 実験 5 の事前登録（ChronoGPT の埋め込み＋リッジ） | `experiments/E5_chrono_embeddings/preregistration.md` |
 | 実験 6 の事前登録の案（10-K の文章と長い期間のリターン） | `experiments/E6_10k_risk_exposure/preregistration.md` |
+| 実験 7（月次の BLM、結果を全部入れたもの）の事前登録と結果 | `experiments/E7_monthly_blm/preregistration.md`、`results/findings.md` |
+| 実験 8（発表の翌日と日次の BLM）の事前登録と結果 | `experiments/E8_daily_blm/preregistration.md`、`results/findings.md` |
 | H01〜H07 の結果と、別のモデルによる確認 | `experiments/H0x_*/results/findings.md`、`experiments/robustness/results/` |
 
 `03_方針と文献調査/` の各フォルダにある `00_依頼.md` は、モデルに渡した依頼の文書。`<モデル名>/` が答え、`実行記録.jsonl` がモデル・トークン・時間の記録、`比較検討.md` が Claude による比較。

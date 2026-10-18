@@ -1,0 +1,96 @@
+{
+ "code_commit": "55ef830d131904e67e5a37606dc0893dfa853b3d",
+ "part1_regression": {
+  "P": {
+   "coef_bp_per_sd": 3.638801431420497,
+   "se_bp": 3.918579899021821,
+   "t": 0.928602076565757,
+   "p_one_sided": 0.17676063448872323,
+   "n": 5374,
+   "event_dates": 527,
+   "ci95_bp": [
+    -4.041615170662272,
+    11.319218033503267
+   ],
+   "day0": {
+    "coef_bp_per_sd": -1.4191444075089794,
+    "t": -0.34482376383489927
+   },
+   "permutation_p_one_sided": 0.14885114885114886,
+   "verdict": "支持されない"
+  },
+  "S1": {
+   "coef_bp_per_sd": 11.420055893968561,
+   "se_bp": 7.524798475494859,
+   "t": 1.5176560450301675,
+   "p_one_sided": 0.06485094836832987,
+   "n": 5374,
+   "event_dates": 527,
+   "ci95_bp": [
+    -3.328549118001361,
+    26.16866090593848
+   ],
+   "day0": {
+    "coef_bp_per_sd": 0.9799129428784495,
+    "t": 0.12801882448637797
+   },
+   "p_holm": 0.12970189673665974
+  },
+  "S2": {
+   "coef_bp_per_sd": 3.3864827379694313,
+   "se_bp": 3.8740142749486357,
+   "t": 0.8741533968700546,
+   "p_one_sided": 0.19121682613436294,
+   "n": 5374,
+   "event_dates": 527,
+   "ci95_bp": [
+    -4.206585240929894,
+    10.979550716868756
+   ],
+   "p_holm": 0.19121682613436294
+  },
+  "n_with_next_day": 5374
+ },
+ "part2_daily_blm": {
+  "days": 593,
+  "first": "2024-04-18",
+  "last": "2026-08-28",
+  "mean_active_net_daily_bp": -7.929248900940219,
+  "nw_t": -8.752545915416565,
+  "mean_active_gross_daily_bp": 0.509353252483311,
+  "annual_active_net": -0.19981707230369353,
+  "annual_active_gross": 0.012835701962579436,
+  "information_ratio_net": -5.886616050751287,
+  "realized_te": 0.03394430188430442,
+  "turnover_daily_mean": 0.4219301076711765,
+  "days_with_views": 467,
+  "status": {
+   "optimal": 435,
+   "no views": 126,
+   "optimal_inaccurate": 32
+  }
+ },
+ "part2_permuted_control": {
+  "days": 593,
+  "first": "2024-04-18",
+  "last": "2026-08-28",
+  "mean_active_net_daily_bp": -7.801383434322762,
+  "nw_t": -8.95335402142437,
+  "mean_active_gross_daily_bp": 0.7806412592988368,
+  "annual_active_net": -0.1965948625449336,
+  "annual_active_gross": 0.019672159734330685,
+  "information_ratio_net": -6.091608575385852,
+  "realized_te": 0.03227306221534121,
+  "turnover_daily_mean": 0.42910123468107997,
+  "days_with_views": 467,
+  "status": {
+   "optimal": 435,
+   "no views": 126,
+   "optimal_inaccurate": 32
+  }
+ },
+ "part2_llm_minus_permuted_gross_daily_bp": {
+  "mean": -0.27128800681552606,
+  "nw_t": -0.29686604813433415
+ }
+}

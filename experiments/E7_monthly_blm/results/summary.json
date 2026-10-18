@@ -1,0 +1,40 @@
+{
+ "code_commit": "55ef830d131904e67e5a37606dc0893dfa853b3d",
+ "n_months": 31,
+ "first": "2024-01-31",
+ "last": "2026-07-31",
+ "views_per_month": {
+  "mean": 454.1290322580645,
+  "min": 145
+ },
+ "stocks_per_month": 490.93548387096774,
+ "te_limit": {
+  "mean": 0.0194870824388085
+ },
+ "te_pred_mean": 0.01948708366110657,
+ "primary_llm_blm_vs_market": {
+  "mean_active_net_monthly": 0.0009648447862109176,
+  "nw_t": 1.2160457608787252,
+  "p_one_sided": 0.11672485514968932,
+  "mean_active_gross_monthly": 0.0014729619974999226,
+  "information_ratio_net": 0.546537571901147,
+  "cumulative_net": 0.6846948776472801,
+  "cumulative_bench": 0.6380979663937874,
+  "realized_te_mean": 0.024620359058573977,
+  "turnover_mean": 0.25405860564450267,
+  "share_months_ahead": 0.5483870967741935,
+  "status": {
+   "optimal": 31
+  },
+  "verdict": "支持されない"
+ },
+ "secondary_llm_vs_permuted": {
+  "mean_diff_gross_monthly": 0.0020009071879865657,
+  "nw_t": 2.2986288254346374,
+  "permuted_mean_active_net": -0.0017134738643912316
+ },
+ "secondary_te": {
+  "realized_mean": 0.024620359058573977,
+  "target": 0.03
+ }
+}
