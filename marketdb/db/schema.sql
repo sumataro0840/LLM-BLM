@@ -422,6 +422,22 @@ CREATE TABLE IF NOT EXISTS release_surprises (
     computed_at      TEXT NOT NULL
 );
 
+-- Analyst consensus and the reported EPS of each quarter, from Alpha Vantage's EARNINGS endpoint
+-- (personal, non-commercial research use; the data stay outside Git). One row per symbol and quarter.
+CREATE TABLE IF NOT EXISTS analyst_estimates (
+    symbol             TEXT NOT NULL REFERENCES tickers(symbol),
+    fiscal_date_ending TEXT NOT NULL,           -- end of the fiscal quarter
+    reported_date      TEXT,                    -- day the result was announced
+    report_time        TEXT,                    -- 'pre-market' / 'post-market' as given by the source (NULL = unknown)
+    reported_eps       REAL,                    -- EPS on the basis the consensus uses (usually adjusted, not GAAP)
+    estimated_eps      REAL,                    -- consensus before the announcement
+    surprise           REAL,                    -- reported - estimated
+    surprise_pct       REAL,                    -- surprise / |estimated| x 100, as given by the source
+    source             TEXT NOT NULL,           -- e.g. 'alphavantage:EARNINGS'
+    fetched_at         TEXT NOT NULL,
+    PRIMARY KEY (symbol, fiscal_date_ending)
+) WITHOUT ROWID;
+
 -- ============================================================
 -- Views (computed when read; nothing is stored)
 -- ============================================================

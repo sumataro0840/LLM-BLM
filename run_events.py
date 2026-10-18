@@ -6,6 +6,7 @@ Earnings releases as events (design: 設計.md).
     python run_events.py timing                              # acceptance time -> session and event date (again after a price update)
     python run_events.py surprise                            # earnings and revenue surprises
     python run_events.py score dictionary [--from ... --to ... --limit N]   # llm / chrono / dictionary / finbert / tfidf
+    python run_events.py estimates [--limit 25 --symbols A,B]   # analyst consensus (Alpha Vantage, 25 a day free)
     python run_events.py status
 
 Scorers trained on stock reactions (tfidf) need --i-have-preregistered: they look at outcomes, which is allowed only
@@ -18,7 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
 
-from events import config, edgar, surprise, texts
+from events import config, edgar, estimates, surprise, texts
 from events.import_h06 import run as import_h06, symbol_chooser, trading_days
 from events.scorers import make
 from events.timing import timing
@@ -100,6 +101,36 @@ def cmd_score(conn, args):
             print(f"  {i}/{len(todo)} ({time.time() - t0:.0f}s)", flush=True)
 
 
+def cmd_estimates(conn, args):
+    """Analyst consensus from Alpha Vantage, up to the daily allowance; run again on later days to continue.
+    Order: symbols of the main sample (releases from 2023-11) first, then the other symbols with releases."""
+    rel = db.load_releases(conn, start="2016-01-01", with_text=True)
+    if args.symbols:
+        symbols = args.symbols.split(",")
+    else:
+        recent = set(rel[rel.filing_date >= config.LLM_FIRST_DATE].symbol)
+        symbols = sorted(recent) + sorted(set(rel.symbol) - recent)
+    known = {s for s in symbols if estimates.cache_path(s).exists()}
+    print(f"{len(symbols)} symbols, {len(known)} cached, up to {args.limit} requests now", flush=True)
+    estimates.run_daily(symbols, config.alphavantage_api_key(), args.limit,
+                        lambda sym, rows: db.save_estimates(conn, rows), lambda m: print(m, flush=True))
+    got = db.load_estimates(conn, symbols)
+    checked = rel[rel.symbol.isin(set(got.symbol))]
+    if checked.empty:
+        return
+    m = estimates.match_releases(checked, got)
+    print(f"releases of fetched symbols: {len(m)}, matched to an estimate within 3 days: {m.matched.mean():.1%}")
+    print("days from EDGAR acceptance to the reported date:", m.days_from_acceptance.value_counts().sort_index().to_dict())
+    agree = m[m.matched & m.report_time.notna()]
+    print("our session vs the source's report time:")
+    print(pd.crosstab(agree.session, agree.report_time).to_string())
+    by = m.groupby("symbol").matched.mean()
+    low = by[by < 0.8]
+    if len(low):
+        print("symbols with fewer than 80% of releases matched (ticker reuse or missing history?):",
+              low.round(2).to_dict())
+
+
 def cmd_status(conn, args):
     s = db.status(conn)
     n, with_text, no_event, first, last = s["releases"]
@@ -129,6 +160,9 @@ def main():
     for p in (su, sc):
         p.add_argument("--from", dest="start")
         p.add_argument("--to", dest="end")
+    es = sub.add_parser("estimates")
+    es.add_argument("--limit", type=int, default=config.ESTIMATES_DAILY_LIMIT, help="new requests in this run")
+    es.add_argument("--symbols", help="comma separated (default: every symbol with releases from 2016)")
     sub.add_parser("status")
     args = parser.parse_args()
 
@@ -138,7 +172,7 @@ def main():
     conn.execute("PRAGMA busy_timeout = 60000")
     init_db(conn)
     {"import-h06": lambda c, a: import_h06(c), "fetch": cmd_fetch, "timing": cmd_timing, "surprise": cmd_surprise,
-     "score": cmd_score, "status": cmd_status}[args.command](conn, args)
+     "score": cmd_score, "estimates": cmd_estimates, "status": cmd_status}[args.command](conn, args)
 
 
 if __name__ == "__main__":

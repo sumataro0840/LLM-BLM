@@ -30,6 +30,10 @@ LLM_FIRST_DATE = os.environ.get("EVENTS_LLM_FIRST_DATE", "2023-11-01")
 
 SEC_MAX_PER_SECOND = 8      # SEC asks for at most 10
 
+# Analyst consensus (Alpha Vantage; personal, non-commercial use; answers cached outside Git)
+ESTIMATES_DIR = REPO / os.environ.get("EVENTS_ESTIMATES_DIR", "data/cache/alphavantage")
+ESTIMATES_DAILY_LIMIT = int(os.environ.get("EVENTS_ESTIMATES_DAILY_LIMIT", "25"))   # the free key allows 25 a day
+
 
 def sec_user_agent():
     agent = os.environ.get("SEC_USER_AGENT")
@@ -40,3 +44,10 @@ def sec_user_agent():
 
 def openai_api_key():
     return os.environ["OPENAI_API_KEY"]
+
+
+def alphavantage_api_key():
+    key = os.environ.get("ALPHAVANTAGE_API_KEY")
+    if not key:
+        raise SystemExit("ALPHAVANTAGE_API_KEY を LLM-BLM/.env に書いてください")
+    return key

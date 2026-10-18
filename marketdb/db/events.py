@@ -142,3 +142,26 @@ def status(conn):
     out['surprises'] = conn.execute("SELECT COUNT(*), SUM(sue IS NOT NULL), SUM(revenue_surprise IS NOT NULL) "
                                     "FROM release_surprises").fetchone()
     return out
+
+
+ESTIMATE_COLUMNS = ['symbol', 'fiscal_date_ending', 'reported_date', 'report_time', 'reported_eps', 'estimated_eps',
+                    'surprise', 'surprise_pct', 'source', 'fetched_at']
+
+
+def save_estimates(conn, estimates):
+    """estimates: frame with ESTIMATE_COLUMNS; a quarter fetched again replaces the earlier row."""
+    if estimates.empty:
+        return
+    rows = [tuple(None if pd.isna(v) else v for v in r) for r in estimates[ESTIMATE_COLUMNS].itertuples(index=False)]
+    conn.executemany(f"INSERT OR REPLACE INTO analyst_estimates ({', '.join(ESTIMATE_COLUMNS)}) "
+                     f"VALUES ({', '.join('?' * len(ESTIMATE_COLUMNS))})", rows)
+    conn.commit()
+
+
+def load_estimates(conn, symbols=None):
+    sql = "SELECT * FROM analyst_estimates"
+    params = []
+    if symbols:
+        sql += f" WHERE symbol IN ({', '.join('?' * len(symbols))})"
+        params = list(symbols)
+    return pd.read_sql(sql + " ORDER BY symbol, fiscal_date_ending", conn, params=params)
