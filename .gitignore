@@ -10,3 +10,6 @@ data/cache/
 
 # E2 panel (rebuilt from the database by experiments/E2_event_reaction/run.py)
 experiments/E2_event_reaction/results/panel.csv
+
+# macOS folder metadata
+.DS_Store
