@@ -66,5 +66,18 @@ class TestE8(unittest.TestCase):
         pd.testing.assert_series_equal(w, bench)
 
 
+
+e9 = _load('e9_run', 'experiments/E9_monthly_blm_long/run.py')
+
+
+class TestE9(unittest.TestCase):
+    def test_te_limit_uses_only_past_months(self):
+        self.assertEqual(e9.limit_for([]), e9.TARGET)
+        few = [{'te_realized': 0.045, 'te_pred': 0.03}] * (e9.MIN_RATIO_MONTHS - 1)
+        self.assertEqual(e9.limit_for(few), e9.TARGET)                      # not enough months yet
+        hist = [{'te_realized': 0.06, 'te_pred': 0.03}] * 10 + [{'te_realized': 0.045, 'te_pred': 0.03}] * 36
+        self.assertAlmostEqual(e9.limit_for(hist), e9.TARGET / 1.5)          # only the last 36 months count
+
+
 if __name__ == '__main__':
     unittest.main()
