@@ -1,0 +1,72 @@
+{
+ "code_commit": "2eadaa3c41dcbe9ca25f1bedf3e9fa97d9fa51c7",
+ "n_months": 125,
+ "first": "2016-03-31",
+ "last": "2026-07-31",
+ "views_per_month": {
+  "mean": 426.512,
+  "min": 291
+ },
+ "te_limit": {
+  "mean": 0.027813300379956905,
+  "min": 0.0259955800707963,
+  "max": 0.03
+ },
+ "primary_vs_market": {
+  "mean_active_net_monthly": 1.5660662185050106e-05,
+  "nw_t": 0.02036478487133427,
+  "p_one_sided": 0.4918925543066401,
+  "mean_active_gross_monthly": 0.0006130967874907362,
+  "information_ratio_net": 0.006113480569020153,
+  "cumulative_net": 3.540165945024879,
+  "cumulative_bench": 3.5634340993981946,
+  "realized_te_mean": 0.030422390544366393,
+  "turnover_mean": 0.2987180626528431,
+  "share_months_ahead": 0.488,
+  "status": {
+   "optimal": 125
+  },
+  "verdict": "支持されない"
+ },
+ "S1_vs_permuted": {
+  "mean_diff_gross_monthly": 0.0014070380750566235,
+  "nw_t": 1.746419250796981,
+  "permuted_mean_active_net": -0.002318485883449134
+ },
+ "S2_block_B_months": {
+  "mean_active_net_monthly": 4.5872854224450057e-05,
+  "nw_t": 0.054748355370996836,
+  "p_one_sided": 0.4782301481895381,
+  "mean_active_gross_monthly": 0.0006775090064233481,
+  "information_ratio_net": 0.018131195320106507,
+  "cumulative_net": 1.3977387681879803,
+  "cumulative_bench": 1.4029747103249806,
+  "realized_te_mean": 0.03027169891314565,
+  "turnover_mean": 0.31581807609944906,
+  "share_months_ahead": 0.4725274725274725,
+  "status": {
+   "optimal": 91
+  },
+  "months": 91
+ },
+ "S3_block_A_months": {
+  "mean_active_net_monthly": -6.520138121452055e-05,
+  "nw_t": -0.03715429241968493,
+  "p_one_sided": 0.5147070821215725,
+  "mean_active_gross_monthly": 0.000440699377994628,
+  "information_ratio_net": -0.02430059277168707,
+  "cumulative_net": 0.8935198468079868,
+  "cumulative_bench": 0.8990770397167571,
+  "realized_te_mean": 0.030825712263221942,
+  "turnover_mean": 0.252950379604574,
+  "share_months_ahead": 0.5294117647058824,
+  "status": {
+   "optimal": 34
+  },
+  "months": 34
+ },
+ "S4_te": {
+  "realized_mean": 0.030422390544366393,
+  "target": 0.03
+ }
+}
