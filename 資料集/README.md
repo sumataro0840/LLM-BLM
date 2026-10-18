@@ -21,6 +21,7 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | `02_実験/実験1_仮説の検証/` | `LLM-BLM_実験仮説`（実験の前に書いた設計書）と `LLM-BLM_実験結果レポート`（H01〜H07 の結果） | 10/14〜17 |
 | `02_実験/実験2_決算発表文/` | 実験 2 のレポート（事前登録した決算発表のイベントの評価）と図 | 10/18 |
 | `02_実験/実験3_アナリスト予想/` | 実験 3 のレポート（アナリスト予想との差を統制しても LLM の点数が残るか）と図 | 10/18 |
+| `02_実験/実験4_FinBERT追加学習/` | 実験 4 のレポート（反応で追加学習した FinBERT と LLM の比較）と図 | 10/18 |
 | `03_方針と文献調査/設計方針/` | 次の方針を Claude・GPT・Gemini に独立に書かせたものと、その比較 | 10/17 |
 | `03_方針と文献調査/文献調査/` | 4 者（Claude・GPT・Gemini・Deep Research）の文献調査、文献の照合の結果（`照合.txt`）、比較 | 10/17 |
 | `03_方針と文献調査/今後の計画/` | 「課題と今後の計画」を GPT・Gemini に立案させたものと比較。`渡した資料/` は依頼に添付した写し | 10/18 |
@@ -40,6 +41,7 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | 共分散のノイズ除去（Marcenko–Pastur と Ledoit–Wolf の比較）と、ノイズ除去が要る理由の図解 | `experiments/X01_covariance_denoise/results/解説_ノイズ除去.md`（結果は同じフォルダの `findings.md`） |
 | 実験 2 の事前登録と結果 | `experiments/E2_event_reaction/preregistration.md`、`results/findings.md` |
 | 実験 3 の事前登録と結果 | `experiments/E3_analyst_surprise/preregistration.md`、`results/findings.md` |
+| 実験 4 の事前登録と結果 | `experiments/E4_finbert_finetune/preregistration.md`、`results/findings.md` |
 | H01〜H07 の結果と、別のモデルによる確認 | `experiments/H0x_*/results/findings.md`、`experiments/robustness/results/` |
 
 `03_方針と文献調査/` の各フォルダにある `00_依頼.md` は、モデルに渡した依頼の文書。`<モデル名>/` が答え、`実行記録.jsonl` がモデル・トークン・時間の記録、`比較検討.md` が Claude による比較。
