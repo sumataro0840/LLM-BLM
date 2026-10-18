@@ -44,6 +44,7 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | 実験 4 の事前登録と結果 | `experiments/E4_finbert_finetune/preregistration.md`、`results/findings.md` |
 | 共分散の窓・EWMA の比較（X02、実現の TE と QLIKE） | `experiments/X02_covariance_window/results/findings.md` |
 | TE の上限の校正（X03、過去の実現 ÷ 予測の比で割る） | `experiments/X03_te_calibration/results/findings.md` |
+| VIX で共分散の大きさを合わせる（X04） | `experiments/X04_vix_scaling/results/findings.md` |
 | 実験 5 の事前登録（ChronoGPT の埋め込み＋リッジ） | `experiments/E5_chrono_embeddings/preregistration.md` |
 | 実験 6 の事前登録の案（10-K の文章と長い期間のリターン） | `experiments/E6_10k_risk_exposure/preregistration.md` |
 | H01〜H07 の結果と、別のモデルによる確認 | `experiments/H0x_*/results/findings.md`、`experiments/robustness/results/` |
