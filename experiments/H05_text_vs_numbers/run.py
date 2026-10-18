@@ -4,10 +4,10 @@ H05: experiment G asked again with the text only (T) and with the numbers only (
     python experiments/H05_text_vs_numbers/run.py ask [test]   # API calls (logged in results/answers_*.jsonl)
     python experiments/H05_text_vs_numbers/run.py evaluate
 
-The prompts of G (資料集/LLM-BLM_実験/premium_results.pkl) are split into their blocks; G itself is the
+The prompts of G (過去のコードと記録/総合報告1の実験/premium_results.pkl) are split into their blocks; G itself is the
 condition with both. The request settings are those of G (gpt-4o-mini, temperature 1.0, n = 30, one token,
 top 20 log-probabilities; the score is read from the probabilities of the digits 1-5).
-Decision rules: 資料集/LLM-BLM_実験仮説.pdf, chapter H05.
+Decision rules: 資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf, chapter H05.
 """
 import json
 import math
@@ -26,7 +26,7 @@ from experiments.common.metrics import t_summary
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / 'results'
-G_RESULTS = D.REPO / '資料集' / 'LLM-BLM_実験' / 'premium_results.pkl'
+G_RESULTS = D.REPO / '過去のコードと記録' / '総合報告1の実験' / 'premium_results.pkl'
 SYSTEM = ("You are a financial analyst. Use only the information given below. "
           "Answer with a single digit from 1 to 5 and nothing else.")      # the system prompt of G
 PARAMS = {'max_tokens': 1, 'temperature': 1.0, 'n': 30, 'logprobs': True, 'top_logprobs': 20}

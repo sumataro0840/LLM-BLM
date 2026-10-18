@@ -1,0 +1,404 @@
+% ============================================================
+% LLM-BLM 文献調査と次の設計方針（2026-10-17）
+% コンパイル：tectonic -X compile LLM-BLM_文献調査と設計方針.tex  （まとめ/ の直下で実行する）
+% 元の資料：../設計方針/（3 者の方針と比較検討）、../文献調査/（4 者の文献調査、照合の結果、比較検討）
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt]{bxjsarticle}
+\setpagelayout*{left=22mm,right=22mm,top=22mm,bottom=24mm,footskip=10mm}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array,longtable,tabularx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{c2}{HTML}{EB6834}
+\definecolor{c3}{HTML}{1BAF7A}
+\definecolor{c4}{HTML}{EDA100}
+\definecolor{c7}{HTML}{6250D6}
+\definecolor{ink2}{HTML}{52514E}
+\definecolor{soft1}{HTML}{E4EEF9}
+\definecolor{soft2}{HTML}{FBEEDF}
+\definecolor{soft3}{HTML}{E3F3E9}
+\definecolor{soft4}{HTML}{EEE8FA}
+
+\newcommand{\SP}{S\&P500}
+\newcommand{\code}[1]{\texttt{#1}}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.15em,topsep=0.3em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.15em,topsep=0.3em}
+\captionsetup{font=small,labelfont=bf,skip=5pt}
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=7pt,right=7pt,top=5pt,bottom=5pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{notebox}[1][注意]{enhanced,breakable,colback=soft2,colframe=c2,boxrule=0.5pt,arc=2pt,
+  left=7pt,right=7pt,top=5pt,bottom=5pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{decision}[1][決めること]{enhanced,breakable,colback=soft4,colframe=c7,boxrule=0.5pt,arc=2pt,
+  left=7pt,right=7pt,top=5pt,bottom=5pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+\tikzset{
+  box/.style={draw=#1,fill=#1!8,rounded corners=2pt,align=center,font=\footnotesize,inner sep=3pt,
+              minimum height=9mm,text width=#1width},
+  b/.style={draw=#1,fill=#1!8,rounded corners=2pt,align=center,font=\footnotesize,inner sep=3pt,minimum height=9mm},
+  arr/.style={-{Stealth[length=2mm]},color=ink2,line width=0.6pt},
+}
+
+\title{LLM-BLM：文献調査と次の設計方針\\[4pt]\large 7 つの仮説の結果を踏まえ、何を問い、どう確かめるか}
+\author{情報工学工房　LLM-BLM}
+\date{2026 年 10 月 17 日}
+
+\begin{document}
+\maketitle
+
+\begin{keybox}[この文書の要点]
+\begin{enumerate}
+\item これまでの実験（H01〜H07）で、LLM に翌月のリターンを数値で答えさせる構成は、統計を超える価値を示せなかった。予想の 81\% は、渡した月の値動きの写しだった。
+\item 方針を、Claude・GPT・Gemini の 3 者に独立に書かせ、比べた。文献調査は、Gemini Deep Research を加えた 4 者で行い、挙げられた文献を機械的に照合した。
+\item 新しい問いは「LLM が決算発表文から取り出した判断は、数値と、LLM を使わない文章の分析を超える情報を持つか」。BLM は、検証を通った信号を安全に比率に変える部分として使う。
+\item 文献から、方針を 4 点変える。
+  \begin{itemize}
+  \item 発表文の内容は寄り付きで株価に反映されるので、主な目的変数を「発表への反応」にする。
+  \item プロンプトに下流の目的（株価の予測）を書かない。
+  \item 2015〜2023 年の文章は、匿名化ではなく、年ごとに学習を区切った LLM（ChronoGPT）で読む。
+  \item 取り下げられた論文の引用を直す。
+  \end{itemize}
+\item 主な検定は、手順を固定した前向きの検証（2026 年 10 月以降の決算発表）にする。
+\end{enumerate}
+\end{keybox}
+
+\tableofcontents
+
+% ------------------------------------------------------------
+\section{これまでの結果}
+
+S\&P500 の銘柄で、gpt-4o-mini の予想を Black--Litterman モデル（BLM）のビューに入れたとき、追加の価値があるかを 7 つの仮説で確かめた（評価は 2024 年 3 月〜2026 年 8 月の 30 か月。gpt-4o-mini の知識の期限 2023 年 10 月より後）。
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}l p{30mm} L@{}}
+\toprule
+仮説 & 確かめたこと & 結果 \\
+\midrule
+H01 & 元論文の計算の再現 & 式は一致した。BLM が LLM の予想を中央値 99.9\% 採用し、均衡はほぼ使われない。元論文の最適化（SLSQP）は、入力のわずかな違いで解が変わり、再現できない \\
+H02 & 統計の基準との比較 & LLM の予想は、渡した月の値動きの写し（決定係数 0.81）。写しを除いた固有の IC は $-0.004$（95\% 区間 $-0.036$〜$+0.027$） \\
+H03 & 相対ビュー & 高ベータへの傾きは消えない。原因は、銘柄の間のなぞり \\
+H04 & Ω の較正 & 過去の当たり具合で較正すると、BLM は設計どおりに動く。ただし成績（年率 $+0.53\%$）は、並べ替えたビューと区別できない（片側 $p=0.104$。セクターの中での並べ替えでは $p=0.38$）。回答のばらつきは、大きさとしては確信が強すぎる（外れの 2 乗の約 8 分の 1）。一方で、外れやすさの順番の手がかりにはなる（偏順位相関 $+0.17$） \\
+H05 & 文章だけを渡す & なぞりは消える（$+0.77$→$+0.05$）。ただし予測力は不十分（セクターの IC $+0.06$、$t$ 0.72） \\
+H06 & 決算発表文の点数 & 5,429 本。IC $+0.033$（Newey--West の $t$ 2.32、探索的）。数値を統制すると有意でない（Fama--MacBeth の $t$ 0.97） \\
+H07 & 成績のフィードバック & 予想は改善しない（IC の差 $+0.011$）。一律に強気に寄った（楽観の偏りが日次 $+0.12\%$→$+0.29\%$） \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+評価が 30 か月だけなので、IC 0.07 未満の効果は検出できない。API の費用は合計約 6.7 ドルだった。
+
+% ------------------------------------------------------------
+\section{方法：3 者の方針と 4 者の文献調査}
+
+\begin{itemize}
+\item \textbf{方針}：同じ依頼と資料（実験結果レポート、ビューとリスクの要点）を、Claude、GPT（gpt-5.6）、Gemini（gemini-3.1-pro）に渡し、独立に書かせた。見出しを揃え、比べやすくした。Claude は、他の回答を読む前に書き終えた。
+\item \textbf{文献調査}：同じ依頼で、上の 3 者に Gemini Deep Research を加えた 4 者が、ウェブ検索で調べた。テーマは 8 つ（LLM の数値の予想、先読み、決算発表文、イベントスタディ、不確実性、BLM、評価の確かさ、フィードバック）。
+\item \textbf{照合}：挙がった文献を、arXiv・OpenAlex・Crossref で機械的に照合した（\code{LLM/refcheck.py}）。arXiv の番号は、題名と著者まで突き合わせた。照合で見つからないものは、検索で個別に確かめた。
+\end{itemize}
+
+\begin{notebox}[依頼の文書の誤り]
+文献調査の依頼で、H04 のばらつきの結果を「大きさにも順番にも合わない」と誤って書いた。正しくは「大きさには使えないが、順番の手がかりにはなる」である。GPT は添付のレポートから正しく読んだが、Gemini と Deep Research は誤った文を前提に書いている。依頼の文書には訂正を注記した。
+\end{notebox}
+
+\begin{table}[h]\centering\small
+\caption{文献調査の条件と、照合の結果}
+\begin{tabularx}{\linewidth}{@{}l c c L@{}}
+\toprule
+ & 文献 & 検索 & 照合で見つかった誤り \\
+\midrule
+Claude & 36 & 約 35 回 & なし（H04 の読み違いを照合の段階で修正） \\
+GPT & 38 & 14 回 & 著者の取り違え 2 件。最も役に立ち、方針を変えた発見の多くはここから \\
+Gemini & 15 & 8 語 & 別の論文の番号 1、著者の誤り 1（DOI は自分で「推定」と書いた）、見つからない 1、著者が Anonymous 3 \\
+Deep Research & 17 & 36 回 & 著者の取り違え 4、題名の取り違え 2、主張の出どころの誤り、要旨にない数値。統計の解説サイトなど、学術でない根拠 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+照合で ok でも、主張の中身までは保証されない。この文書で使う主張は、要旨か本文で確かめたものに限った。
+
+% ------------------------------------------------------------
+\section{文献調査の結果}
+
+\subsection{4 者が一致したこと}
+\begin{enumerate}
+\item \textbf{LLM に数値のリターンを答えさせる構成はやめる。}LLM のリターンの予想は、直近の成績を外挿しすぎ、楽観に寄る。プロンプトでは消しにくい（Chen, Green, Gulen, Zhou 2024）。H02 の「写し」はこの現象そのものである。
+\item \textbf{知識の期限より前の文章は、匿名化しても確認用にはならない。}LLM は期限より前の経済の数値を記憶から再現する。社名や日付を伏せても、文脈から復元される（Lopez-Lira, Tang, Zhu 2025）。
+\item \textbf{前向きの検証を、主な検定にする。}
+\item \textbf{LLM を使わない対照は、Loughran--McDonald の辞書、TF-IDF の正則化回帰、FinBERT の 3 つにする。}FinBERT は辞書を大きく上回る（Huang, Wang, Yang 2023）。
+\item \textbf{イベントの時刻の監査は必須である。}発表が同じ日に集まると、超過リターンの弱い相関でも、検定は大きく過大に棄却する（Kolari, Pynnönen 2010）。悪いニュースは、引け後や忙しい日に出やすい（deHaan, Shevlin, Thornock 2015）。
+\end{enumerate}
+
+\subsection{方針を変える発見}
+
+\begin{enumerate}
+\item \textbf{決算発表文の内容は、寄り付きで株価に完全に反映される。}
+  \begin{itemize}
+  \item 2005〜2023 年の 13.8 万本の決算発表文で、文章は利益の驚きと同じくらい情報を持つ。FinBERT が最も強い。そして、株価は寄り付きの時点で発表文の内容を完全に反映する（Wu ほか 2025）。
+  \item 遅れて効くのは、決算説明会の語調である（Yu ほか 2026）。決算説明会の書き起こしは、EDGAR から無料では取れない。
+  \item LLM による決算発表文の測度は、発表の短い期間のリターンの変動を、辞書や LLM でない機械学習の約 3 倍説明する（Siano 2025）。
+  \end{itemize}
+  $\Rightarrow$ 主な目的変数を「翌日以降のドリフト」から「\textbf{発表への反応}」に移す。
+\item \textbf{LLM に下流の目的を教えると、測定が偏る。}
+  \begin{itemize}
+  \item 「株価の予測に使う」と伝えると、語調などの中間の点数が目的に沿って偏る。その「改善」は、知識の期限より前にだけ現れる（Cao, Jiang, Xu 2026、NBER WP 35142）。
+  \item H06 のプロンプトは目的を書いていない。ただし「株価の動きについて知っていることを使わない」という一文があり、株価との関係をほのめかしている。
+  \end{itemize}
+  $\Rightarrow$ 凍結の前に、プロンプトを株価に触れない言い方に変える。
+\item \textbf{年ごとに学習を区切った LLM が、重みつきで公開されている。}
+  \begin{itemize}
+  \item ChronoGPT-Instruct は、1999〜2024 年の各年末までの文章だけで学習している。1.55B パラメータ、文脈 1,792 トークン、MIT ライセンスである（He, Lv, Manela, Wu 2025）。
+  \item ほかに、DatedGPT（1.3B、2013〜2024 年）と、Kelly ほかの 4B までの月ごとのモデルがある。
+  \item 先読みを測る検定もある。日付だけを示して想起させ、当たりとの交互作用を見る（Gao, Jiang, Yan 2025）。
+  \end{itemize}
+  $\Rightarrow$ 2015〜2023 年は、匿名化ではなく ChronoGPT で読む（この PC に環境を作った）。
+\item \textbf{取り下げられた論文がある。}
+  \begin{itemize}
+  \item Kim, Muhn, Nikolaev（2024）「Financial Statement Analysis with LLMs」は、2025 年 2 月に arXiv で取り下げられた。共著者が、データと分析の不整合を見つけたためである。
+  \item プロジェクトの資料 4 つが、これを成功例として引いている。
+  \end{itemize}
+  $\Rightarrow$ 引用を直す。
+\end{enumerate}
+
+\subsection{意見が分かれた点と、文献からの判断}
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{24mm} L L@{}}
+\toprule
+論点 & 意見 & 判断 \\
+\midrule
+2015〜2023 年の文章 & 前回、Gemini は「匿名化して主に使う」とし、GPT は「使わない」とした。今回は 4 者とも「確認用にはしない」 & 時点を区切ったモデルで読み、「汚染のない下限」として報告する。gpt-4o-mini の汚染は、LAP の検定で診断する \\
+意味のある最小の効果 & GPT は追加の rank IC 0.01 ＋経済効果、Gemini は IC 0.03、Deep Research は 0.05、Claude は検出力の実験で決める & 文献に共通の値はない。合成信号の検出力の実験で決め、GPT の基準を候補にする \\
+BLM & GPT は副次の評価に下げる。他は残す（Deep Research は Factor BLM でベータを中立化） & 残す。役割は「弱い信号での損と回転を抑える」。単純な順位の戦略と、同じ TE で比べる \\
+回答のばらつき & GPT は二段階（大きさは誤差で、比率は順位で）が上限とする & 数値の予想をやめるので、使わない。H04 の結果は、元論文の前提への検証として報告する \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ------------------------------------------------------------
+\section{研究の問い}
+
+\begin{keybox}[主な問い]
+LLM が決算発表文から取り出した判断（語調、見通し、ガイダンスの変更）は、数値の驚き（SUE など）と、LLM を使わない文章の分析（辞書、TF-IDF、FinBERT）を超える情報を持つか。
+\end{keybox}
+
+副次の問いは次の 4 つ。
+
+\begin{enumerate}
+\item その情報は、寄り付きより後（取引できる時点）にも残るか。
+\item 先読みのない時点を区切ったモデルでも、同じ方向の情報が取れるか。
+\item 較正した BLM は、当たらない信号を自動で使わず、当たる信号だけを使うか（合成信号で測る）。
+\item LLM の数値の予想が写しになること、ばらつきが大きさに使えないこと、フィードバックで楽観に寄ることを、元論文の前提の検証としてまとめる。
+\end{enumerate}
+
+% ------------------------------------------------------------
+\section{新しいアーキテクチャ}
+
+\begin{figure}[h]\centering
+\begin{tikzpicture}[node distance=5mm and 6mm, every node/.style={font=\footnotesize}]
+\node[b=c1,text width=27mm] (edgar) {EDGAR 8-K\\Item 2.02 EX-99.1};
+\node[b=c1,text width=27mm,below=of edgar] (time) {時刻の監査\\受理時刻→ET\\寄り前／引け後};
+\node[b=c3,text width=34mm,right=12mm of edgar,yshift=6mm] (gpt) {gpt-4o-mini（期限後）\\2023-11〜と前向き};
+\node[b=c3,text width=34mm,below=3mm of gpt] (chrono) {ChronoGPT（版＝前年末）\\2015〜2023};
+\node[b=c4,text width=34mm,below=3mm of chrono] (base) {対照：辞書・TF-IDF・\\FinBERT};
+\node[b=c4,text width=34mm,below=3mm of base] (sue) {数値：SUE・売上の驚き・\\直前のリターン};
+\node[b=c7,text width=30mm,right=12mm of chrono,yshift=-4mm] (event) {イベントの評価\\(a) 発表への反応\\(b) 寄り付き後のドリフト\\日付のクラスタ・置換};
+\node[b=c2,text width=30mm,below=6mm of event] (bl) {通過した信号だけ\\BLM（$\Omega\propto\Sigma$、較正、TE）\\vs 順位の戦略};
+\draw[arr] (edgar) -- (time);
+\draw[arr] (time.east) -- ++(4mm,0) |- (gpt.west);
+\draw[arr] (time.east) -- ++(4mm,0) |- (chrono.west);
+\draw[arr] (time.east) -- ++(4mm,0) |- (base.west);
+\draw[arr] (time.east) -- ++(4mm,0) |- (sue.west);
+\draw[arr] (gpt.east) -- (event.west);
+\draw[arr] (chrono.east) -- (event.west);
+\draw[arr] (base.east) -- (event.west);
+\draw[arr] (sue.east) -- (event.west);
+\draw[arr] (event) -- (bl);
+\end{tikzpicture}
+\caption{新しい構成。LLM は文章の点数を取り出す役だけを担い、価値の判定はイベントの評価で行う。}
+\end{figure}
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}l L@{}}
+\toprule
+捨てるもの & LLM の数値の予想、回答のばらつきの Ω、予想役へのフィードバック、月次レポートの分析、SLSQP、新しいモデル（gpt-5.x・gemini-3.x）による予想 \\
+残すもの & $\Omega\propto\Sigma$ と過去の当たり具合での較正（採用率＝縮めた傾き）、能動ベータ 0 と TE の上限、Clarabel による最適化、置換の対照、Holm の補正 \\
+足すもの & 発表の時刻の監査、イベントの評価、非 LLM の 3 つの対照、ChronoGPT による期限前の点数、LAP の検定、前向きの凍結の記録、合成信号による検出力の測定 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection*{LLM の役割}
+\begin{itemize}
+\item \textbf{させること}：決算発表文だけを読み、決まった形の点数（ガイダンスの変更、見通し、語調、リスクの種類）を返す。
+\item \textbf{させないこと}
+  \begin{itemize}
+  \item 数値の予想
+  \item 自信の申告
+  \item 下流の目的（株価の予測）の説明
+  \item 成績のフィードバック
+  \item 知識の期限より前の文章を、gpt-4o-mini で読むこと
+  \end{itemize}
+\item \textbf{使わない選択肢}：辞書・TF-IDF・FinBERT と同じ物差しで比べる。超えなければ、以後の文章の信号は安い方法で作る。
+\end{itemize}
+
+% ------------------------------------------------------------
+\section{評価の枠組み}
+
+\begin{itemize}
+\item \textbf{目的変数}
+  \begin{itemize}
+  \item 主は (a) 発表への反応。引け後の発表なら、翌日の寄り付きまでを含む。
+  \item 副は (b) 寄り付きより後 1・5・20 取引日の、市場とセクターを調整した超過リターン。
+  \end{itemize}
+\item \textbf{時刻}
+  \begin{itemize}
+  \item EDGAR の受理時刻を ET に直す。寄り前の発表はその日、引け後の発表は翌取引日を最初の取引日にする。
+  \item 17 時 30 分 ET より後の受理は、翌営業日の扱いになるので、個別に確かめる。
+  \end{itemize}
+\item \textbf{統制}：SUE、売上の驚き、直前のリターン、規模、ベータ、セクター。
+\item \textbf{検定}：日付ごとのクラスタリング（または Kolari--Pynnönen）、同じ日・同じ業種での置換の対照、Holm の補正。
+\item \textbf{未来の情報の混入の防ぎ方}
+  \begin{itemize}
+  \item 期限より前は、時点を区切ったモデルだけで読む。
+  \item 期限より後は gpt-4o-mini。
+  \item 確認は、2026 年 10 月以降の前向きの記録で行う。
+  \end{itemize}
+\item \textbf{検出力}：既知の強さの合成信号を、実際のイベントの日付の構造に入れて測る。意味のある最小の効果は、その結果で決める。
+\item \textbf{前向きの検証}
+  \begin{itemize}
+  \item 目的変数、点数、統制、除外の規則、窓、判定の基準、プロンプトとコードのハッシュを凍結する。
+  \item 2027 年 2 月まで結果を開けない。
+  \end{itemize}
+\end{itemize}
+
+% ------------------------------------------------------------
+\section{ChronoGPT の環境と最初の確認}
+
+この PC に、ChronoGPT-Instruct の環境を作った（\code{工房/LLM/chrono/}）。2015〜2023 年の判断日と、その後の比較に使う 2014〜2024 年末の 11 の版を取得する（2026 年 10 月 17 日に取得中。以下の確認は 2022 年末の版で行った）。
+
+\begin{itemize}
+\item \textbf{重み}：元は fp32（7.4GB）で 8GB の GPU に載らないため、bf16（3.7GB）にして保存した。元のファイルの SHA-256 は、公開されている値と一致した。
+\item \textbf{速さとメモリ}：選択肢の確率で点数を付けると、1 本あたり 0.1〜0.3 秒、GPU のメモリは最大約 5.2GB。
+\item \textbf{知識}：2022 年の版でも、今の米国大統領を「Bill Clinton」と答えた。指示の学習のデータが 2000 年より前の内容に限られているためで、知識を問う使い方には向かない。
+\item \textbf{ゼロショットの点数}
+  \begin{itemize}
+  \item モデルの癖が強い。較正しないと、良い発表でも悪い発表でも、ガイダンスを「lower」と 9 割以上で答えた。
+  \item 中身のない文章で測った癖で割る「文脈による較正」で、大きく改善した（下の表）。
+  \end{itemize}
+\end{itemize}
+
+\begin{center}\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+較正後の確率（2022 年の版） & 良い発表の例 & 悪い発表の例 \\
+\midrule
+ガイダンス：raise／lower／keep & 0.79／0.17／0.04 & 0.33／0.54／0.13 \\
+語調：positive 系／negative 系 & 0.79／0.20 & 0.31／0.66 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent 「据え置き」や中間の文章は、まだ区別できない。研究では、He ほか（2025）と同じように、最後の層の埋め込み（1,536 次元）の上に、判断日より前のイベントだけで学習した回帰を置く。ゼロショットの点数は、補助に使う。
+
+% ------------------------------------------------------------
+\section{次の実験（優先順）}
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{24mm} L p{30mm} p{18mm}@{}}
+\toprule
+実験 & 方法と成功の基準 & 次の判断 & 費用・時間 \\
+\midrule
+P0 前向きの記録 & 手順を凍結し、毎週 EDGAR の新しい発表文を取得して点数化。プロンプトから株価への言及を除く & 2027 年 2 月に一度だけ開ける & 数ドル、今週着手 \\
+E1 時刻の監査 & 5,429 件の受理時刻と取引日を確定。時刻の不明なものは主な分析から外す & 以後のすべての前提 & 0 円、1 週間 \\
+E2 イベントの評価 & 既存の点数で (a) 反応と (b) ドリフトを評価。数値を統制して、係数と区間を求める & (a) で残らなければ文章の線を縮小 & 0 円、1 週間 \\
+E3 非 LLM の対照 & 辞書・TF-IDF・FinBERT を同じイベントに。LLM が 3 つを統制して残るか & 超えなければ安い方法へ & 0 円、1〜2 週間 \\
+E4 検出力と BLM & 2016〜2026 年に合成信号を入れ、検出に要る件数と、較正した BLM の採用率を測る & 最小の効果と規模を決める & 0 円、1〜2 週間 \\
+E5 期限前の延長 & ChronoGPT（前年末の版）で 2015〜2023 年の発表文を点数化。2023 年以降で gpt-4o-mini と一致度を比べる。LAP の検定で gpt-4o-mini の汚染を診断 & 使えれば標本が約 4 倍 & 0 円（GPU）、2〜3 週間 \\
+E6 BLM への組み込み & E2〜E5 で残った信号だけ。順位の戦略・等リスクと、同じ TE とコストで比べる & 改善しなければ BLM を外す & 0 円、1〜2 週間 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ------------------------------------------------------------
+\section{やらないこと}
+\begin{itemize}
+\item 数値の予想のプロンプトの工夫、新しいモデルによる予想。外挿と先読みの問題は、工夫で消えない。
+\item 予想役へのフィードバック。H07 で、一律に強気に寄った。
+\item 成績を見て $\tau$・TE・$\Omega$ を選ぶこと。過剰適合になる。
+\item 2015〜2023 年の文章を、gpt-4o-mini と匿名化で読むこと。記憶を除けない。
+\item 月次レポートの分析。米国の銘柄やセクターにほとんど触れていない。
+\end{itemize}
+
+% ------------------------------------------------------------
+\section{リスクと未解決の問い}
+\begin{itemize}
+\item 前向きの検証の標本は、2026 年 10 月〜2027 年 1 月の決算シーズンの約 1,000 件にとどまる。区間で報告し、「有意でない」を「効果がない」と読まない。
+\item ChronoGPT は文脈が 1,792 トークンと短く、読む力も弱い。決算発表文は、見出しと冒頭の要約か、段落ごとの点数で扱う。
+\item 寄り付きで反映されるなら、取引できる価値はゼロに近い。その場合も「LLM は情報を正しく取り出すが、取引できる価値はない」が結論になる。
+\item Liang（2026）の「期限の前と後の誤差の差」など、独立に確かめられなかった文献は、根拠に使わない。
+\end{itemize}
+
+% ------------------------------------------------------------
+\section{スケジュール}
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{30mm} L L@{}}
+\toprule
+時期 & 作業 & 終わりの判断点 \\
+\midrule
+10 月後半 & P0 の凍結と記録の開始、E1 の時刻の監査、引用の修正 & 主な目的変数と判定の基準を凍結したか \\
+11 月 & E2・E3、並行して E4 & 文章の点数が数値と対照を超えるか。超えなければ縮小 \\
+12 月 & E5（ChronoGPT による延長）、LAP の検定 & 期限前の点数が期限後と同じ方向か \\
+1〜2 月 & E6（信号が残った場合）、前向きの記録を締める & BLM を残すか \\
+2〜3 月 & 前向きの検証を開け、最終報告 & 凍結した基準で一度だけ判定 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{decision}
+\begin{enumerate}
+\item 前向きの記録を今すぐ始めるか。主な目的変数を「発表への反応」にするか。
+\item 取り下げられた論文の引用を、LLM-BLM の資料 4 つで直すか。
+\end{enumerate}
+\end{decision}
+
+% ------------------------------------------------------------
+\section*{主な参考文献}
+\addcontentsline{toc}{section}{主な参考文献}
+\begin{small}
+\begin{itemize}[leftmargin=1.2em,itemsep=0.1em]
+\item Cao, S., Jiang, W., Xu, H. (2026). Seeing the Goal, Missing the Truth: Human Accountability for AI Bias. NBER WP 35142; arXiv:2602.09504.
+\item Chen, S., Green, T. C., Gulen, H., Zhou, D. (2024). What Does ChatGPT Make of Historical Stock Returns? arXiv:2409.11540.
+\item deHaan, E., Shevlin, T., Thornock, J. (2015). Market (in)attention and the strategic scheduling and timing of earnings announcements. J. Accounting and Economics 60. doi:10.1016/j.jacceco.2015.03.003.
+\item Gao, Z., Jiang, W., Yan, Y. (2025). Detecting Lookahead Bias in LLM Forecasts. arXiv:2512.23847.
+\item Glasserman, P., Lin, C. (2024). Assessing Look-Ahead Bias in Stock Return Predictions Generated by GPT Sentiment Analysis. J. Financial Data Science 6(1); arXiv:2309.17322.
+\item Harvey, C. R., Liu, Y., Zhu, H. (2016). … and the Cross-Section of Expected Returns. Review of Financial Studies 29(1). doi:10.1093/rfs/hhv059.
+\item He, S., Lv, L., Manela, A., Wu, J. (2025). Chronologically Consistent Large Language Models. arXiv:2502.21206.
+\item He, S., Lv, L., Manela, A., Wu, J. (2025). Instruction Tuning Chronologically Consistent Language Models. arXiv:2510.11677.
+\item Huang, A. H., Wang, H., Yang, Y. (2023). FinBERT: A Large Language Model for Extracting Information from Financial Text. Contemporary Accounting Research 40(2). doi:10.1111/1911-3846.12832.
+\item Kelly, B., Malamud, S., Schwab, J., Xu, T. A. (2026). Scaling Point-in-Time Language Models. arXiv:2607.11889.
+\item Kim, A. G., Muhn, M., Nikolaev, V. V. (2024). Financial Statement Analysis with Large Language Models. arXiv:2407.17866（2025 年 2 月に取り下げ）.
+\item Kolari, J. W., Pynnönen, S. (2010). Event Study Testing with Cross-Sectional Correlation of Abnormal Returns. Review of Financial Studies 23(11). doi:10.1093/rfs/hhq072.
+\item Lee, Y., Kim, Y., Kim, S., Lee, Y. (2025). LLM-Enhanced Black-Litterman Portfolio Optimization. CIKM 2025; arXiv:2504.14345.
+\item Lopez-Lira, A., Tang, Y., Zhu, M. (2025). The Memorization Problem: Can We Trust LLMs' Economic Forecasts? arXiv:2504.14765.
+\item Loughran, T., McDonald, B. (2011). When Is a Liability Not a Liability? J. Finance 66(1). doi:10.1111/j.1540-6261.2010.01625.x.
+\item McLean, R. D., Pontiff, J. (2016). Does Academic Research Destroy Stock Return Predictability? J. Finance 71(1). doi:10.1111/jofi.12365.
+\item Meursault, V., Liang, P. J., Routledge, B. R., Scanlon, M. M. (2023). PEAD.txt: Post-Earnings-Announcement Drift Using Text. JFQA 58(6). doi:10.1017/S0022109022001181.
+\item Siano, F. (2025). The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods. Management Science 71(11). doi:10.1287/mnsc.2024.05417.
+\item Wu, Y., Akin, E. M., Martineau, C., Grégoire, V., Veneris, A. (2025). Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns. arXiv:2509.24254.
+\item Yan, Y., Tang, R., Gao, Z., Jiang, W., Lu, Y. (2026). DatedGPT: Preventing Lookahead Bias in Large Language Models with Time-Aware Pretraining. arXiv:2603.11838.
+\item Yu, D., Liu, Z., Zhang, H., He, H. (2026). Fast Numbers, Slow Language: Bridging Quantitative and Qualitative Earnings Signals. arXiv:2606.29734.
+\end{itemize}
+\end{small}
+
+\end{document}

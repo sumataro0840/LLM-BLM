@@ -5,7 +5,7 @@ H06 step 3: do the scores read from earnings releases predict the next month, be
 
 Composite score = tone + outlook + guidance_change (null -> 0), fixed before the run, not fitted.
 Writes results/summary.json, results/monthly.csv, results/fama_macbeth.csv, results/performance.csv.
-Decision rules: 資料集/LLM-BLM_実験仮説.pdf, chapter H06.
+Decision rules: 資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf, chapter H06.
 """
 import json
 import sys

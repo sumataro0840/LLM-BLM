@@ -61,7 +61,7 @@ def nw():
 
 def temperature():
     from experiments.H05_text_vs_numbers.run import SYSTEM, build
-    g = pd.read_pickle(D.REPO / '資料集' / 'LLM-BLM_実験' / 'premium_results.pkl')
+    g = pd.read_pickle(D.REPO / '過去のコードと記録' / '総合報告1の実験' / 'premium_results.pkl')
     sample = g.sample(30, random_state=0)
     api = llm.client()
     log = OUT / 'temperature.jsonl'

@@ -1,0 +1,10 @@
+
+# LLM-BLM考察用\今後の計画\gemini\計画.md
+題名? arXiv:2502.21206 → Chronologically Consistent Large Language Models (2025; He, Lv, Manela ほか)
+     本文: *（理由：実験 2 において gpt-4o-mini が強力な読み取り能力を示したが、先読みの懸念を完全に払拭するには期限前のデータで学習された ChronoGPT で同様の力が証明される必要があるため。ゼロショットではなく回帰（He ほか 2025, arXiv:2502.21
+題名? arXiv:2504.14765 → The Memorization Problem: Can We Trust LLMs' Economic Forecasts? (2025; Lopez-Lira, Tang, Zhu)
+     本文: 理由：評価期間の株価を学習している（データ汚染）恐れが高く、Lopez-Lira ほか（2025, arXiv:2504.14765）が指摘するように先読みを排除できないため。
+題名? arXiv:2509.24254 → Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns (2025; Wu, Akin, Martineau ほか)
+     本文: 理由：実験 2 の結果（Wu ほか 2025, arXiv:2509.24254 と整合）の通り、反応が即座に出尽くすため、月次のビューに入れても無価値であることが明白なため（実験 C でドリフトが発見されない限り行わない）。
+ok **主な標本期間（2023 年 11 月以降）が短い**
+     → 世界経済見通し2023年7月改訂版 —  (2023) [Crossref]  [一致 0.77]

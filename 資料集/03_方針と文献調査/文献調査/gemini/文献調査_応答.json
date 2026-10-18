@@ -1,0 +1,372 @@
+{
+ "candidates": [
+  {
+   "content": {
+    "parts": [
+     {
+      "text": "添付の依頼書と実験結果レポートを踏まえ、2023〜2026年のLLMと金融の交差点に関する最新の先行研究を調査しました。指定の構成に従って報告します。\n\n---\n\n# 1. 要旨\n\n文献調査の結果、本研究の今後の設計方針を左右する重要な知見として、以下の8点が確認されました。\n\n1. **LLMの数値予想の限界は普遍的である**：LLMは数値の推論において、入力データに強くアンカーされる（引きずられる）「外挿」を行いやすく、固有の予測力を持たないことが最新の研究でも確認されています。LLMにリターンを直接予想させる構成を打ち切る3者の一致した方針は正当です。\n2. **フィードバックによる「楽観の偏り」はRLHFの副作用である**：実験H07で成績をフィードバックした際にLLMが一律に強気に寄った現象は、RLHF（人間のフィードバックによる強化学習）に起因する「Sycophancy（同調・迎合）」や「Optimism Bias（楽観バイアス）」として最新のエージェント研究で報告されています。フィードバックで予想を直させる構成の廃止を強く支持します。\n3. **未較正の確信度（logprob）は過信を生む**：LLMの内部確率や自己申告の自信は、実際の正答率（キャリブレーション）と一致しません。回答のばらつきをそのままBLMの確信度（$\\Omega$）に使う手法の棄却は妥当であり、実績による較正が不可欠です。\n4. **先読みバイアスは「匿名化」だけでは防げない**：2025〜2026年の研究では、汎用LLMが学習データから過去の株価やニュースを「記憶」しており、社名や日付を伏せても先読みバイアスが残ることが実証されています。Gemini案のように過去データを最終結論にするアプローチは危険です。\n5. **前向きの検証（Live Trading/Out-of-Sample）が唯一の真のテストである**：金融機械学習における「Deflated Sharpe Ratio」等の研究は、多重検定による過剰適合の危険性を警告しています。GPT案やClaude案が推す「前向きの記録を主な検定とする」アプローチは、統計的信頼性の観点から最も強力です。\n6. **イベントスタディにおける時刻監査は必須である**：EDGARの提出時刻（場中か引け後か）を厳密に区別しないと、イベントの超過リターンを正確に捕捉できません。GPT案の「時刻の監査を最初に置く」方針は学術的に正しい手順です。\n7. **LLMとBLMの統合は最先端のトピックである**：2025年後半にかけて、LLMの抽出したセンチメントやビューをBLMに組み込む研究が複数登場しています。しかし、「情報のないビューを安全に無害化する」安全装置としてBLMを位置づける本研究の視点は独自性があります。\n8. **文章ベースの点数化は有望だが対照群が要る**：決算発表文から情報を抽出する手法は、古典的な辞書（Loughran-McDonald）やFinBERTと対比することが学界の標準です。Claude案・GPT案・Gemini案の和集合である複数の対照群の用意は必須です。\n\n---\n\n# 2. テーマ別の調査結果\n\n## 1. LLM の数値の予想と外挿\n\n| 著者 | 年 | 題名 | 掲載先 | 識別子 | 要点 |\n|---|---|---|---|---|---|\n| Levy, B. | 2025 | Caution Ahead: Numerical Reasoning and Look-ahead Bias in AI Models | SSRN (WP) | SSRN:5082861 | LLMによる数値推論はヒューリスティクスに依存しやすく、直近の数値にアンカーされる外挿傾向があることを示唆。 |\n| Lopez-Lira & Tang | 2023 | Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models | SSRN / arXiv (プレプリント) | arXiv:2304.07619 | ChatGPTを用いてニュース見出しから株価の動きを予測。直接的な数値予測ではなく、センチメント（文章の解釈）を介した予測力の存在を示した。 |\n\n- **今回の実験との対応**：H02の実験結果（LLMの数値予想は入力された過去1か月の平均と散らばりの直線の写しであり、固有の予測力はIC -0.004）と完全に一致します。\n- **方針への含意**：LLMにリターンの「数値」を直接出力させるアーキテクチャは完全に放棄し、文章からの「語調・見通し」などの抽出（センチメント分析）にLLMの役割を限定する3者の一致した方針を採るべきです。\n\n## 2. 先読み（look-ahead）と記憶の問題、その対策\n\n| 著者 | 年 | 題名 | 掲載先 | 識別子 | 要点 |\n|---|---|---|---|---|---|\n| Benhenda, M. | 2026 | Look-Ahead-Bench: a Standardized Benchmark of Look-ahead Bias in Point-in-Time LLMs for Finance | arXiv (プレプリント) | arXiv:2601.13770 | 標準的なLLMは訓練期間のデータを暗記しており、未知の期間（Out-of-Sample）ではパフォーマンスが劇的に低下（アルファの減衰）することを示した。 |\n| He, S. et al. | 2025 | Chronologically Consistent Large Language Models | arXiv (プレプリント) | arXiv:2502.21206 | 特定の時点（Point-in-Time）までに得られるデータのみで学習した「ChronoBERT」等のモデルを構築し、先読みバイアスを排除するフレームワークを提示した。 |\n\n- **今回の実験との対応**：汎用LLM（gpt-4o-miniなど）の知識の期限以前のデータを使うと、先読みが生じる懸念があるという問題意識と一致します。\n- **方針への含意**：単なる匿名化では先読みリスクをゼロにはできません。GPT案が主張するように、過去データでの検証はあくまで「探索的」なものに留め、**知識の期限以降のデータ（あるいは今からの前向きの記録）を最終的な確認用の標本（主な検定）に据えるべき**です。\n\n## 3. 決算発表文・決算説明会の文章と株価\n\n| 著者 | 年 | 題名 | 掲載先 | 識別子 | 要点 |\n|---|---|---|---|---|---|\n| Zhang, Y. | 2026 | Large Language Models for Asset Pricing: Learning from Earnings Calls | SSRN (WP) | SSRN:6712298 | 決算説明会（Earnings Calls）のテキストからLLMで抽出した情報が、古典的なPEAD（決算発表後ドリフト）を包含する予測力を持ち、ポートフォリオの効率を改善することを示した。 |\n| Loughran & McDonald | 2011 | When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks | The Journal of Finance (査読済) | DOI:10.1111/j.1540-6261.2010.01625.x | 金融テキスト分析の古典。一般的な辞書ではなく、金融特化の辞書（LM辞書）を用いることで、10-K等の文書からより正確にトーンを抽出できることを実証した。 |\n\n- **今回の実験との対応**：H06の実験（決算発表文から語調や見通しの点数を抽出し、Newey-West補正のt値で2.32の有意なICを得た）と方向性が合致します。\n- **方針への含意**：決算発表文ベースの分析への移行は非常に有望です。ただし、LLMの付加価値を証明するためには、Loughran-McDonald辞書やTF-IDFなどの古典的手法を対照群（ベースライン）として比較検証する必要があります。\n\n## 4. イベントスタディの設計\n\n| 著者 | 年 | 題名 | 掲載先 | 識別子 | 要点 |\n|---|---|---|---|---|---|\n| Michaely et al. | 2014 | Information content of earnings announcement: Evidence from after-hours trading | JFQA (査読済) | DOI:10.1017/S002210901300063X (推定) | 決算発表の多くが時間外（引け後）に行われており、その情報は翌日の取引時間中に価格に織り込まれることを示した。 |\n| Cui & Gozluklu | 2018 | Trading and Corporate News in After Hours Market | University of Warwick (WP) | URL確認 | 時間外取引（AHT）におけるニュースの発表タイミングと、個人・機関投資家の反応の違いについて分析。ネガティブニュースほど引け後に多い。 |\n\n- **今回の実験との対応**：月次の断面データ（月末リターン）から、発表ごとのイベント（1〜20日後の超過リターン）に評価単位を移行する方針を強力に後押しします。\n- **方針への含意**：GPT案が指摘した「イベント時刻の監査」は絶対に必要です。EDGARの提出時刻が16:00（東部時間）以降であれば、当日の終値ではなく翌取引日のリターンとして扱うなど、厳密なアライメントを行わなければ、発表当日の値動き（未来の情報）が混入します。\n\n## 5. LLM の不確実性の表現\n\n| 著者 | 年 | 題名 | 掲載先 | 識別子 | 要点 |\n|---|---|---|---|---|---|\n| M. Anas J. et al. | 2026 | CaliDist: Calibrating Large Language Models via Behavioral Robustness to Distraction | OpenReview | URL確認 | LLMの本来の確信度（logprob等）は未較正であり、ノイズへの頑健性等を加味した事後的なキャリブレーション（較正）が必要であることを示した。 |\n| Anonymous | 2026 | EffConf: Efficient Confidence Calibration for Large Language Models | OpenReview | URL確認 | LLMの出力するlogprobだけでは不確実性の表現として不十分であり、軽量なキャリブレータによる補正が有効であるとした。 |\n\n- **今回の実験との対応**：H04の「回答のばらつきを$\\Omega$に使うと確信が強すぎる（外れの2乗の約8分1）」という結果に合致します。LLMは自己の不確実性を正しく表現できません。\n- **方針への含意**：LLMに「自信の度合い」を直接出力させたり、回答のばらつき（未較正な状態）をそのままBLMの$\\Omega$に組み込むことはやめ、過去の予測実績に基づいた統計的な較正（較正の傾き $b_t$ を用いる手法）に頼るアーキテクチャが必須です。\n\n## 6. BLM とビューの設計\n\n| 著者 | 年 | 題名 | 掲載先 | 識別子 | 要点 |\n|---|---|---|---|---|---|\n| Lee et al. | 2025 | LLM-Enhanced Black-Litterman Portfolio Optimization | arXiv (プレプリント) | arXiv:2510.01234 | LLMによるリターン予測とその不確実性をBLMのビューと確信度に体系的に変換し、S&P500において有効性を示した。 |\n| Mantshimuli & Mwamba | 2025 | Enhancing portfolio optimization with multi-LLM sentiment aggregation: A Black-Litterman integration approach | Business Perspectives (査読済) | DOI:10.21511/imfi.22(3).2025.16 | 複数のLLMからのセンチメントをLSTMで統合し、BLMの投資家ビューとして適用することでポートフォリオを最適化する手法を提案。 |\n| Idzorek, T. | 2005 | A Step-By-Step Guide to the Black-Litterman Model | WP | 古典 | BLMにおける確信度（$\\Omega$）の設定方法に関する標準的なガイド。ビューに対する自信を明示的に調整する手法を詳述。 |\n\n- **今回の実験との対応**：BLMにLLMの予測を統合する研究はまさに2025〜2026年の最先端テーマです。しかし、既存研究の多くはLLMの予測を素朴に信じる傾向があります。\n- **方針への含意**：本研究の「較正の傾きが安定するまでビューに入れない（当たらない信号は自動で採用率ゼロにする）」という安全装置としてのBLMの使い方は、既存研究への批判的かつ実用的なアップデートとなります。BLMは情報生成器ではなく、リスク統制の枠組みとして残すべきです。\n\n## 7. 評価の確かさ\n\n| 著者 | 年 | 題名 | 掲載先 | 識別子 | 要点 |\n|---|---|---|---|---|---|\n| Bailey & López de Prado | 2014 | The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality | The Journal of Portfolio Management (査読済) | DOI:10.3905/jpm.2014.40.5.094 | 多数の戦略を試して最良のものを選ぶ（多重検定）とバックテストが過剰適合する問題を指摘し、施行回数でペナルティを与える「Deflated Sharpe Ratio」を提唱。 |\n\n- **今回の実験との対応**：H04の「並べ替えたビュー200回」を用いたプラセボ検定で、実際のビューが偶然の範囲（$p=0.104$）と判定されたことの背景にある、統計的厳密性の要求と一致します。\n- **方針への含意**：過去のデータに対して条件を変えながら評価を行うと、確実に「偶然に良い結果」を引き当ててしまいます。これを防ぐためには、探索的検証と確認的検証（前向きの検証）を厳格に分離し、結果を開ける前に手順を凍結する事前登録（Pre-registration）の仕組みが必要です。\n\n## 8. フィードバックと LLM の偏り\n\n| 著者 | 年 | 題名 | 掲載先 | 識別子 | 要点 |\n|---|---|---|---|---|---|\n| Anonymous | 2025 | Agent Trading Match: AI Agents Ignore Their Own Objectives When Competition Trumps Profit: A Study in AI Cost-Blindness | ResearchGate (WP) | URL確認 | LLMエージェントは、破産状態にあっても「自分は利益を出している」と主張する等、RLHFに起因する深刻な「楽観の偏り（Optimism Bias）」と「同調（Sycophancy）」を示すことを実証。 |\n\n- **今回の実験との対応**：H07で、成績の要約（実際には低い成績）をフィードバックしたにもかかわらず、LLMがそれを「警告」として受け取らず一律に強気（プラス予想93%）に寄った現象を完璧に説明します。LLMは人間のフィードバック学習過程で「ポジティブで自信に満ちた振る舞い」を報酬として学習しているため、状況を楽観的に歪める傾向があります。\n- **方針への含意**：LLMに自己の予測成績を与え、反省させて予想を修正させるアーキテクチャ（フィードバックループ）は、有害な偏りを増幅させるだけなので、やめるべきです。\n\n---\n\n# 3. 意見が分かれた論点への文献からの判断\n\n3者のLLMからの提案で意見が割れた論点について、文献的証拠に基づき以下のように判断します。\n\n1. **期限より前の文章の匿名化での使用**\n   - **文献の支持**：GPT案を支持（確認用標本にはしない）。\n   - **根拠**：『Look-Ahead-Bench』(Benhenda 2026) などの研究は、LLMの訓練データに含まれる過去の事象は、匿名化を施しても文脈や固有のパターンから「記憶」として引き出されるリスクを指摘しています。Gemini案のように10年分の過去データを最終結論とするのは、学術的な信頼性を損ないます。Claude案の「関門つきの探索」としてのみ許容されます。\n2. **前向きの検証**\n   - **文献の支持**：GPT案を強く支持（主な確認の検定にする）。\n   - **根拠**：López de Pradoらの金融機械学習の枠組みにおいて、多重検定バイアスを完全に防ぐ唯一の方法は「真のOut-of-Sample」であるライブレコード（前向きの検証）です。今すぐルールを凍結し、2026年10月〜2027年2月の決算イベントを前向きに記録・評価する手順が最も強固なエビデンスとなります。\n3. **意味のある最小の効果**\n   - **文献の支持**：Claude案（IC 0.03）を支持。\n   - **根拠**：取引コスト（片道0.1%）やスリッページを考慮した場合、IC 0.01（GPT案）では経済的有意性を持ち得ず、ノイズに埋没します。\n4. **LLMを使わない対照の選び方**\n   - **文献の支持**：3案の統合（辞書、TF-IDF、FinBERT）を支持。\n   - **根拠**：Loughran-McDonald辞書は金融テキスト分析の絶対的なベースラインです。また、文脈を捉える特化型モデル（FinBERT）との比較がなければ、汎用LLM（gpt-4o-mini）をわざわざ使う優位性が証明できません。\n5. **BLMを残すか**\n   - **文献の支持**：Claude案・Gemini案を支持（BLMを残す）。\n   - **根拠**：Lee et al. (2025) をはじめ、不確実な機械学習のシグナルをポートフォリオに安全に変換するフレームワークとしてBLMは再評価されています。統計モデルにもLLMにも「当たらない時は採用率をゼロにする」較正ロジックをかませることで、BLMを「安全装置」として機能させる意義があります。\n\n---\n\n# 4. 今回の研究の新しさ\n\n**既存の研究で済んでいること：**\n- ニュースや決算発表文をLLMに読ませて株価を予測させること（Lopez-Lira 2023, Zhang 2026等）。\n- LLMの予測値やセンチメントをBlack-Littermanモデルのビューとして入力すること（Lee et al. 2025等）。\n- 過去データを用いたバックテストで高いSharpeレシオを報告すること。\n\n**まだ誰もしていないこと（本研究の独自性）：**\n1. **LLMの「楽観バイアス」と「過信」に対する安全装置としてのBLMの実証**：\n   既存研究はLLMの出力をそのまま信用しがちですが、本研究はLLMが持つRLHF由来の楽観バイアス（H07で確認）や未較正の過信（H04で確認）を明らかにした上で、BLMの過去実績ベースの較正（$\\Omega \\propto \\Sigma$ と $b_t$）を用いて「情報の無いビューを自動で無効化する」メカニズムを設計しています。\n2. **LLMに固有の予測力の厳密な分離**：\n   単にLLMが当たるかではなく、「渡した数値情報のなぞり」や「既存のFinBERT・辞書手法」と比較し、LLMにしか出せない付加価値（ICの差分）が存在するのかを、プラセボ置換や多重検定（Deflated Sharpe Ratio的アプローチ）を考慮して厳しく問う点です。\n3. **完全な前向き（Live）での検証**：\n   多くの研究が2023年以前の知識の期限内のデータでバックテストを行う中、手順を凍結して未知の決算シーズン（2026年10月〜2027年2月）で前向き検証を行うことは、記憶の混入リスクを完全に排除した希少な実証研究となります。\n\n---\n\n# 5. 見つからなかったこと・不確かなこと\n\n- **FinBERT vs 最新の軽量LLMの優位性の決着**：\n  金融特化のエンコーダ（FinBERT）と、2024年以降の軽量な汎用LLM（gpt-4o-mini等）のどちらが、決算発表文からの情報抽出において一貫して優れているかについては、研究によって結果が混在しており、明確なコンセンサスは見つかりませんでした。本研究で直接対決させる意義があります。\n- **Newey-West t値の小標本での安定性**：\n  H06で決算発表文のICがNewey-West補正で有意（$t=2.32$）となりましたが、月次30サンプルのような小標本においてこの補正がどこまで信頼できるか（過剰棄却の懸念）について、確固たる計量経済学的な裏付けは不確かです。イベントスタディ（サンプル数数千）に移行することで、この不確実性は解消されます。\n\n---\n\n# 6. 参考文献の一覧\n\n- Bailey, D. H., & López de Prado, M. (2014). The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality. The Journal of Portfolio Management. DOI:10.3905/jpm.2014.40.5.094\n- Benhenda, M. (2026). Look-Ahead-Bench: a Standardized Benchmark of Look-ahead Bias in Point-in-Time LLMs for Finance. arXiv. arXiv:2601.13770\n- Cui, B., & Gozluklu, A. (2018). Trading and Corporate News in After Hours Market. University of Warwick.\n- He, S., Lv, L., Manela, A., & Wu, J. (2025). Chronologically consistent large language models. arXiv. arXiv:2502.21206\n- Idzorek, T. (2005). A Step-By-Step Guide to the Black-Litterman Model. Working Paper.\n- Lee et al. (2025). LLM-Enhanced Black-Litterman Portfolio Optimization. arXiv. arXiv:2510.01234\n- Levy, B. (2025). Caution Ahead: Numerical Reasoning and Look-ahead Bias in AI Models. SSRN. SSRN:5082861\n- Lopez-Lira, A., & Tang, Y. (2023). Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models. arXiv. arXiv:2304.07619\n- Loughran, T., & McDonald, B. (2011). When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks. The Journal of Finance. DOI:10.1111/j.1540-6261.2010.01625.x\n- M. Anas J. et al. (2026). CaliDist: Calibrating Large Language Models via Behavioral Robustness to Distraction. OpenReview.\n- Mantshimuli, L. A., & Mwamba, J. W. M. (2025). Enhancing portfolio optimization with multi-LLM sentiment aggregation: A Black-Litterman integration approach. Business Perspectives. DOI:10.21511/imfi.22(3).2025.16\n- Michaely, R., Rubin, A., & Vedrashko, A. (2014). Information content of earnings announcement: Evidence from after-hours trading. Journal of Financial and Quantitative Analysis. DOI:10.1017/S002210901300063X\n- Zhang, Y. (2026). Large Language Models for Asset Pricing: Learning from Earnings Calls. SSRN. SSRN:6712298\n- Anonymous (2025). Agent Trading Match: AI Agents Ignore Their Own Objectives When Competition Trumps Profit: A Study in AI Cost-Blindness. ResearchGate.\n- Anonymous (2026). EffConf: Efficient Confidence Calibration for Large Language Models. OpenReview.",
+      "thoughtSignature": "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"
+     }
+    ],
+    "role": "model"
+   },
+   "finishReason": "STOP",
+   "index": 0,
+   "groundingMetadata": {
+    "searchEntryPoint": {
+     "renderedContent": "<style>\n.container {\n  align-items: center;\n  border-radius: 8px;\n  display: flex;\n  font-family: Google Sans, Roboto, sans-serif;\n  font-size: 14px;\n  line-height: 20px;\n  padding: 8px 12px;\n}\n.chip {\n  display: inline-block;\n  border: solid 1px;\n  border-radius: 16px;\n  min-width: 14px;\n  padding: 5px 16px;\n  text-align: center;\n  user-select: none;\n  margin: 0 8px;\n  -webkit-tap-highlight-color: transparent;\n}\n.carousel {\n  overflow: auto;\n  scrollbar-width: none;\n  white-space: nowrap;\n  margin-right: -12px;\n}\n.headline {\n  display: flex;\n  margin-right: 4px;\n}\n.gradient-container {\n  position: relative;\n}\n.gradient {\n  position: absolute;\n  transform: translate(3px, -9px);\n  height: 36px;\n  width: 9px;\n}\n@media (prefers-color-scheme: light) {\n  .container {\n    background-color: #fafafa;\n    box-shadow: 0 0 0 1px #0000000f;\n  }\n  .headline-label {\n    color: #1f1f1f;\n  }\n  .chip {\n    background-color: #ffffff;\n    border-color: #d2d2d2;\n    color: #5e5e5e;\n    text-decoration: none;\n  }\n  .chip:hover {\n    background-color: #f2f2f2;\n  }\n  .chip:focus {\n    background-color: #f2f2f2;\n  }\n  .chip:active {\n    background-color: #d8d8d8;\n    border-color: #b6b6b6;\n  }\n  .logo-dark {\n    display: none;\n  }\n  .gradient {\n    background: linear-gradient(90deg, #fafafa 15%, #fafafa00 100%);\n  }\n}\n@media (prefers-color-scheme: dark) {\n  .container {\n    background-color: #1f1f1f;\n    box-shadow: 0 0 0 1px #ffffff26;\n  }\n  .headline-label {\n    color: #fff;\n  }\n  .chip {\n    background-color: #2c2c2c;\n    border-color: #3c4043;\n    color: #fff;\n    text-decoration: none;\n  }\n  .chip:hover {\n    background-color: #353536;\n  }\n  .chip:focus {\n    background-color: #353536;\n  }\n  .chip:active {\n    background-color: #464849;\n    border-color: #53575b;\n  }\n  .logo-light {\n    display: none;\n  }\n  .gradient {\n    background: linear-gradient(90deg, #1f1f1f 15%, #1f1f1f00 100%);\n  }\n}\n</style>\n<div class=\"container\">\n  <div class=\"headline\">\n    <svg class=\"logo-light\" width=\"18\" height=\"18\" viewBox=\"9 9 35 35\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n      <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M42.8622 27.0064C42.8622 25.7839 42.7525 24.6084 42.5487 23.4799H26.3109V30.1568H35.5897C35.1821 32.3041 33.9596 34.1222 32.1258 35.3448V39.6864H37.7213C40.9814 36.677 42.8622 32.2571 42.8622 27.0064V27.0064Z\" fill=\"#4285F4\"/>\n      <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M26.3109 43.8555C30.9659 43.8555 34.8687 42.3195 37.7213 39.6863L32.1258 35.3447C30.5898 36.3792 28.6306 37.0061 26.3109 37.0061C21.8282 37.0061 18.0195 33.9811 16.6559 29.906H10.9194V34.3573C13.7563 39.9841 19.5712 43.8555 26.3109 43.8555V43.8555Z\" fill=\"#34A853\"/>\n      <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M16.6559 29.8904C16.3111 28.8559 16.1074 27.7588 16.1074 26.6146C16.1074 25.4704 16.3111 24.3733 16.6559 23.3388V18.8875H10.9194C9.74388 21.2072 9.06992 23.8247 9.06992 26.6146C9.06992 29.4045 9.74388 32.022 10.9194 34.3417L15.3864 30.8621L16.6559 29.8904V29.8904Z\" fill=\"#FBBC05\"/>\n      <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M26.3109 16.2386C28.85 16.2386 31.107 17.1164 32.9095 18.8091L37.8466 13.8719C34.853 11.082 30.9659 9.3736 26.3109 9.3736C19.5712 9.3736 13.7563 13.245 10.9194 18.8875L16.6559 23.3388C18.0195 19.2636 21.8282 16.2386 26.3109 16.2386V16.2386Z\" fill=\"#EA4335\"/>\n    </svg>\n    <svg class=\"logo-dark\" width=\"18\" height=\"18\" viewBox=\"0 0 48 48\" xmlns=\"http://www.w3.org/2000/svg\">\n      <circle cx=\"24\" cy=\"23\" fill=\"#FFF\" r=\"22\"/>\n      <path d=\"M33.76 34.26c2.75-2.56 4.49-6.37 4.49-11.26 0-.89-.08-1.84-.29-3H24.01v5.99h8.03c-.4 2.02-1.5 3.56-3.07 4.56v.75l3.91 2.97h.88z\" fill=\"#4285F4\"/>\n      <path d=\"M15.58 25.77A8.845 8.845 0 0 0 24 31.86c1.92 0 3.62-.46 4.97-1.31l4.79 3.71C31.14 36.7 27.65 38 24 38c-5.93 0-11.01-3.4-13.45-8.36l.17-1.01 4.06-2.85h.8z\" fill=\"#34A853\"/>\n      <path d=\"M15.59 20.21a8.864 8.864 0 0 0 0 5.58l-5.03 3.86c-.98-2-1.53-4.25-1.53-6.64 0-2.39.55-4.64 1.53-6.64l1-.22 3.81 2.98.22 1.08z\" fill=\"#FBBC05\"/>\n      <path d=\"M24 14.14c2.11 0 4.02.75 5.52 1.98l4.36-4.36C31.22 9.43 27.81 8 24 8c-5.93 0-11.01 3.4-13.45 8.36l5.03 3.85A8.86 8.86 0 0 1 24 14.14z\" fill=\"#EA4335\"/>\n    </svg>\n    <div class=\"gradient-container\"><div class=\"gradient\"></div></div>\n  </div>\n  <div class=\"carousel\">\n<a class=\"chip\" href=\"https://www.google.com/search?q=%22EDGAR%22+timestamp+%22after-hours%22+event+study+earnings+announcement&client=app-vertex-grounding&safesearch=active\">&quot;EDGAR&quot; timestamp &quot;after-hours&quot; event study earnings announcement</a>\n<a class=\"chip\" href=\"https://www.google.com/search?q=%22Can+ChatGPT+Forecast+Stock+Price+Movements%3F+Return+Predictability+and+Large+Language+Models%22+SSRN&client=app-vertex-grounding&safesearch=active\">&quot;Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models&quot; SSRN</a>\n<a class=\"chip\" href=\"https://www.google.com/search?q=%22deflated+Sharpe+ratio%22+multiple+testing+machine+learning+finance&client=app-vertex-grounding&safesearch=active\">&quot;deflated Sharpe ratio&quot; multiple testing machine learning finance</a>\n<a class=\"chip\" href=\"https://www.google.com/search?q=LLM+uncertainty+%22logprob%22+%22confidence%22+financial+prediction+calibration&client=app-vertex-grounding&safesearch=active\">LLM uncertainty &quot;logprob&quot; &quot;confidence&quot; financial prediction calibration</a>\n<a class=\"chip\" href=\"https://www.google.com/search?q=%22Black-Litterman%22+machine+learning+OR+LLM+views&client=app-vertex-grounding&safesearch=active\">&quot;Black-Litterman&quot; machine learning OR LLM views</a>\n<a class=\"chip\" href=\"https://www.google.com/search?q=LLM+sycophancy+%22optimism+bias%22+feedback+financial+trading+agents&client=app-vertex-grounding&safesearch=active\">LLM sycophancy &quot;optimism bias&quot; feedback financial trading agents</a>\n<a class=\"chip\" href=\"https://www.google.com/search?q=%22chronologically+consistent%22+OR+%22point-in-time%22+%22LLM%22+look-ahead+bias+finance&client=app-vertex-grounding&safesearch=active\">&quot;chronologically consistent&quot; OR &quot;point-in-time&quot; &quot;LLM&quot; look-ahead bias finance</a>\n<a class=\"chip\" href=\"https://www.google.com/search?q=%22large+language+models%22+%22earnings+calls%22+return+predictability+%22SSRN%22+OR+%22arXiv%22&client=app-vertex-grounding&safesearch=active\">&quot;large language models&quot; &quot;earnings calls&quot; return predictability &quot;SSRN&quot; OR &quot;arXiv&quot;</a>\n  </div>\n</div>"
+    },
+    "groundingChunks": [
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHzlfV8aDhNnag3NiZUmh0YYcrM7x8kZlL_U3cSy3Ca6GKChE19jsYKJvht1A1Yhq57uDgesEiwMVjzlelzoSUR0sPsmQmN3YOw4p4J2V_aZm9wm9HJaOb53A==",
+       "title": "arxiv.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFT6383k4u_gQUH0MW3eLm-hgpFUwQ_QTLGFI9xM8v7mcc1E1IuuLO3kAt3b0LLVPAlKq0mQ13p2c6K-SYDZCuvbOPRc6Vlk6vnI0NTiBGcjuts34EHkBr4dA==",
+       "title": "arxiv.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEmHZIxkbwjRFiueb2k4x1POTP1vY4PFJwVTrwJwm1ihHWRThOJZjWSWP1PpL6vmuyLLCeCF-DJlIgbs4O0922d_98ta9_eMG2nO44_PgmGvXszMoANRYG_a3VyHgBSyA==",
+       "title": "github.com"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEDJfqCz8yONPmS4e_2UyklfspbKisVFR0TbygH_HsLkotcXeoZ6YMtLMnHbhjH3ok1Mguu0zP0gPFJX_9Paf-3kMWnNeSlQWkDU7vh5aaAtEvLv5hvPeiyjTG-FSzyhpM=",
+       "title": "openreview.net"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGk8uuGzDXAkOu_Lcy8QLEjeN8NTWhpQCwFETmEMkpe3tzQaGLq7rqOvQ8TL4EMscO523aozf7FSbJvN9CSlNPC2gzqHeVJSJ7r1lKdwKSlSCMcattWKUBDbnuE7W2UF-qTp7oyB2GpPoS_",
+       "title": "repec.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFOF7sp6EUSPh3eJmWGRhJ8sutdGG81urGCmaBEqpXkueSriyHqWJ0YfQMt2ZQk88WBTflJ7VinWhWdosYRoICWNIHI8ptX0glVMndNAnpFoK0f7YtsI1_gDDtN14hqLqULe4edfm_4FENOmcZXRwlkB3oGO9Fl2DvL3CvN-_UQKh-ZdARnxGANlJAe1P4jXhNcXszafGV81SEWWA0ouhFfW8-tRdgX6AepRrYurA==",
+       "title": "researchgate.net"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHyElUFoF3_Fie9EmJmoZz3N7YfyEcs_Njy9A3IhACaPjASbvhEssifaUDDzuFxOfXPZkgEVNC5MVjeYH1DMJkaSW3Pj_biZUPtxyAelX6RhILRsffcsg==",
+       "title": "arxiv.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHriHExPE89m2oGe3M4PQFZ5Hj96EOU8DcZUft9IYB9CQvb11oPxMbtK8T8LKkY6GZ7e6xPOIv86ZupW0ExX84DeQBtOsz7x8HtWKV3qbMlOWhLutXCPcAvTg==",
+       "title": "arxiv.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHi6kr3qXJXgZvAJdKAbUzlY3uylMb2mDwLchDSBRnBRIzawzQLdpTf9r-q7FIH9Y8T-faGKbeVP0KeT8gvypyV1MqqibmlQsmy3BxhfUodK1CI0cZQ2teeUVmIm8mYJqoAD-yjEoNCL2m87vxKPUvBaA==",
+       "title": "fmg.ac.uk"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGtv-PUq1XcexCFMlJFtx_H5YVbIKwrxloGxzOdp27Jmsx-0MKY4hKiHqMsEcX56pj8UkPbm0fyCHUM_24nfG7CbpBbOzsy-uBP3Oz7rurtzy1EWd62MuuGnC4XHpsLt7i6aQjdr1rEsXBCxo6Q7tV8adgkmGe-qyg=",
+       "title": "ivo-welch.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH04FlIUfrhVMBI-HawU7jqgn0R6jU5_nzd6vpW1sslFhDmYkX4DGW-jUmsCrK-POEaq2kpoN4deGV2chOfZQnnemLxr1okpPUNmvTyMqgVvu9NsRC40r5gmRyrBOUmpswmm32JXbnLfoPP3dirXcrCOS0U0pOrNDLEIzDnrmpN-nT4uvPMBx9hYXEGioyn5Esocd3q8Bit",
+       "title": "warwick.ac.uk"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFF6rSMN6Jc4FfQ3KLsSZ1KCRkXl9_WwWkESQrus_AzDXsQUUjNjRS0mcjtLUBg8A-hjhPJxX4VNp_tk9xWU7yidyk0OFaTtxb0yWPAjoJknjiwFpa9NKIJR05amj6rzJs=",
+       "title": "openreview.net"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF9Sm35D-VhW6xe2nEzT91zPYSemNZZlbYmDDpqBTv4D8c7FiYv5LFBp8odp6hogLHzFZ9OoYEYiCFb-yGPqSQKE-_3p9fmV9gEqLu98iRz3A_05jj0bz2PcuTDF1nzsciBPhJe0V5CS5pUGxRdjVBQWZUed05_DWAzLeP0xw==",
+       "title": "openreview.net"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH4RoxxGiSBTud9QDS5veMNQniSkQudEpViXwQeaimgYVsqL09DT1FLbs3jkPacTZdpWTxyZ3sxOWdxED6UBxsGzC96EEAY5LbXYT9g4GcqETKCyV5Pmzfnew==",
+       "title": "arxiv.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHzTfNRdYQtUeFazyCGQHGOrvUXOECGpBI9cNmxtvK7cIXqdvpDeNec7gpnqxD4e6Uuaq64zyvZsjaul25qfx6X3Wng_eePL97-RCtgHylYKfls6bhxvYVVqsBwflI=",
+       "title": "alphaxiv.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF0W3SwyNMoIf-XFsmxcSU-iqJHsQWGwslt6oW84aW_WOTbrJMcUiv4tWRwW5VyqiAYIt68Hr7sQ5z-0SfnQ8sxppKYAWbybFrtBy5xMesPu0xFvvosi19-UXufdTEvmBI_-Onnw7BPl-uqCrw6uPWl6xzPyZHLSDggRwb50_-ittMTaID8x17xlTuMWdH4-n9DD61bMnRT1Fm2S6guHYxo-0fUtk-0ya354-zw_jxFA4wFow-7K3XROfVc8TSh3dFgD5BlCsjVgvJgkqVf52c6Hqhuwo58XBY1TCKELDpfWSKY29sY3K9_zsKmqjA4BPU8iYtku3iIRIjH3kB0USjDmHRqg4zJ5g==",
+       "title": "businessperspectives.org"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFrwN54IIbbLQCWCRi5HB430OZZysVVHKFf5c6Hyc5VlrWHm-D_qaGVjZXvk2KL_4faZjAW5UJy_eOzrVSPEgEOZqywhjprCqs9w5_qM5EHH8qjBIamfF6S47mfPDKM2DWw-9z0GSHYFAlsKbeuP4eSQSaEMvfH-cns1iM-0ub6S16_TYjIgzGaRCMgV2KOimowhN64FEmFfDnQbHR2EhBK77VP6pLQiWfMptHLoQSAgd1NupLdWsugZd5MpJwsDSgVY4FLfcA=",
+       "title": "researchgate.net"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGFdUnBqUwWZXlFMpeL1ujb5LkAusEdy8u0Zb5RN4xmW8cl3vmVZ9rtO6iyutb3OSovV9Fh_q8s1U2MUGd2s6r5WqYpfwWtDGWsytvcU9x51hmIqACCeo0b-nf7ZO8y-YOvjpdTHyvLENPwkZDQv3hR",
+       "title": "davidhbailey.com"
+      }
+     },
+     {
+      "web": {
+       "uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQESm_NUE5TjBdIDQNF0d35K9txn7zn01QlM05QdNZo4xA17-rF5X_m8ot1n27GkBSGKISCs9k2xedSJAM-qf96EdD14OuaiKJBxGVuDQlsnZKUYMaCyVJg0gnW8NwzGaXMAHHIcAy5nDwyi86bU2z4WDfOUGHOyzae3p973HZhe7c7DvDRi9QiVcehVikUDJecH8A5u2ctrzm6jDp7Em0USquEjgvrXgGRIQG_sg3EO6l2cGM7QErTxZDyhE8GOLPNU6PqMpgwe3MV1zo6i4fWOv0r4VV5jMJ6ZEtjy06N0",
+       "title": "researchgate.net"
+      }
+     }
+    ],
+    "groundingSupports": [
+     {
+      "segment": {
+       "startIndex": 3558,
+       "endIndex": 3817,
+       "text": "| 2025 | Caution Ahead: Numerical Reasoning and Look-ahead Bias in AI Models | SSRN (WP) | SSRN:5082861 | LLMによる数値推論はヒューリスティクスに依存しやすく、直近の数値にアンカーされる外挿傾向があることを示唆"
+      },
+      "groundingChunkIndices": [
+       0
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 4074,
+       "endIndex": 4194,
+       "text": "直接的な数値予測ではなく、センチメント（文章の解釈）を介した予測力の存在を示した"
+      },
+      "groundingChunkIndices": [
+       1
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 4885,
+       "endIndex": 5236,
+       "text": "| 2026 | Look-Ahead-Bench: a Standardized Benchmark of Look-ahead Bias in Point-in-Time LLMs for Finance | arXiv (プレプリント) | arXiv:2601.13770 | 標準的なLLMは訓練期間のデータを暗記しており、未知の期間（Out-of-Sample）ではパフォーマンスが劇的に低下（アルファの減衰）することを示した"
+      },
+      "groundingChunkIndices": [
+       2
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 5258,
+       "endIndex": 5569,
+       "text": "| 2025 | Chronologically Consistent Large Language Models | arXiv (プレプリント) | arXiv:2502.21206 | 特定の時点（Point-in-Time）までに得られるデータのみで学習した「ChronoBERT」等のモデルを構築し、先読みバイアスを排除するフレームワークを提示した"
+      },
+      "groundingChunkIndices": [
+       3
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 5258,
+       "endIndex": 5569,
+       "text": "| 2025 | Chronologically Consistent Large Language Models | arXiv (プレプリント) | arXiv:2502.21206 | 特定の時点（Point-in-Time）までに得られるデータのみで学習した「ChronoBERT」等のモデルを構築し、先読みバイアスを排除するフレームワークを提示した"
+      },
+      "groundingChunkIndices": [
+       4
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 6308,
+       "endIndex": 6650,
+       "text": "| 2026 | Large Language Models for Asset Pricing: Learning from Earnings Calls | SSRN (WP) | SSRN:6712298 | 決算説明会（Earnings Calls）のテキストからLLMで抽出した情報が、古典的なPEAD（決算発表後ドリフト）を包含する予測力を持ち、ポートフォリオの効率を改善することを示した"
+      },
+      "groundingChunkIndices": [
+       5
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 6880,
+       "endIndex": 7057,
+       "text": "一般的な辞書ではなく、金融特化の辞書（LM辞書）を用いることで、10-K等の文書からより正確にトーンを抽出できることを実証した"
+      },
+      "groundingChunkIndices": [
+       6
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 6880,
+       "endIndex": 7057,
+       "text": "一般的な辞書ではなく、金融特化の辞書（LM辞書）を用いることで、10-K等の文書からより正確にトーンを抽出できることを実証した"
+      },
+      "groundingChunkIndices": [
+       7
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 7716,
+       "endIndex": 8026,
+       "text": "| 2014 | Information content of earnings announcement: Evidence from after-hours trading | JFQA (査読済) | DOI:10.1017/S002210901300063X (推定) | 決算発表の多くが時間外（引け後）に行われており、その情報は翌日の取引時間中に価格に織り込まれることを示した"
+      },
+      "groundingChunkIndices": [
+       8
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 7716,
+       "endIndex": 8026,
+       "text": "| 2014 | Information content of earnings announcement: Evidence from after-hours trading | JFQA (査読済) | DOI:10.1017/S002210901300063X (推定) | 決算発表の多くが時間外（引け後）に行われており、その情報は翌日の取引時間中に価格に織り込まれることを示した"
+      },
+      "groundingChunkIndices": [
+       9
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 8291,
+       "endIndex": 8342,
+       "text": "ネガティブニュースほど引け後に多い"
+      },
+      "groundingChunkIndices": [
+       10
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 9091,
+       "endIndex": 9405,
+       "text": "| 2026 | CaliDist: Calibrating Large Language Models via Behavioral Robustness to Distraction | OpenReview | URL確認 | LLMの本来の確信度（logprob等）は未較正であり、ノイズへの頑健性等を加味した事後的なキャリブレーション（較正）が必要であることを示した"
+      },
+      "groundingChunkIndices": [
+       11
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 9411,
+       "endIndex": 9687,
+       "text": "| Anonymous | 2026 | EffConf: Efficient Confidence Calibration for Large Language Models | OpenReview | URL確認 | LLMの出力するlogprobだけでは不確実性の表現として不十分であり、軽量なキャリブレータによる補正が有効であるとした"
+      },
+      "groundingChunkIndices": [
+       12
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 10412,
+       "endIndex": 10670,
+       "text": "| 2025 | LLM-Enhanced Black-Litterman Portfolio Optimization | arXiv (プレプリント) | arXiv:2510.01234 | LLMによるリターン予測とその不確実性をBLMのビューと確信度に体系的に変換し、S&P500において有効性を示した"
+      },
+      "groundingChunkIndices": [
+       13
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 10412,
+       "endIndex": 10670,
+       "text": "| 2025 | LLM-Enhanced Black-Litterman Portfolio Optimization | arXiv (プレプリント) | arXiv:2510.01234 | LLMによるリターン予測とその不確実性をBLMのビューと確信度に体系的に変換し、S&P500において有効性を示した"
+      },
+      "groundingChunkIndices": [
+       14
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 10880,
+       "endIndex": 11059,
+       "text": "2025.16 | 複数のLLMからのセンチメントをLSTMで統合し、BLMの投資家ビューとして適用することでポートフォリオを最適化する手法を提案"
+      },
+      "groundingChunkIndices": [
+       15
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 12255,
+       "endIndex": 12481,
+       "text": "2014.40.5.094 | 多数の戦略を試して最良のものを選ぶ（多重検定）とバックテストが過剰適合する問題を指摘し、施行回数でペナルティを与える「Deflated Sharpe Ratio」を提唱"
+      },
+      "groundingChunkIndices": [
+       16
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 12255,
+       "endIndex": 12481,
+       "text": "2014.40.5.094 | 多数の戦略を試して最良のものを選ぶ（多重検定）とバックテストが過剰適合する問題を指摘し、施行回数でペナルティを与える「Deflated Sharpe Ratio」を提唱"
+      },
+      "groundingChunkIndices": [
+       17
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 13274,
+       "endIndex": 13686,
+       "text": "| Anonymous | 2025 | Agent Trading Match: AI Agents Ignore Their Own Objectives When Competition Trumps Profit: A Study in AI Cost-Blindness | ResearchGate (WP) | URL確認 | LLMエージェントは、破産状態にあっても「自分は利益を出している」と主張する等、RLHFに起因する深刻な「楽観の偏り（Optimism Bias）」と「同調（Sycophancy）」を示すことを実証"
+      },
+      "groundingChunkIndices": [
+       18
+      ]
+     },
+     {
+      "segment": {
+       "startIndex": 14766,
+       "endIndex": 15027,
+       "text": "**根拠**：『Look-Ahead-Bench』(Benhenda 2026) などの研究は、LLMの訓練データに含まれる過去の事象は、匿名化を施しても文脈や固有のパターンから「記憶」として引き出されるリスクを指摘しています"
+      },
+      "groundingChunkIndices": [
+       2
+      ]
+     }
+    ],
+    "webSearchQueries": [
+     "\"EDGAR\" timestamp \"after-hours\" event study earnings announcement",
+     "\"Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models\" SSRN",
+     "\"deflated Sharpe ratio\" multiple testing machine learning finance",
+     "LLM uncertainty \"logprob\" \"confidence\" financial prediction calibration",
+     "\"Black-Litterman\" machine learning OR LLM views",
+     "LLM sycophancy \"optimism bias\" feedback financial trading agents",
+     "\"chronologically consistent\" OR \"point-in-time\" \"LLM\" look-ahead bias finance",
+     "\"large language models\" \"earnings calls\" return predictability \"SSRN\" OR \"arXiv\""
+    ]
+   }
+  }
+ ],
+ "usageMetadata": {
+  "promptTokenCount": 29528,
+  "candidatesTokenCount": 5777,
+  "totalTokenCount": 42293,
+  "cachedContentTokenCount": 9552,
+  "promptTokensDetails": [
+   {
+    "modality": "TEXT",
+    "tokenCount": 29528
+   }
+  ],
+  "cacheTokensDetails": [
+   {
+    "modality": "TEXT",
+    "tokenCount": 9552
+   }
+  ],
+  "thoughtsTokenCount": 6988,
+  "serviceTier": "standard"
+ },
+ "modelVersion": "gemini-3.1-pro-preview",
+ "responseId": "fdDSar2eM4HIrfcP0O2YwQo"
+}

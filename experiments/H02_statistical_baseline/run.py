@@ -4,7 +4,7 @@ H02: does the LLM forecast (run 1) know more than a simple function of its own i
     python experiments/H02_statistical_baseline/run.py
 
 No API calls. Writes results/summary.json, results/monthly_ic.csv, results/fama_macbeth.csv.
-Decision rules: 資料集/LLM-BLM_実験仮説.pdf, chapter H02.
+Decision rules: 資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf, chapter H02.
 """
 import json
 import sys

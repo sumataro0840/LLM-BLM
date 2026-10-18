@@ -5,7 +5,7 @@ and an uninformative control (the forecasts shuffled across stocks, 200 times).
     python experiments/H04_omega_calibration/run.py [number of shuffles]
 
 No API calls. Writes results/summary.json, results/performance.csv, results/monthly.csv, results/placebo.csv.
-Decision rules: 資料集/LLM-BLM_実験仮説.pdf, chapter H04.
+Decision rules: 資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf, chapter H04.
 """
 import os
 

@@ -4,7 +4,7 @@ H01: reproduce the current calculation and check its consistency (no API calls).
     python experiments/H01_verification/run.py
 
 Writes results/summary.json (every figure) and results/monthly.csv.
-The checks and pass conditions are those of 資料集/LLM-BLM_実験仮説.pdf, chapter H01.
+The checks and pass conditions are those of 資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf, chapter H01.
 """
 import json
 import sys

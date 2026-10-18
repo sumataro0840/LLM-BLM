@@ -2,7 +2,7 @@
 Black-Litterman strategies of the experiments H03 / H04: a view form (q, P), an Omega and an optimizer.
 
 Every strategy sees, on a decision date, only that date's inputs and the outcomes of earlier decision
-dates (the calibration slope b_t). The coefficients are those of the design (資料集/LLM-BLM_実験仮説.pdf).
+dates (the calibration slope b_t). The coefficients are those of the design (資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf).
 """
 import numpy as np
 import pandas as pd

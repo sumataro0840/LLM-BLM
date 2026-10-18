@@ -1,6 +1,6 @@
 # experiments/
 
-仮説 H01〜H07 の実験です。仮説と判定の条件は `資料集/LLM-BLM_実験仮説.pdf`、結果は `資料集/LLM-BLM_実験結果レポート.pdf` にあります。
+仮説 H01〜H07 の実験です。仮説と判定の条件は `資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf`、結果は `資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験結果レポート.pdf` にあります。
 
 ## 構成
 
@@ -40,7 +40,7 @@ python experiments/H06_earnings_text/evaluate.py
 python experiments/H07_feedback_llm/run.py ask           # API を使う
 python experiments/H07_feedback_llm/run.py evaluate
 python experiments/robustness/run.py nw            # nw | temperature | feedback | placebo
-python 資料集/LLM-BLM_実験結果レポート_図/作成スクリプト/figs.py
+python 資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験結果レポート_図/作成スクリプト/figs.py
 ```
 
 - DB は `.env` の `DB_PATH`（`data/blm_2015.sqlite`）を読み取り専用で開きます。実験は DB に書き込みません。

@@ -1,0 +1,34 @@
+
+# LLM-BLM考察用\文献調査\gemini\文献調査.md
+ok arXiv:2304.07619 → Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models (2023; Lopez-Lira, Tang)
+     本文: | Lopez-Lira & Tang | 2023 | Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models | SSRN / arXiv (プレプ
+ok arXiv:2502.21206 → Chronologically Consistent Large Language Models (2025; He, Lv, Manela ほか)
+     本文: | He, S. et al. | 2025 | Chronologically Consistent Large Language Models | arXiv (プレプリント) | arXiv:2502.21206 | 特定の時点（Point-in-Time）までに得られるデ
+題名? arXiv:2504.14345 → LLM-Enhanced Black-Litterman Portfolio Optimization (2025; Lee, Kim, Kim ほか)
+     本文: - [arxiv.org](https://arxiv.org/html/2504.14345v2)
+題名? arXiv:2510.01234 → LLMRank: Understanding LLM Strengths for Model Routing (2025; Agrawal, Gupta)
+     本文: | Lee et al. | 2025 | LLM-Enhanced Black-Litterman Portfolio Optimization | arXiv (プレプリント) | arXiv:2510.01234 | LLMによるリターン予測とその不確実性をBLMのビューと
+題名? arXiv:2510.03195 → From Text to Alpha: Can LLMs Track Evolving Signals in Corporate Disclosures? (2025; Choi, Kim, Yu ほか)
+     本文: - [arxiv.org](https://arxiv.org/html/2510.03195v4)
+題名? arXiv:2510.05533 → The New Quant: A Survey of Large Language Models in Financial Prediction and Trading (2025; Fu)
+     本文: - [arxiv.org](https://arxiv.org/pdf/2510.05533)
+ok arXiv:2601.13770 → Look-Ahead-Bench: a Standardized Benchmark of Look-ahead Bias in Point-in-Time LLMs for Finance (2026; Benhenda)
+     本文: | Benhenda, M. | 2026 | Look-Ahead-Bench: a Standardized Benchmark of Look-ahead Bias in Point-in-Time LLMs for Finance | arXiv (プレプリント) | a
+ok doi:10.1017/S002210901300063X → On the Importance of Golden Parachutes (2013, Journal of Financial and Quantitative Analysis)
+ok doi:10.1111/j.1540-6261.2010.01625.x → When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10‐Ks (2011, The Journal of Finance)
+ok doi:10.21511/imfi.22(3).2025.16 → Enhancing portfolio optimization with multi-LLM sentiment aggregation: A Black-Litterman integration approach (2025, Investment Management and Financial Innovations)
+ok doi:10.3905/jpm.2014.40.5.094 → The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality (2014, The Journal of Portfolio Management)
+src Cui, B., & Gozluklu, A. (2018). Trading and Corporate News in After Hours Market. University of Warwick.
+     → 検索ツールの出典に題名あり: warwick.ac.uk
+ok Idzorek, T. (2005). A Step-By-Step Guide to the Black-Litterman Model. Working Paper.
+     → A step-by-step guide to the Black-Litterman model — Idzorek (2007) [Crossref]  [一致 1.00]
+ok Levy, B. (2025). Caution Ahead: Numerical Reasoning and Look-ahead Bias in AI Models. SSRN. SSRN:5082861
+     → Caution Ahead: Numerical Reasoning and Look-ahead Bias in AI Models — Levy (2025) [Crossref]  [一致 1.00]
+src M. Anas J. et al. (2026). CaliDist: Calibrating Large Language Models via Behavioral Robustness to Distraction. OpenReview.
+     → 検索ツールの出典に題名あり: openreview.net
+ok Zhang, Y. (2026). Large Language Models for Asset Pricing: Learning from Earnings Calls. SSRN. SSRN:6712298
+     → Large Language Models for Asset Pricing: Learning from Earnings Calls — Zhang, Zhou (2026) [Crossref]  [一致 1.00]
+src Anonymous (2025). Agent Trading Match: AI Agents Ignore Their Own Objectives When Competition Trumps Profit: A Study in AI Cost-Blindness. R
+     → 検索ツールの出典に題名あり: researchgate.net
+src Anonymous (2026). EffConf: Efficient Confidence Calibration for Large Language Models. OpenReview.
+     → 検索ツールの出典に題名あり: openreview.net

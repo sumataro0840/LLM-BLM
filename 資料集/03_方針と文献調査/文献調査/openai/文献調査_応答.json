@@ -1,0 +1,1122 @@
+{
+ "id": "resp_0b908f82a05e7f97006ad2d07da31487d0a6e9aefd6c5494a3",
+ "object": "response",
+ "created_at": 1792200829,
+ "status": "completed",
+ "access_programs": null,
+ "background": true,
+ "billing": {
+  "payer": "developer"
+ },
+ "completed_at": 1792201195,
+ "error": null,
+ "frequency_penalty": 0.0,
+ "incomplete_details": null,
+ "instructions": null,
+ "max_output_tokens": null,
+ "max_tool_calls": null,
+ "model": "gpt-5.6-sol",
+ "moderation": null,
+ "output": [
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d07fac1887d0811c2fc9bf319637",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d08658b887d0b0d91487802cba47",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d08f60cc87d0bf52480fe7d3630b",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d09702a087d0bf37c91bfe881f07",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d09d3c6087d0bf6932d6fa1836f4",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0a21be487d0abcafcad51e628ca",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "site:arxiv.org LLM numerical stock return forecast anchoring extrapolation finance 2024",
+     "site:ssrn.com ChatGPT numerical forecasts stock returns anchoring extrapolation",
+     "site:papers.ssrn.com LLM financial forecasting anonymized knowledge cutoff look ahead bias",
+     "site:arxiv.org chronologically consistent language model finance point in time 2024"
+    ],
+    "query": "site:arxiv.org LLM numerical stock return forecast anchoring extrapolation finance 2024"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0a5c90c87d0bed5985fcb098004",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0a62dac87d0b1a16dda9d22c2ac",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "site:ssrn.com large language model earnings call transcript stock returns 2024 LLM",
+     "site:arxiv.org earnings press release LLM stock returns FinBERT dictionary 2024",
+     "site:papers.ssrn.com GPT earnings calls return predictability text SUE control",
+     "site:doi.org earnings press release language abnormal returns textual tone SUE"
+    ],
+    "query": "site:ssrn.com large language model earnings call transcript stock returns 2024 LLM"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0a9c07487d0a83567cf2feee0f1",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0a9e0d087d0ad463fe45e0fb432",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "Davis Piger Sedor 2012 Beyond the Numbers earnings press release language DOI",
+     "Price Doran Peterson Bliss 2012 earnings conference calls stock returns textual tone DOI",
+     "Tetlock Saar-Tsechansky Macskassy 2008 More Than Words DOI",
+     "Loughran McDonald 2011 When Is a Liability Not a Liability DOI"
+    ],
+    "query": "Davis Piger Sedor 2012 Beyond the Numbers earnings press release language DOI"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0aeeb1c87d0865da75446b971fc",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0af026487d0823fea38f0331afb",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "\"GPT-4 as a Financial Analyst\" paper SSRN Kim Muhn Nikolaev",
+     "site:ssrn.com \"earnings conference calls\" ChatGPT stock returns LLM",
+     "site:ssrn.com large language models earnings announcements textual analysis stock return 2025",
+     "site:arxiv.org large language model earnings call post earnings announcement drift"
+    ],
+    "query": "\"GPT-4 as a Financial Analyst\" paper SSRN Kim Muhn Nikolaev"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0b42dd087d09adaf931d78485c3",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0b4457087d0b5f5d7f13c8bee0a",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "Alex Kim Maximilian Muhn Valeri Nikolaev GPT-4 financial statement analysis SSRN",
+     "\"Financial Statement Analysis with Large Language Models\" Kim Muhn Nikolaev",
+     "site:papers.ssrn.com \"Financial Statement Analysis with Large Language Models\""
+    ],
+    "query": "Alex Kim Maximilian Muhn Valeri Nikolaev GPT-4 financial statement analysis SSRN"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0bab84887d09196e34b0fc41038",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0bc819887d0a3bc5be1e8c62632",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "site:sec.gov EDGAR filing acceptance time after 5:30 pm next business day official",
+     "event study cross-sectional correlation Kolari Pynnonen 2010 DOI",
+     "event study power sample size Brown Warner 1985 DOI",
+     "earnings announcement timing after hours intraday market returns paper DOI"
+    ],
+    "query": "site:sec.gov EDGAR filing acceptance time after 5:30 pm next business day official"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0c93d3c87d090d87e07bba1a846",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0c9694887d097623f94e41a6ba9",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "LLM confidence calibration verbalized confidence log probabilities repeated sampling uncertainty paper 2024",
+     "site:arxiv.org finance LLM uncertainty confidence forecast errors stock returns",
+     "site:ssrn.com ChatGPT confidence financial forecasts uncertainty calibration",
+     "site:openreview.net LLM uncertainty verbal confidence calibration semantic uncertainty"
+    ],
+    "query": "LLM confidence calibration verbalized confidence log probabilities repeated sampling uncertainty paper 2024"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0d5a5d887d088af3340f9b83855",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0d5eeb887d09b586cc4f1c1e43c",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "Kadavath Language Models Mostly Know What They Know arXiv 2207.05221",
+     "Kuhn Gal Farquhar semantic uncertainty ICLR 2023 arXiv",
+     "Xiong Can LLMs Express Their Uncertainty ICLR 2024",
+     "Tian Just Ask for Calibration EMNLP 2023"
+    ],
+    "query": "Kadavath Language Models Mostly Know What They Know arXiv 2207.05221"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0e488c887d0ab7d72e77c30d778",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0e5274887d09fc859bfbfd01e51",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "large language model Black-Litterman portfolio 2024 2025 paper",
+     "site:arxiv.org LLM Black-Litterman portfolio optimization",
+     "site:ssrn.com ChatGPT Black-Litterman portfolio",
+     "machine learning views Black-Litterman empirical portfolio paper"
+    ],
+    "query": "large language model Black-Litterman portfolio 2024 2025 paper"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d0f713c087d0be3d8fe8321a9166",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d0f7589487d0b8c7bcd92f76512d",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "Black Litterman 1992 Global Portfolio Optimization DOI",
+     "Idzorek Step-by-Step Guide Black-Litterman confidence omega PDF",
+     "He Litterman 1999 intuition behind Black Litterman model portfolios PDF",
+     "Meucci Black Litterman Approach Original Model and Extensions SSRN 1117574"
+    ],
+    "query": "Black Litterman 1992 Global Portfolio Optimization DOI"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d10c8d3087d0abdfb9b4b9a23c8d",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d10cd32887d09d60b18864fcc7a4",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "open_page",
+    "url": "https://arxiv.org/abs/2504.14345"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d110f8e087d081a7261cb5025cdd",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d112576887d09cfc0a972803293f",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "Deflated Sharpe Ratio Bailey Lopez de Prado DOI",
+     "Probability of Backtest Overfitting Bailey Borwein Lopez de Prado Zhu DOI",
+     "Harvey Liu Zhu and the cross-section of expected returns DOI multiple testing",
+     "finance machine learning preregistration prospective validation study"
+    ],
+    "query": "Deflated Sharpe Ratio Bailey Lopez de Prado DOI"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d12671c087d09f248cd926a1f881",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d126bffc87d0b69a2ea7fa3eaa87",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "LLM sycophancy feedback optimism bias financial forecasting trading agents paper 2024 2025",
+     "site:arxiv.org LLM trading agents herding bullish bias stock market simulation",
+     "financial LLM benchmark contamination FinBen FinanceBench paper",
+     "preregistered machine learning finance prospective validation study stock returns"
+    ],
+    "query": "LLM sycophancy feedback optimism bias financial forecasting trading agents paper 2024 2025"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d14097a087d087765d2eb943f370",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "ws_0b908f82a05e7f97006ad2d140d55087d0904783ab6e19fca6",
+   "type": "web_search_call",
+   "status": "completed",
+   "action": {
+    "type": "search",
+    "queries": [
+     "Towards Understanding Sycophancy in Language Models arXiv 2310.13548",
+     "Simple synthetic data reduces sycophancy in large language models arXiv",
+     "FinMem LLM trading agent AAAI 2024 arXiv",
+     "StockAgent LLM stock market simulation herding arXiv"
+    ],
+    "query": "Towards Understanding Sycophancy in Language Models arXiv 2310.13548"
+   }
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d158ba9887d0a01b1e59c9890ecf",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d160b7c087d09929b7f6e81b3791",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d166e80887d0b0e14cbf3b3a9a41",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d16cbfd487d09d2fa26adcd3aec3",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d171ce7487d0bb58d5caf0dbac5d",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d176aedc87d0946eccbff963de98",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d17c25dc87d0ba016b9dd56adb4f",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "rs_0b908f82a05e7f97006ad2d181c4e887d09997f18882b3b350",
+   "type": "reasoning",
+   "content": [],
+   "summary": []
+  },
+  {
+   "id": "msg_0b908f82a05e7f97006ad2d187156487d0a318ff7893366446",
+   "type": "message",
+   "status": "completed",
+   "content": [
+    {
+     "type": "output_text",
+     "annotations": [
+      {
+       "type": "url_citation",
+       "end_index": 355,
+       "start_index": 257,
+       "title": "What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Return Forecasts by Shuaiyu Chen, T. Clifton Green, Huseyin Gulen, Dexin Zhou :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4941906&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 604,
+       "start_index": 506,
+       "title": "The Memorization Problem: Can We Trust LLMs' Economic Forecasts? by Alejandro Lopez-Lira, Yuehua Tang, Mingyin Zhu :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5217505&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 870,
+       "start_index": 744,
+       "title": "Look-Ahead Bias in Financial Forecasts Generated by Large Language Models  by Chuan Liang :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/6772819.pdf?abstractid=6772819&mirid=1&type=2&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 1337,
+       "start_index": 1211,
+       "title": "The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods by Federico Siano :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/5198675.pdf?abstractid=5198675&mirid=1&type=2&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 1549,
+       "start_index": 1479,
+       "title": "<fc>FinBERT</fc>: A Large Language Model for Extracting Information from Financial Text<link href='#care12832-note-0001'>*</link> - Huang - 2023 - Contemporary Accounting Research - Wiley Online Library",
+       "url": "https://doi.org/10.1111/1911-3846.12832?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 1742,
+       "start_index": 1677,
+       "title": "Can LLMs Express Their Uncertainty? An Empirical Evaluation of Confidence Elicitation in LLMs",
+       "url": "https://arxiv.org/abs/2306.13063?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 1954,
+       "start_index": 1907,
+       "title": "Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model",
+       "url": "https://arxiv.org/abs/2504.14345"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 2376,
+       "start_index": 2311,
+       "title": "Towards Understanding Sycophancy in Language Models",
+       "url": "https://arxiv.org/abs/2310.13548?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 2867,
+       "start_index": 2769,
+       "title": "What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Return Forecasts by Shuaiyu Chen, T. Clifton Green, Huseyin Gulen, Dexin Zhou :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4941906&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 3187,
+       "start_index": 3061,
+       "title": "Look-Ahead Bias in Financial Forecasts Generated by Large Language Models  by Chuan Liang :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/6772819.pdf?abstractid=6772819&mirid=1&type=2&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 3507,
+       "start_index": 3384,
+       "title": "Seeing the Goal, Missing the Truth: Human Accountability for AI Bias by Sean Cao, Wei Jiang, Hui Xu :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/nber_w35142.pdf?abstractid=6705499&mirid=1&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 3794,
+       "start_index": 3729,
+       "title": "Financial Statement Analysis with Large Language Models",
+       "url": "https://arxiv.org/abs/2407.17866?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 4677,
+       "start_index": 4579,
+       "title": "The Memorization Problem: Can We Trust LLMs' Economic Forecasts? by Alejandro Lopez-Lira, Yuehua Tang, Mingyin Zhu :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5217505&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 4967,
+       "start_index": 4848,
+       "title": "<div> Detecting Lookahead Bias in LLM Forecasts </div> by Zhenyu Gao, Wenxi Jiang, Yutong Yan :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/5985277.pdf?abstractid=5985277&mirid=1&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 5258,
+       "start_index": 5160,
+       "title": "Instruction Tuning Chronologically Consistent Language Models by Songrun He, Linying Lv, Asaf Manela, Jimmy Wu :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5348747&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 5483,
+       "start_index": 5418,
+       "title": "Chronologically Consistent Large Language Models",
+       "url": "https://arxiv.org/abs/2502.21206?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 5707,
+       "start_index": 5642,
+       "title": "Scaling Point-in-Time Language Models",
+       "url": "https://arxiv.org/abs/2607.11889?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 6633,
+       "start_index": 6514,
+       "title": "Beyond the Numbers: Measuring the Information Content of Earnings Press Release Language<link href='#fn1'>*</link> - Davis - 2012 - Contemporary Accounting Research - Wiley Online Library",
+       "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1911-3846.2011.01130.x?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 6992,
+       "start_index": 6894,
+       "title": "Earnings Conference Calls and Stock Returns: The Incremental Informativeness of Textual Tone by S. McKay Price, James Doran, David R. Peterson, Barbara A. Bliss :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1625863&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 7222,
+       "start_index": 7155,
+       "title": "Tone Management | The Accounting Review | American Accounting Association",
+       "url": "https://doi.org/10.2308%2Faccr-50684?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 7529,
+       "start_index": 7459,
+       "title": "<fc>FinBERT</fc>: A Large Language Model for Extracting Information from Financial Text<link href='#care12832-note-0001'>*</link> - Huang - 2023 - Contemporary Accounting Research - Wiley Online Library",
+       "url": "https://doi.org/10.1111/1911-3846.12832?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 7912,
+       "start_index": 7786,
+       "title": "The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods by Federico Siano :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/5198675.pdf?abstractid=5198675&mirid=1&type=2&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 8210,
+       "start_index": 8145,
+       "title": "Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns",
+       "url": "https://arxiv.org/abs/2509.24254?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 8515,
+       "start_index": 8450,
+       "title": "Which Voices Move Markets? Speaker Identity and the Cross-Section of Post-Earnings Returns",
+       "url": "https://arxiv.org/abs/2604.13260?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 9320,
+       "start_index": 9188,
+       "title": "SEC.gov | Determine the Status of My Filing",
+       "url": "https://www.sec.gov/submit-filings/filer-support-resources/how-do-i-guides/determine-status-my-filing?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 9649,
+       "start_index": 9538,
+       "title": "PII: 0304-405X(85)90042-X",
+       "url": "https://leeds-faculty.colorado.edu/bhagat/brownwarner1985.pdf?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 9972,
+       "start_index": 9868,
+       "title": "Event Study Testing with Cross-sectional Correlation of Abnormal Returns | The Review of Financial Studies | Oxford Academic",
+       "url": "https://academic.oup.com/rfs/article-abstract/23/11/3996/1605665?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 10271,
+       "start_index": 10165,
+       "title": "How is Earnings News Transmitted to Stock Prices? - Grégoire - 2022 - Journal of Accounting Research - Wiley Online Library",
+       "url": "https://onlinelibrary.wiley.com/doi/10.1111/1475-679X.12394?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 10618,
+       "start_index": 10510,
+       "title": "Measuring the informativeness of earnings announcements: The role of event windows - ScienceDirect",
+       "url": "https://www.sciencedirect.com/science/article/pii/S1062976921001526?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 11351,
+       "start_index": 11286,
+       "title": "Language Models (Mostly) Know What They Know",
+       "url": "https://arxiv.org/abs/2207.05221?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 11661,
+       "start_index": 11596,
+       "title": "Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation",
+       "url": "https://arxiv.org/abs/2302.09664?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 11900,
+       "start_index": 11818,
+       "title": "dblp: Just Ask for Calibration: Strategies for Eliciting Calibrated Confidence Scores from Language Models Fine-Tuned with Human Feedback.",
+       "url": "https://dblp.org/rec/conf/emnlp/TianMZSRYFM23.html?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 12134,
+       "start_index": 12056,
+       "title": "Published as a conference paper at ICLR 2024",
+       "url": "https://openreview.net/pdf?id=gjeQKFxFpZ&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 12388,
+       "start_index": 12297,
+       "title": "What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Return Forecasts",
+       "url": "https://ideas.repec.org/p/arx/papers/2409.11540.html?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 13090,
+       "start_index": 12963,
+       "title": "Global Portfolio Optimization",
+       "url": "https://rpc.cfainstitute.org/research/financial-analysts-journal/1992/faj-v48-n5-28?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 13402,
+       "start_index": 13264,
+       "title": "The Intuition Behind Black-Litterman Model Portfolios by Guangliang He, Robert Litterman :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID334304_code021021640.pdf?abstractid=334304&mirid=1&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 13620,
+       "start_index": 13548,
+       "title": "A STEP-BY-STEP GUIDE TO THE BLACK-LITTERMAN MODEL",
+       "url": "https://ojalgo.org/pdf/bl_steps_en.pdf?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 13838,
+       "start_index": 13771,
+       "title": "The Black-Litterman Approach: Original Model and Extensions by Attilio Meucci :: SSRN",
+       "url": "https://doi.org/10.2139/ssrn.1117574?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 14173,
+       "start_index": 14126,
+       "title": "Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model",
+       "url": "https://arxiv.org/abs/2504.14345"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 14501,
+       "start_index": 14393,
+       "title": "Intelligent portfolio construction via news sentiment analysis - ScienceDirect",
+       "url": "https://www.sciencedirect.com/science/article/pii/S1059056023003131?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 14783,
+       "start_index": 14692,
+       "title": "Latent Variable Estimation in Bayesian Black-Litterman Models",
+       "url": "https://proceedings.mlr.press/v267/lin25g.html?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 15799,
+       "start_index": 15718,
+       "title": "The probability of backtest overfitting",
+       "url": "https://escholarship.org/uc/item/4w1110bb?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 16094,
+       "start_index": 15994,
+       "title": "… and the Cross-Section of Expected Returns | The Review of Financial Studies | Oxford Academic",
+       "url": "https://academic.oup.com/rfs/article-abstract/29/1/5/1843824?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 16458,
+       "start_index": 16293,
+       "title": "FinBen: A Holistic Financial Benchmark for Large Language Models",
+       "url": "https://papers.nips.cc/paper_files/paper/2024/hash/adb1d9fa8be4576d28703b396b82ba1b-Abstract-Datasets_and_Benchmarks_Track.html?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 16707,
+       "start_index": 16642,
+       "title": "FinanceBench: A New Benchmark for Financial Question Answering",
+       "url": "https://arxiv.org/abs/2311.11944?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 16980,
+       "start_index": 16911,
+       "title": "Pre-Registered Protocol: Replication of Eight Recent 'AI-Finance' Return Claims on a Pre-Specified Hold-Out Slice — clawRxiv",
+       "url": "https://clawrxiv.io/abs/2604.01719?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 17757,
+       "start_index": 17692,
+       "title": "Towards Understanding Sycophancy in Language Models",
+       "url": "https://arxiv.org/abs/2310.13548?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 18020,
+       "start_index": 17955,
+       "title": "Simple synthetic data reduces sycophancy in large language models",
+       "url": "https://arxiv.org/abs/2308.03958?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 18257,
+       "start_index": 18166,
+       "title": "What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Return Forecasts",
+       "url": "https://ideas.repec.org/p/arx/papers/2409.11540.html?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 18582,
+       "start_index": 18489,
+       "title": "FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design | Proceedings of the AAAI Symposium Series",
+       "url": "https://ojs.aaai.org/index.php/AAAI-SS/article/view/31290?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 18801,
+       "start_index": 18736,
+       "title": "When AI Meets Finance (StockAgent): Large Language Model-based Stock Trading in Simulated Real-world Environments",
+       "url": "https://arxiv.org/abs/2407.18957?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 19054,
+       "start_index": 18987,
+       "title": "AI Herding in Financial Market: An Experiment with Large Language Models by Leping Zhang, Guangyou Zhou :: SSRN",
+       "url": "https://doi.org/10.2139/ssrn.6805805?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 19792,
+       "start_index": 19694,
+       "title": "The Memorization Problem: Can We Trust LLMs' Economic Forecasts? by Alejandro Lopez-Lira, Yuehua Tang, Mingyin Zhu :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5217505&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 20831,
+       "start_index": 20705,
+       "title": "The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods by Federico Siano :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/5198675.pdf?abstractid=5198675&mirid=1&type=2&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 21036,
+       "start_index": 20989,
+       "title": "Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model",
+       "url": "https://arxiv.org/abs/2504.14345"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 22613,
+       "start_index": 22491,
+       "title": "Ongoing Research Projects | The University of Chicago Booth School of Business",
+       "url": "https://faculty.chicagobooth.edu/valeri-nikolaev/ongoing-research-projects?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 22886,
+       "start_index": 22805,
+       "title": "The probability of backtest overfitting",
+       "url": "https://escholarship.org/uc/item/4w1110bb?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 23346,
+       "start_index": 23219,
+       "title": "Global Portfolio Optimization",
+       "url": "https://rpc.cfainstitute.org/research/financial-analysts-journal/1992/faj-v48-n5-28?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 23618,
+       "start_index": 23507,
+       "title": "PII: 0304-405X(85)90042-X",
+       "url": "https://leeds-faculty.colorado.edu/bhagat/brownwarner1985.pdf?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 23886,
+       "start_index": 23763,
+       "title": "Seeing the Goal, Missing the Truth: Human Accountability for AI Bias by Sean Cao, Wei Jiang, Hui Xu :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/nber_w35142.pdf?abstractid=6705499&mirid=1&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 24201,
+       "start_index": 24103,
+       "title": "What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Return Forecasts by Shuaiyu Chen, T. Clifton Green, Huseyin Gulen, Dexin Zhou :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4941906&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 24536,
+       "start_index": 24417,
+       "title": "Beyond the Numbers: Measuring the Information Content of Earnings Press Release Language<link href='#fn1'>*</link> - Davis - 2012 - Contemporary Accounting Research - Wiley Online Library",
+       "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1911-3846.2011.01130.x?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 24773,
+       "start_index": 24654,
+       "title": "<div> Detecting Lookahead Bias in LLM Forecasts </div> by Zhenyu Gao, Wenxi Jiang, Yutong Yan :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/5985277.pdf?abstractid=5985277&mirid=1&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 25031,
+       "start_index": 24925,
+       "title": "How is Earnings News Transmitted to Stock Prices? - Grégoire - 2022 - Journal of Accounting Research - Wiley Online Library",
+       "url": "https://onlinelibrary.wiley.com/doi/10.1111/1475-679X.12394?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 25274,
+       "start_index": 25174,
+       "title": "… and the Cross-Section of Expected Returns | The Review of Financial Studies | Oxford Academic",
+       "url": "https://academic.oup.com/rfs/article-abstract/29/1/5/1843824?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 25571,
+       "start_index": 25433,
+       "title": "The Intuition Behind Black-Litterman Model Portfolios by Guangliang He, Robert Litterman :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID334304_code021021640.pdf?abstractid=334304&mirid=1&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 25814,
+       "start_index": 25716,
+       "title": "Instruction Tuning Chronologically Consistent Language Models by Songrun He, Linying Lv, Asaf Manela, Jimmy Wu :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5348747&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 26042,
+       "start_index": 25971,
+       "title": "Are Investors Influenced By How Earnings Press Releases Are Written? - Elaine Henry, 2008",
+       "url": "https://doi.org/10.1177/0021943608319388?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 26301,
+       "start_index": 26231,
+       "title": "<fc>FinBERT</fc>: A Large Language Model for Extracting Information from Financial Text<link href='#care12832-note-0001'>*</link> - Huang - 2023 - Contemporary Accounting Research - Wiley Online Library",
+       "url": "https://doi.org/10.1111/1911-3846.12832?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 26479,
+       "start_index": 26412,
+       "title": "Tone Management | The Accounting Review | American Accounting Association",
+       "url": "https://doi.org/10.2308%2Faccr-50684?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 26782,
+       "start_index": 26674,
+       "title": "Intelligent portfolio construction via news sentiment analysis - ScienceDirect",
+       "url": "https://www.sciencedirect.com/science/article/pii/S1059056023003131?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 27014,
+       "start_index": 26942,
+       "title": "A STEP-BY-STEP GUIDE TO THE BLACK-LITTERMAN MODEL",
+       "url": "https://ojalgo.org/pdf/bl_steps_en.pdf?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 27253,
+       "start_index": 27188,
+       "title": "FinanceBench: A New Benchmark for Financial Question Answering",
+       "url": "https://arxiv.org/abs/2311.11944?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 27422,
+       "start_index": 27357,
+       "title": "Language Models (Mostly) Know What They Know",
+       "url": "https://arxiv.org/abs/2207.05221?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 27652,
+       "start_index": 27587,
+       "title": "Financial Statement Analysis with Large Language Models",
+       "url": "https://arxiv.org/abs/2407.17866?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 27924,
+       "start_index": 27820,
+       "title": "Event Study Testing with Cross-sectional Correlation of Abnormal Returns | The Review of Financial Studies | Oxford Academic",
+       "url": "https://academic.oup.com/rfs/article-abstract/23/11/3996/1605665?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 28167,
+       "start_index": 28102,
+       "title": "Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation",
+       "url": "https://arxiv.org/abs/2302.09664?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 28402,
+       "start_index": 28337,
+       "title": "Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model",
+       "url": "https://arxiv.org/abs/2504.14345?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 28660,
+       "start_index": 28534,
+       "title": "Look-Ahead Bias in Financial Forecasts Generated by Large Language Models  by Chuan Liang :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/6772819.pdf?abstractid=6772819&mirid=1&type=2&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 28899,
+       "start_index": 28808,
+       "title": "Latent Variable Estimation in Bayesian Black-Litterman Models",
+       "url": "https://proceedings.mlr.press/v267/lin25g.html?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 29148,
+       "start_index": 29050,
+       "title": "The Memorization Problem: Can We Trust LLMs' Economic Forecasts? by Alejandro Lopez-Lira, Yuehua Tang, Mingyin Zhu :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5217505&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 29334,
+       "start_index": 29267,
+       "title": "The Black-Litterman Approach: Original Model and Extensions by Attilio Meucci :: SSRN",
+       "url": "https://doi.org/10.2139/ssrn.1117574?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 29660,
+       "start_index": 29562,
+       "title": "Earnings Conference Calls and Stock Returns: The Incremental Informativeness of Textual Tone by S. McKay Price, James Doran, David R. Peterson, Barbara A. Bliss :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1625863&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 29838,
+       "start_index": 29773,
+       "title": "Towards Understanding Sycophancy in Language Models",
+       "url": "https://arxiv.org/abs/2310.13548?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 30138,
+       "start_index": 30012,
+       "title": "The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods by Federico Siano :: SSRN",
+       "url": "https://papers.ssrn.com/sol3/Delivery.cfm/5198675.pdf?abstractid=5198675&mirid=1&type=2&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 30431,
+       "start_index": 30349,
+       "title": "dblp: Just Ask for Calibration: Strategies for Eliciting Calibrated Confidence Scores from Language Models Fine-Tuned with Human Feedback.",
+       "url": "https://dblp.org/rec/conf/emnlp/TianMZSRYFM23.html?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 30649,
+       "start_index": 30584,
+       "title": "Simple synthetic data reduces sycophancy in large language models",
+       "url": "https://arxiv.org/abs/2308.03958?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 30903,
+       "start_index": 30838,
+       "title": "Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns",
+       "url": "https://arxiv.org/abs/2509.24254?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 31218,
+       "start_index": 31053,
+       "title": "FinBen: A Holistic Financial Benchmark for Large Language Models",
+       "url": "https://papers.nips.cc/paper_files/paper/2024/hash/adb1d9fa8be4576d28703b396b82ba1b-Abstract-Datasets_and_Benchmarks_Track.html?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 31493,
+       "start_index": 31415,
+       "title": "Published as a conference paper at ICLR 2024",
+       "url": "https://openreview.net/pdf?id=gjeQKFxFpZ&utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 31784,
+       "start_index": 31691,
+       "title": "FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design | Proceedings of the AAAI Symposium Series",
+       "url": "https://ojs.aaai.org/index.php/AAAI-SS/article/view/31290?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 32024,
+       "start_index": 31959,
+       "title": "When AI Meets Finance (StockAgent): Large Language Model-based Stock Trading in Simulated Real-world Environments",
+       "url": "https://arxiv.org/abs/2407.18957?utm_source=openai"
+      },
+      {
+       "type": "url_citation",
+       "end_index": 32232,
+       "start_index": 32165,
+       "title": "AI Herding in Financial Market: An Experiment with Large Language Models by Leping Zhang, Guangyou Zhou :: SSRN",
+       "url": "https://doi.org/10.2139/ssrn.6805805?utm_source=openai"
+      }
+     ],
+     "logprobs": [],
+     "text": "# 1. 要旨\n\n調査日は **2026 年 10 月 17 日**。論文名、著者、年、識別子を出版社、学会、arXiv、SSRN、NBER、SEC のページで確認した。主な判断は次のとおりである。\n\n1. **LLM に過去の株価列を見せて数値のリターンを答えさせる方法は打ち切る根拠が強い。** Chen et al. は、短期反転が生じやすい株価系列に対して LLM が直近の傾向を過度に外挿し、平均的に楽観的になることを報告した。今回の「予想の 81% が入力の写し」という結果は、この文献と強く一致する。([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4941906&utm_source=openai))\n2. **知識期限前の文章は、匿名化しても確認用標本にはできない。** Lopez-Lira et al. は、社名・日付等を伏せても周辺文脈から企業や時点を再構成でき、黒箱モデルが実現値を見ている場合、予測力と記憶を識別できないと論じる。匿名化は感度分析には使えても、先読み除去の保証にはならない。([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5217505&utm_source=openai))\n3. **期限前後の性能差は無視できない。** Liang は GPT-4 の絶対予測誤差が知識期限前で、指数約18%、月次株価約16%、四半期利益約11%小さいと報告した。したがって、2023年10月以前のデータを増やして検出力を得ても、確認的結論の信頼性を失う可能性が高い。([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/6772819.pdf?abstractid=6772819&mirid=1&type=2&utm_source=openai))\n4. **最も妥当な主検定は、今から固定する前向き検証である。** 既存期間は探索用、2026年10月以降はプロンプト、イベント時刻、統制変数、評価窓、判定基準を凍結した確認用とすべきである。並行して、期限後の既存5,429件はイベント単位で再分析できる。\n5. **決算発表文には、数値だけでは尽くされない情報が存在する。ただし、その多くは「数字を文章で説明した部分」に由来する。** Siano は LLM による決算発表文の表現が、辞書・非LLM機械学習より短期リターンの変動を約3倍説明し、財務数値の驚きだけの \\(R^2\\) を約2倍にした一方、主要な情報源は数字を記述する文章だったと報告する。今回、数値を統制すると LLM 点数が有意でなくなったこととは矛盾しない。([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/5198675.pdf?abstractid=5198675&mirid=1&type=2&utm_source=openai))\n6. **対照は Loughran–McDonald 辞書だけでは不足する。** 少なくとも、辞書、TF-IDF＋正則化回帰、FinBERTを同じ時点分割で比較すべきである。FinBERTや文脈モデルが辞書を上回る研究がある一方、単純な語調にも追加情報があるという古典的証拠もある。([doi.org](https://doi.org/10.1111/1911-3846.12832?utm_source=openai))\n7. **回答のばらつきや自己申告の自信を、そのまま \\(\\Omega\\) にする根拠はない。** 複数回答の一致度は誤答検出に役立つ場合があるが、手法・課題依存であり、言語化した自信は過信しやすい。金融予想では、実現誤差に対する時点外較正が必要である。([arxiv.org](https://arxiv.org/abs/2306.13063?utm_source=openai))\n8. **BLMは残しても副次的な配分器に限る。** 2025年のLLM×BLM研究は、わずか8か月、事後的に選ばれた大型50銘柄、回答分散を \\(\\Omega\\) にする設計で、モデル間の結果も不安定だった。単純順位戦略との比較もない。BLMは信号の発見を担わず、検証済み信号の縮小、TE管理、ベータ中立化に限定すべきである。([arxiv.org](https://arxiv.org/abs/2504.14345))\n9. **意味のある最小効果は、普遍的な IC では決められない。** 文献はICよりCAR、ロング・ショート収益、説明力を使うことが多い。今回の主問いには「数値＋非LLM文章モデルに対する追加 rank IC 0.01」を統計的な関門とし、同時にコスト控除後の経済的効果を要求するのが妥当である。確信度は中程度で、IC 0.03を一律に要求するのはイベント分析には厳しすぎる。\n10. **成績フィードバックで一律に強気になった結果は、sycophancy と整合するが、直接の金融先行研究は少ない。** 人間の好みに合わせるよう学習されたLLMが、正しさより利用者の見方に同調することは確立している。一方、「過去成績を見せると株価予想が強気になる」という直接の実証は見つからず、今回の研究の新規性になり得る。([arxiv.org](https://arxiv.org/abs/2310.13548?utm_source=openai))\n\n# 2. テーマ別の調査結果\n\n## 1. LLM の数値の予想と外挿\n\n### 主要な文献の表\n\n| 著者・年 | 題名 | 掲載先・状態 | 識別子 | 要点 |\n|---|---|---|---|---|\n| Chen, Green, Gulen, Zhou (2024) | *What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Return Forecasts* | SSRN／arXivプレプリント | arXiv:2409.11540、SSRN:4941906 | 株式リターンが短期反転する局面でも、LLMは直近の上昇・下落を過度に外挿する。予想は実現値や歴史的平均より楽観的で、80%予測区間は裾の外れ値を過小評価する。([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4941906&utm_source=openai)) |\n| Liang (2026) | *Look-Ahead Bias in Financial Forecasts Generated by Large Language Models* | SSRNワーキングペーパー | SSRN:6772819 | GPT-4の期限前の絶対誤差は、期限後より指数で約18%、株価で約16%、利益で約11%小さい。数値だけを与える条件でも差が残る。([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/6772819.pdf?abstractid=6772819&mirid=1&type=2&utm_source=openai)) |\n| Cao, Jiang, Xu (2026) | *Seeing the Goal, Missing the Truth: Human Accountability for AI Bias* | NBERワーキングペーパー | NBER WP 35142 | 「株価予測に使う」と目的を教えるだけで、中間的な語調・競争度の測定が目的に沿って変わる。改善は期限前に現れ、期限後には消える。([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/nber_w35142.pdf?abstractid=6705499&mirid=1&utm_source=openai)) |\n| Kim, Muhn, Nikolaev (2024) | *Financial Statement Analysis with Large Language Models* | ワーキングペーパー、**後に取り下げ** | arXiv:2407.17866、SSRN:4835311 | 匿名化した財務諸表から利益方向を予測できるとしたが、著者が基礎データと分析の不整合を確認し、論文を一時取り下げた。肯定的証拠としては使用できない。([arxiv.org](https://arxiv.org/abs/2407.17866?utm_source=openai)) |\n\n### 今回の実験との対応\n\n今回の「予想の決定係数0.81が入力月の平均と散らばりで説明され、残差ICがほぼゼロ」という結果は、Chen et al. の**短期トレンドの過度な外挿**とほぼ同じ現象である。LLMが有用な数値モデルを内部で組み立てたというより、顕著な直近値をアンカーにしたと解釈する方が文献と整合する。\n\nまた、目的を明示すると中間測定まで予測対象に合わせて変わるという Cao et al. は、LLMに「翌月リターンを予測せよ」と教えることで、説明変数の中立的な要約ではなく、目的に迎合した数値が生成される危険を示す。\n\n### 方針への含意\n\n- 数値時系列を直接見せたリターン予想は終了する。\n- LLMに数値を読ませる場合も、予測値ではなく、あらかじめ定義した事実の抽出に限定する。\n- 「LLM固有の情報」は、直近リターン、ボラティリティ、ベータ、規模、SUE等を残差化した後で評価する。\n- プロンプトに下流目的を詳しく書きすぎず、文章測定とリターン回帰を分離する。\n\n## 2. 先読みと記憶の問題、その対策\n\n### 主要な文献の表\n\n| 著者・年 | 題名 | 掲載先・状態 | 識別子 | 要点 |\n|---|---|---|---|---|\n| Lopez-Lira, Tang, Zhu (2025/2026) | *The Memorization Problem: Can We Trust LLMs’ Economic Forecasts?* | SSRNワーキングペーパー | SSRN:5217505 | 期限前の経済・金融値をLLMが正確に再生する例を示す。「当時のつもりで」と指示しても防げず、マスキング後も文脈から企業・時点を再構成する。黒箱モデルでは真の予測力と記憶は原理的に識別できないと論じる。([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5217505&utm_source=openai)) |\n| Gao, Jiang, Yan (2026) | *Detecting Lookahead Bias in LLM Forecasts* | SSRNワーキングペーパー | SSRN:5985277 | 企業と日付だけを問い合わせ、結果を記憶している確率「LAP」を作る。LAPと予測値の交互作用が期限前だけ強いかを汚染検定に使う。([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/5985277.pdf?abstractid=5985277&mirid=1&utm_source=openai)) |\n| He, Lv, Manela, Wu (2025) | *Instruction Tuning Chronologically Consistent Language Models* | SSRNワーキングペーパー | SSRN:5348747 | 各期限以前のデータだけで学習した、重み固定・再現可能なchronologically consistent LLMを提案する。([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5348747&utm_source=openai)) |\n| He et al. (2025) | *Chronologically Consistent Large Language Models* | arXivプレプリント | arXiv:2502.21206 | 時点整合モデルは先読みを構造的に除く一方、利用できる学習量が減るため一般能力とのトレードオフがある。([arxiv.org](https://arxiv.org/abs/2502.21206?utm_source=openai)) |\n| Manela et al. (2026) | *Scaling Point-in-Time Language Models* | arXivプレプリント | arXiv:2607.11889 | 2013～2024年の月次チェックポイントを、時系列で選別した最大1兆トークン、最大40億パラメータで構築する。([arxiv.org](https://arxiv.org/abs/2607.11889?utm_source=openai)) |\n\n### 今回の実験との対応\n\ngpt-4o-miniの知識期限後だけを評価した現行設計は、先行研究が求める最も重要な条件を満たす。反対に、2015～2023年の文章を匿名化して追加する案は、Lopez-Lira et al. の結論と衝突する。\n\n匿名化前後の点数相関が高くても、それは「同じ文章を同じように読んだ」ことを示すだけで、将来の結果を記憶していない証明にはならない。期限前後の精度差、企業・日付の再認能力、モデル世代間の差まで調べる必要がある。\n\n### 方針への含意\n\n- **期限前の文章は探索用・測定安定性の確認用に限定し、主検定には使わない。**\n- 匿名化を試すなら、社名、ティッカー、人名、日付、固有製品名、買収先、地名を別々に伏せ、再識別テストを行う。\n- 最も強い代替策は、point-in-timeモデルまたは期限後の前向きデータである。\n- 8GB GPUで動く小型時点整合モデルは補助比較に使えるが、読解能力の低さにより「汚染なしだが弱い下限」と解釈する。\n\n## 3. 決算発表文・決算説明会の文章と株価\n\n### 主要な文献の表\n\n| 著者・年 | 題名 | 掲載先・状態 | 識別子 | 要点 |\n|---|---|---|---|---|\n| Davis, Piger, Sedor (2012) | *Beyond the Numbers: Measuring the Information Content of Earnings Press Release Language* | *Contemporary Accounting Research*、査読済み | DOI:10.1111/j.1911-3846.2011.01130.x | 約23,000本の決算発表文で、楽観・悲観語が将来業績と市場反応に追加情報を持つ。定量的な発表内容を統制している。([onlinelibrary.wiley.com](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1911-3846.2011.01130.x?utm_source=openai)) |\n| Price, Doran, Peterson, Bliss (2012) | *Earnings Conference Calls and Stock Returns: The Incremental Informativeness of Textual Tone* | *Journal of Banking & Finance*、査読済み | DOI:10.1016/j.jbankfin.2011.10.013 | 語調は異常リターンと出来高を説明し、Q&A部分は60取引日までのPEADに追加情報を持つ。([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1625863&utm_source=openai)) |\n| Huang, Teoh, Zhang (2014) | *Tone Management* | *The Accounting Review*、査読済み | DOI:10.2308/accr-50684 | 数値的基礎条件から予測される語調を除いた異常楽観語調は、発表時の正の反応と、その後1～2四半期の反転を伴う。([doi.org](https://doi.org/10.2308%2Faccr-50684?utm_source=openai)) |\n| Huang, Wang, Yang (2023) | *FinBERT: A Large Language Model for Extracting Information from Financial Text* | *Contemporary Accounting Research*、査読済み | DOI:10.1111/1911-3846.12832 | 財務文章で事前学習したFinBERTを辞書等と比較し、決算説明会語調と3日CARとの関連を評価する。([doi.org](https://doi.org/10.1111/1911-3846.12832?utm_source=openai)) |\n| Siano (2025) | *The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods* | *Management Science*掲載予定、査読済み | DOI:10.1287/mnsc.2024.05417 | LLM文章モデルは辞書・非LLM機械学習より短期リターンの説明力が約3倍。財務数値の驚きの \\(R^2\\) を約2倍にし、決算説明会を加えるとさらに約4分の1増える。([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/5198675.pdf?abstractid=5198675&mirid=1&type=2&utm_source=openai)) |\n| Wu et al. (2025) | *Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns* | arXivプレプリント | arXiv:2509.24254 | 2005～2023年の13.8万本超を使い、bag-of-wordsとBERT系を比較。文章は利益サプライズと同程度に情報を持ち、FinBERTが最も高い予測力を示す。([arxiv.org](https://arxiv.org/abs/2509.24254?utm_source=openai)) |\n| Abedin et al. (2026) | *Which Voices Move Markets? Speaker Identity and the Cross-Section of Post-Earnings Returns* | arXivプレプリント | arXiv:2604.13260 | 16,428本のS&P500決算説明会で、FinBERT語調はLM辞書を包含するとの結果（同時投入でFinBERT \\(t=5.90\\)、LM \\(t=0.86\\)）。([arxiv.org](https://arxiv.org/abs/2604.13260?utm_source=openai)) |\n\n### 今回の実験との対応\n\n今回の合成点数IC \\(+0.033\\) は、文章に弱い追加情報があるという文献の方向と一致する。ただし、数値を統制した係数が有意でなかったことも、Sianoの「多くの情報は数字を説明する文章から生じる」という結果と整合する。\n\nしたがって、現在の点数が捉えているのは、純粋な語用論的情報だけでなく、売上・利益・ガイダンス数値を文章から再構成した成分である可能性が高い。これは失敗ではないが、「LLMだけが読める情報」とは区別すべきである。\n\n### 方針への含意\n\n- 目的変数は発表後1、5、20取引日の市場・業種調整リターンとする。\n- SUE、売上サプライズ、ガイダンス変更、発表前モメンタムを必ず統制する。\n- 数字を残す版と、数字を置換する版を分ける。\n- LLM、FinBERT、LM辞書、TF-IDF＋Elastic Netを同じ学習窓で比較する。\n- 全文点数だけでなく、見出し、経営者引用、ガイダンス、リスク、非GAAP説明を分ける。\n\n## 4. イベントスタディの設計\n\n### 主要な文献・資料の表\n\n| 著者・年 | 題名 | 掲載先・状態 | 識別子 | 要点 |\n|---|---|---|---|---|\n| SEC (2024) | *Determine the Status of My Filing* | SEC公式資料 | SEC公式ページ | 17時30分ET以前に送信・受理された提出は原則当日付。それ以後の多くは翌営業日6時付となり、翌営業日まで公開されない。([sec.gov](https://www.sec.gov/submit-filings/filer-support-resources/how-do-i-guides/determine-status-my-filing?utm_source=openai)) |\n| Brown, Warner (1985) | *Using Daily Stock Returns: The Case of Event Studies* | *Journal of Financial Economics*、査読済み | DOI:10.1016/0304-405X(85)90042-X | 日次イベントスタディの検定力と仕様をシミュレーションで検討。標本数50の例も示すが、独立したイベントを主に想定する。([leeds-faculty.colorado.edu](https://leeds-faculty.colorado.edu/bhagat/brownwarner1985.pdf?utm_source=openai)) |\n| Kolari, Pynnönen (2010) | *Event Study Testing with Cross-sectional Correlation of Abnormal Returns* | *Review of Financial Studies*、査読済み | DOI:10.1093/rfs/hhq072 | イベント日が集中すると、小さな断面相関でも通常の検定は過剰棄却する。相関を補正した検定を提案する。([academic.oup.com](https://academic.oup.com/rfs/article-abstract/23/11/3996/1605665?utm_source=openai)) |\n| Grégoire, Martineau (2022) | *How Is Earnings News Transmitted to Stock Prices?* | *Journal of Accounting Research*、査読済み | DOI:10.1111/1475-679X.12394 | 分単位の価格を用い、時間外発表後の価格発見がどの程度速いかを検証する。([onlinelibrary.wiley.com](https://onlinelibrary.wiley.com/doi/10.1111/1475-679X.12394?utm_source=openai)) |\n| Mayberry et al. (2022) | *Measuring the Informativeness of Earnings Announcements: The Role of Event Windows* | *Journal of Contemporary Accounting & Economics*、査読済み | PII:S1062976921001526 | 発表が場中、引け後、寄り前のどれかによって、情報を正しく含む日次イベント窓が異なる。([sciencedirect.com](https://www.sciencedirect.com/science/article/pii/S1062976921001526?utm_source=openai)) |\n\n### 今回の実験との対応\n\n提出日だけでイベント日を決めると、引け後発表の反応を同日の終値以前に置く誤りや、17時30分以降の提出を1日早く扱う誤りが起きる。5,429件という件数も、そのまま独立標本数ではない。同じ日に数十社が発表し、20日窓が重複すれば、共通市場ショックとイベント窓の重なりがある。\n\n### 方針への含意\n\n- `acceptance-datetime`をETに変換し、**寄り前＝当日、引け後＝翌取引日**を最初の取引可能日とする。\n- 場中発表は主分析から除外するか、分足データを使う。\n- 17時30分以降はSEC上の公開・提出日を個別監査する。\n- 標準誤差は少なくとも発表日単位でクラスタ化する。補助的に企業単位、日付ブロック・ブートストラップ、Kolari–Pynnönen検定を使う。\n- 検出力は件数だけで判断せず、実際の日付クラスタを保った置換または合成信号で測る。\n\n## 5. LLM の不確実性の表現\n\n### 主要な文献の表\n\n| 著者・年 | 題名 | 掲載先・状態 | 識別子 | 要点 |\n|---|---|---|---|---|\n| Kadavath et al. (2022) | *Language Models (Mostly) Know What They Know* | arXivプレプリント | arXiv:2207.05221 | 選択式等では適切な形式で自己評価確率を取り出せるが、新しい課題への較正は弱い。複数サンプルを見せると自己評価が改善する。([arxiv.org](https://arxiv.org/abs/2207.05221?utm_source=openai)) |\n| Kuhn, Gal, Farquhar (2023) | *Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation* | ICLR 2023、査読済み | arXiv:2302.09664 | 表現の違いではなく意味の異なる回答群のエントロピーを測る「semantic entropy」が、単純なトークン確率より正解率を予測する。([arxiv.org](https://arxiv.org/abs/2302.09664?utm_source=openai)) |\n| Tian et al. (2023) | *Just Ask for Calibration* | EMNLP 2023、査読済み | DOI:10.18653/v1/2023.emnlp-main.330 | RLHFモデルから言語化した確率を取り出す方法を比較し、プロンプトと事後較正の重要性を示す。([dblp.org](https://dblp.org/rec/conf/emnlp/TianMZSRYFM23.html?utm_source=openai)) |\n| Xiong et al. (2024) | *Can LLMs Express Their Uncertainty?* | ICLR 2024、査読済み | arXiv:2306.13063 | 自己申告の自信は過信傾向。複数回答の一致度等で改善するが、難しい専門課題ではどの方法も安定して優位でない。([openreview.net](https://openreview.net/pdf?id=gjeQKFxFpZ&utm_source=openai)) |\n| Chen et al. (2024) | *What Does ChatGPT Make of Historical Stock Returns?* | SSRN／arXivプレプリント | arXiv:2409.11540 | 株価予想の80%区間は人間調査より較正される面があるが、外れ値を過小評価し分布が歪む。([ideas.repec.org](https://ideas.repec.org/p/arx/papers/2409.11540.html?utm_source=openai)) |\n\n### 今回の実験との対応\n\n今回、回答分散は誤差の**水準**とは合わず、銘柄間の誤差順位とは弱く対応した。これは「複数回答の不一致には情報があり得るが、そのまま確率・分散とは解釈できない」という文献と一致する。\n\n### 方針への含意\n\n- 回答分散を無変換で \\(\\Omega\\) に入れない。\n- 使うなら、過去データで「分散順位→実現残差分散」の単調写像を推定する。\n- 自己申告の信頼度は主分析から外す。\n- logprobはラベル選択の補助には使えるが、自由記述全体の金融予測誤差とは同一視しない。\n- \\(\\Omega\\) の全体水準は時点外の予測誤差から、銘柄間の比率だけを回答不一致度から得る、という二段階設計が上限である。\n\n## 6. BLM とビューの設計\n\n### 主要な文献の表\n\n| 著者・年 | 題名 | 掲載先・状態 | 識別子 | 要点 |\n|---|---|---|---|---|\n| Black, Litterman (1992) | *Global Portfolio Optimization* | *Financial Analysts Journal*、査読済み | DOI:10.2469/faj.v48.n5.28 | 市場均衡を中立点とし、絶対・相対ビューと確信度で比率を傾ける原型。([rpc.cfainstitute.org](https://rpc.cfainstitute.org/research/financial-analysts-journal/1992/faj-v48-n5-28?utm_source=openai)) |\n| He, Litterman (1999/2002) | *The Intuition Behind Black-Litterman Model Portfolios* | Goldman Sachs研究資料／SSRN | SSRN:334304 | 制約なしでは、市場ポートフォリオと各ビューを表すポートフォリオの加重和になることを示す。([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID334304_code021021640.pdf?abstractid=334304&mirid=1&utm_source=openai)) |\n| Idzorek (2004) | *A Step-by-Step Guide to the Black-Litterman Model* | 実務ワーキングペーパー | 原稿日2004-07-20 | 投資家が指定する確信度を、ビューがポートフォリオをどの程度動かすかに対応させる。([ojalgo.org](https://ojalgo.org/pdf/bl_steps_en.pdf?utm_source=openai)) |\n| Meucci (2008) | *The Black-Litterman Approach: Original Model and Extensions* | SSRNワーキングペーパー | SSRN:1117574 | BLを一般的なベイズ更新・縮小推定として整理し、ビューの一般化を示す。([doi.org](https://doi.org/10.2139/ssrn.1117574?utm_source=openai)) |\n| Lee, Kim, Kim, Lee (2025) | *Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model* | arXivプレプリント | arXiv:2504.14345 | LLMの平均予想を \\(q\\)、反復回答の分散を対角\\(\\Omega\\)とする。2024年6月～2025年2月の50銘柄で、Llama版は高収益だがGPT・Gemma版は負、等ウェイトの年率Sharpe 2.51がLlama版2.18を上回る。([arxiv.org](https://arxiv.org/abs/2504.14345)) |\n| Hung et al. (2024) | *Intelligent Portfolio Construction via News Sentiment Analysis* | *International Review of Financial Analysis*、査読済み | PII:S1059056023003131 | BERT語調とGRU価格予測からBLビューを作る。ただし、文章モデル単独、順位戦略との切り分けは弱い。([sciencedirect.com](https://www.sciencedirect.com/science/article/pii/S1059056023003131?utm_source=openai)) |\n| Lin et al. (2025) | *Latent Variable Estimation in Bayesian Black-Litterman Models* | ICML 2025、査読済み | PMLR 267 | 主観ビューを潜在変数化したデータ駆動BL。DowとセクターETFでMarkowitz・指数比Sharpe約50%改善、回転率約55%低下と報告。([proceedings.mlr.press](https://proceedings.mlr.press/v267/lin25g.html?utm_source=openai)) |\n\n### 今回の実験との対応\n\n今回の研究はLee et al. とほぼ同じ中心設計を、はるかに多い回答、長い30か月、全S&P500、置換対照、\\(\\Omega\\)較正で厳しく再検証している。その結果、平均予想と回答分散をそのまま使う設計の弱点を確認した。\n\n相対ビューは共通水準を除くが、予想とベータの断面相関は除かない。したがって今回、高ベータ傾斜が残ったことはBLMと矛盾しない。ベータ中立化は、\\(q\\)をベータに回帰した残差にするか、最適化に能動ベータ0制約を加える別工程である。\n\n### 方針への含意\n\n- \\(\\Omega\\) は主観確信度より、ローリング時点外誤差から較正する。\n- BLM投入前に、信号から市場・業種・ベータ・規模方向を除く。\n- BLMの比較対象は、①単純な上位下位順位、②順位×等リスク、③制約付き平均分散、④BLMとする。\n- BLMが同じTEで回転率、集中、推定誤差を改善しなければ外す。\n- 「BLMで収益が出た」だけでは、信号、縮小、最適化のどれが寄与したか分からないため不十分である。\n\n## 7. 評価の確かさ\n\n### 主要な文献の表\n\n| 著者・年 | 題名 | 掲載先・状態 | 識別子 | 要点 |\n|---|---|---|---|---|\n| Bailey, López de Prado (2014) | *The Deflated Sharpe Ratio* | *Journal of Portfolio Management*、査読済み | DOI:10.3905/jpm.2014.40.5.094 | 試した戦略数、標本長、歪度、尖度を考慮して、選択後Sharpeを割り引く。 |\n| Bailey, Borwein, López de Prado, Zhu (2017) | *The Probability of Backtest Overfitting* | *Journal of Computational Finance*、査読済み | DOI:10.21314/JCF.2016.322 | 組合せ対称交差検証により、インサンプル最良戦略がアウトサンプルで劣る確率を測る。([escholarship.org](https://escholarship.org/uc/item/4w1110bb?utm_source=openai)) |\n| Harvey, Liu, Zhu (2016) | *… and the Cross-Section of Expected Returns* | *Review of Financial Studies*、査読済み | DOI:10.1093/rfs/hhv059 | 多数の因子探索下では通常の \\(t=2\\) は低すぎ、新規因子には概ね \\(t>3\\) 程度が必要と論じる。([academic.oup.com](https://academic.oup.com/rfs/article-abstract/29/1/5/1843824?utm_source=openai)) |\n| Xie et al. (2024) | *FinBen: A Holistic Financial Benchmark for Large Language Models* | NeurIPS 2024 Datasets and Benchmarks、査読済み | arXiv:2402.12659 | 24金融課題を評価。LLMは抽出・文章分析には強いが、予測や複雑な意思決定では弱い。([papers.nips.cc](https://papers.nips.cc/paper_files/paper/2024/hash/adb1d9fa8be4576d28703b396b82ba1b-Abstract-Datasets_and_Benchmarks_Track.html?utm_source=openai)) |\n| Islam et al. (2023) | *FinanceBench: A New Benchmark for Financial Question Answering* | arXivプレプリント | arXiv:2311.11944 | 10,231問の財務QA。評価したGPT-4 Turbo＋検索構成は、150問中81%で誤答または回答拒否だった。([arxiv.org](https://arxiv.org/abs/2311.11944?utm_source=openai)) |\n| 匿名著者 (2026) | *Pre-Registered Protocol: Replication of Eight Recent “AI-Finance” Return Claims…* | clawRxivプロトコル、未査読 | clawRxiv:2604.01719 | 論文の評価期間後だけを使って8件のAI金融主張を検証する事前登録プロトコル。実証結果ではなく、媒体の審査状態も弱い。([clawrxiv.io](https://clawrxiv.io/abs/2604.01719?utm_source=openai)) |\n\n### 今回の実験との対応\n\nHolm補正、置換対照、聞き直し雑音、主検定と探索結果の区別は、金融の多重探索問題に対する適切な対応である。一方、既に結果を見た30か月を別モデルや別窓で再利用すると、形式上の主検定が一つでも研究全体の試行数は増える。\n\n公開金融ベンチマークは再現性を高めるが、公開後に学習されたモデルでは汚染され得る。したがって、金融LLMの能力ランキングと、時点外の投資予測力は別問題である。\n\n### 方針への含意\n\n- 2026年10月以降の前向き標本を主確認検定とする。\n- 目的変数、主要点数、統制、除外規則、イベント窓、符号、モデル版、コードハッシュを事前固定する。\n- 置換は全銘柄置換だけでなく、同日・同業種内置換を主対照にする。\n- 試したモデル、プロンプト、点数合成、窓、ポートフォリオ制約をすべて試行数として記録する。\n- ポートフォリオ結果にはDSRまたは少なくとも選択前後を区別したSharpeの区間を添える。\n\n## 8. フィードバックと LLM の偏り\n\n### 主要な文献の表\n\n| 著者・年 | 題名 | 掲載先・状態 | 識別子 | 要点 |\n|---|---|---|---|---|\n| Sharma et al. (2023/2024) | *Towards Understanding Sycophancy in Language Models* | ICLR 2024、査読済み | arXiv:2310.13548 | 5種類の主要AI助手でsycophancyを確認。人間と選好モデルが、正しい回答より説得的で利用者に同調する回答を好む場合がある。([arxiv.org](https://arxiv.org/abs/2310.13548?utm_source=openai)) |\n| Wei et al. (2023) | *Simple Synthetic Data Reduces Sycophancy in Large Language Models* | arXivプレプリント | arXiv:2308.03958 | モデル規模とinstruction tuningがsycophancyを強める場合がある。客観的に誤った算術にも利用者が同意すると追随する。([arxiv.org](https://arxiv.org/abs/2308.03958?utm_source=openai)) |\n| Chen et al. (2024) | *What Does ChatGPT Make of Historical Stock Returns?* | SSRN／arXivプレプリント | arXiv:2409.11540 | LLM株価予想に直近値の外挿と楽観の偏りを報告する。([ideas.repec.org](https://ideas.repec.org/p/arx/papers/2409.11540.html?utm_source=openai)) |\n| Yu et al. (2024) | *FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design* | AAAI Spring Symposium会議録 | DOI:10.1609/aaaiss.v3i1.31290 | 性格設定と階層的記憶を調整して取引成績を改善するが、調整後の選択バイアスや前向き再現は十分に検証されていない。([ojs.aaai.org](https://ojs.aaai.org/index.php/AAAI-SS/article/view/31290?utm_source=openai)) |\n| Zhang et al. (2024/2026) | *When AI Meets Finance (StockAgent)* | arXivプレプリント | arXiv:2407.18957 | LLM投資家の市場シミュレーションを構築し、テスト期間についての事前知識を遮断する仕組みを重視する。([arxiv.org](https://arxiv.org/abs/2407.18957?utm_source=openai)) |\n| Zhang, Zhou (2026) | *AI Herding in Financial Market: An Experiment with Large Language Models* | SSRNワーキングペーパー | SSRN:6805805 | 順次取引実験で、LLMは人間より非合理的カスケードが少ない一方、情報に基づく合理的herdingを示す。([doi.org](https://doi.org/10.2139/ssrn.6805805?utm_source=openai)) |\n\n### 今回の実験との対応\n\n成績要約を与えると予想全体が一律に強気へ動いた結果は、次の二つと整合する。\n\n1. 要約中の過去予想値が新しい数値アンカーになった。\n2. 「改善を期待する利用者」に合わせて、より積極的な回答を返した。\n\nただし、sycophancy研究は主として意見・QA・評価課題であり、金融予想の水準が上方へ動くことを直接示してはいない。したがって今回の結果は、一般的なsycophancyの再現というより、**金融数値予想における自己参照型フィードバックの新しい例**と位置づけるのが適切である。\n\n### 方針への含意\n\n- 予想役に成績や利用者の希望を返さない。\n- フィードバックは、モデル出力を変更するためではなく、外部の統計較正器を更新するために使う。\n- LLMに反省させる場合も、予想を再提出させず、誤差原因を分類する補助作業に限定する。\n- 複数エージェントの討論や多数決は、独立性が確認できない限り不確実性低減とは見なさない。\n\n# 3. 意見が分かれた論点への文献からの判断\n\n## 期限より前の文章の匿名化での使用\n\n**文献は「確認用には使わない」を強く支持する。確信度は高い。**\n\n匿名化は企業固有の記憶を減らす可能性はあるが、記憶除去の保証にはならない。Lopez-Lira et al. の非識別性の議論と、Liangの期限前後の誤差差を合わせると、期限前の文章による10年バックテストを主結論にするのは不適切である。([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5217505&utm_source=openai))\n\nただし、次の用途なら使える。\n\n- 点数の再現性と測定不変性の確認\n- 期限前後で係数が不自然に変わるかの汚染診断\n- point-in-timeモデルとの比較\n- 「上限としてどれほど良く見えるか」を示す探索的分析\n\n## 前向きの検証\n\n**文献は前向き検証を主検定にする案を強く支持する。確信度は高い。**\n\n時点整合モデル以外の黒箱LLMでは、学習データを完全に把握できない。さらに既存30か月は既に複数の仮説・窓・点数を見ている。2026年10月以降の手順凍結は、記憶と研究者の選択の両方を同時に防ぐ。短期間で検出力が不足する場合も、「有意でない」ではなく、事前に定めた効果に対する信頼区間を報告すべきである。\n\n## 意味のある最小の効果\n\n**文献はIC 0.03という固定値より、追加効果と経済性による二段階基準を支持する。確信度は中程度。**\n\n推奨する主基準は次である。\n\n- 統計的基準：SUE、直近リターン、辞書、TF-IDF、FinBERTに対する**追加 rank IC 0.01以上**\n- 経済的基準：事前固定した売買規則で、コスト控除後の上位－下位差が正\n- 不確実性基準：主係数の区間がゼロをまたがず、少なくとも大きな負の効果を除外\n- 再現性基準：探索期間と前向き期間で符号が一致\n\nIC 0.01は小さいが「LLMの追加価値」を問う増分基準としては妥当である。IC 0.03は単独信号の基準または実用化の強い関門として残せる。\n\n## LLM を使わない対照の選び方\n\n**文献は、辞書・疎な統計モデル・FinBERTの三段階を支持する。確信度は高い。**\n\n1. LM辞書：解釈可能な古典的基準  \n2. TF-IDF＋Elastic Netまたはリッジ：語彙をデータから学ぶ非LLM基準  \n3. FinBERT：文脈を扱う小型・再現可能な金融言語モデル  \n4. LLM：指示に従った構造化抽出  \n\nLLMが辞書だけを上回っても、TF-IDFやFinBERTを上回らなければ、追加価値は示されない。SianoやWu et al. の設計も複数世代の文章モデルを比較している。([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/5198675.pdf?abstractid=5198675&mirid=1&type=2&utm_source=openai))\n\n## BLM を残すか\n\n**文献は「主研究からは外し、副次評価として条件付きで残す」を支持する。確信度は中～高。**\n\nBLMは、ビューが正しいかを判定するモデルではなく、ビューと市場均衡を混ぜる配分モデルである。LLM×BLMの直接研究は少なく、既存研究の評価期間は短く、単純順位戦略との比較も不足している。([arxiv.org](https://arxiv.org/abs/2504.14345))\n\nしたがって、\n\n1. まずイベント単位で信号の追加情報を検証する。\n2. 通過した場合だけ月次・週次信号に集約する。\n3. 同じ信号を単純順位、等リスク、BLMに入れる。\n4. BLMが同じTEで集中・回転・下方リスクを改善した場合だけ残す。\n\nという順序が妥当である。\n\n# 4. 今回の研究の新しさ\n\n既存研究で既に行われていることは次のとおりである。\n\n- 過去の価格列をLLMに与えた数値予想と外挿偏り\n- 決算発表文・決算説明会の語調とCAR・PEAD\n- 辞書、TF-IDF、BERT系、LLM文章モデルの比較\n- LLM予想を \\(q\\)、反復回答分散を \\(\\Omega\\) とするBLM\n- LLMの記憶、期限前後差、匿名化の限界\n- LLM取引エージェントと記憶・性格・herding\n\n検索で確認した範囲では、今回の研究には次の新しさが残る。\n\n1. **LLM×BLM原型を、全S&P500・約44万回答で分解し、予想の81%が入力の写しだと定量化したこと。**\n2. **LLM固有残差のIC、単純な入力コピー、並べ替えビューを同じ枠内で比較したこと。**\n3. **回答分散を、誤差水準と誤差順位に分けて検証し、\\(\\Omega\\)としての利用可能性を棄却・限定したこと。**\n4. **相対ビューではベータ傾斜が消えない理由を、LLM予想とベータの断面相関に分解したこと。**\n5. **数値予想、文章抽出、BLM配分、置換対照を一つの研究内で段階的に検証したこと。**\n6. **成績フィードバックが予想改善ではなく、一律な強気化を生むことを金融数値予想で示したこと。**\n7. **価値のないビューを自動的にほぼ不採用にする「BLMを安全装置として使う」設計を実証したこと。**\n\n今後の新規性は、「LLMが決算発表文から抽出した情報が、SUE、辞書、TF-IDF、FinBERTを**前向き標本で**超えるか」に絞るべきである。\n\n# 5. 見つからなかったこと・不確かなこと\n\n- 反復回答の分散を、金融予想の実現誤差に十分な時点外標本で較正し、BLMの \\(\\Omega\\) として成功した査読済み研究は見つからなかった。\n- 匿名化によって期限前のLLM金融予測から記憶を完全に除けると示した研究は見つからなかった。むしろ反対の証拠が強い。\n- LLM文章点数の効果をICで報告する研究は少なく、CAR、回帰 \\(R^2\\)、ロング・ショート収益が中心である。IC 0.01・0.03の文献横断的比較はできなかった。\n- LLM-BLMと、同じ信号を使う単純順位戦略を、同一TE・同一コスト・同一銘柄で厳密比較した研究は見つからなかった。\n- 金融機械学習で、事前登録した前向き株式リターン検証を完了し、査読済みとなった例は確認できなかった。2026年の事前登録プロトコルはあるが、結果論文ではない。\n- 成績フィードバックがLLMを一律に強気にするという直接の先行研究は見つからなかった。\n- 2025～2026年の一部プレプリントは新しく、査読、再現、汚染監査が未了である。特に高いSharpeや短期間の大幅超過収益は、確認的証拠として扱えない。\n- *Financial Statement Analysis with Large Language Models* と関連研究は著者自身が不整合を理由に取り下げており、匿名化の成功例として引用すべきではない。([faculty.chicagobooth.edu](https://faculty.chicagobooth.edu/valeri-nikolaev/ongoing-research-projects?utm_source=openai))\n\n# 6. 参考文献の一覧\n\n- Bailey, D. H., Borwein, J. M., López de Prado, M., Zhu, Q. J. (2017). The Probability of Backtest Overfitting. *Journal of Computational Finance*. DOI:10.21314/JCF.2016.322. ([escholarship.org](https://escholarship.org/uc/item/4w1110bb?utm_source=openai))\n- Bailey, D. H., López de Prado, M. (2014). The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality. *Journal of Portfolio Management*. DOI:10.3905/jpm.2014.40.5.094.\n- Black, F., Litterman, R. (1992). Global Portfolio Optimization. *Financial Analysts Journal*. DOI:10.2469/faj.v48.n5.28. ([rpc.cfainstitute.org](https://rpc.cfainstitute.org/research/financial-analysts-journal/1992/faj-v48-n5-28?utm_source=openai))\n- Brown, S. J., Warner, J. B. (1985). Using Daily Stock Returns: The Case of Event Studies. *Journal of Financial Economics*. DOI:10.1016/0304-405X(85)90042-X. ([leeds-faculty.colorado.edu](https://leeds-faculty.colorado.edu/bhagat/brownwarner1985.pdf?utm_source=openai))\n- Cao, S., Jiang, W., Xu, H. (2026). Seeing the Goal, Missing the Truth: Human Accountability for AI Bias. *NBER Working Paper*. NBER WP 35142. ([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/nber_w35142.pdf?abstractid=6705499&mirid=1&utm_source=openai))\n- Chen, S., Green, T. C., Gulen, H., Zhou, D. (2024). What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Return Forecasts. *SSRN／arXiv*. arXiv:2409.11540; SSRN:4941906. ([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4941906&utm_source=openai))\n- Davis, A. K., Piger, J. M., Sedor, L. M. (2012). Beyond the Numbers: Measuring the Information Content of Earnings Press Release Language. *Contemporary Accounting Research*. DOI:10.1111/j.1911-3846.2011.01130.x. ([onlinelibrary.wiley.com](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1911-3846.2011.01130.x?utm_source=openai))\n- Gao, Z., Jiang, W., Yan, Y. (2026). Detecting Lookahead Bias in LLM Forecasts. *SSRN Working Paper*. SSRN:5985277. ([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/5985277.pdf?abstractid=5985277&mirid=1&utm_source=openai))\n- Grégoire, V., Martineau, C. (2022). How Is Earnings News Transmitted to Stock Prices? *Journal of Accounting Research*. DOI:10.1111/1475-679X.12394. ([onlinelibrary.wiley.com](https://onlinelibrary.wiley.com/doi/10.1111/1475-679X.12394?utm_source=openai))\n- Harvey, C. R., Liu, Y., Zhu, H. (2016). … and the Cross-Section of Expected Returns. *Review of Financial Studies*. DOI:10.1093/rfs/hhv059. ([academic.oup.com](https://academic.oup.com/rfs/article-abstract/29/1/5/1843824?utm_source=openai))\n- He, G., Litterman, R. (1999/2002). The Intuition Behind Black-Litterman Model Portfolios. *Goldman Sachs Investment Management Research／SSRN*. SSRN:334304. ([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID334304_code021021640.pdf?abstractid=334304&mirid=1&utm_source=openai))\n- He, S., Lv, L., Manela, A., Wu, J. (2025). Instruction Tuning Chronologically Consistent Language Models. *SSRN Working Paper*. SSRN:5348747. ([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5348747&utm_source=openai))\n- Henry, E. (2008). Are Investors Influenced by How Earnings Press Releases Are Written? *Journal of Business Communication*. DOI:10.1177/0021943608319388. ([doi.org](https://doi.org/10.1177/0021943608319388?utm_source=openai))\n- Huang, A. H., Wang, H., Yang, Y. (2023). FinBERT: A Large Language Model for Extracting Information from Financial Text. *Contemporary Accounting Research*. DOI:10.1111/1911-3846.12832. ([doi.org](https://doi.org/10.1111/1911-3846.12832?utm_source=openai))\n- Huang, X., Teoh, S. H., Zhang, Y. (2014). Tone Management. *The Accounting Review*. DOI:10.2308/accr-50684. ([doi.org](https://doi.org/10.2308%2Faccr-50684?utm_source=openai))\n- Hung, M.-C., Hsia, P.-H., Kuang, X.-J., Lin, S.-K. (2024). Intelligent Portfolio Construction via News Sentiment Analysis. *International Review of Financial Analysis*. PII:S1059056023003131. ([sciencedirect.com](https://www.sciencedirect.com/science/article/pii/S1059056023003131?utm_source=openai))\n- Idzorek, T. M. (2004). A Step-by-Step Guide to the Black-Litterman Model: Incorporating User-Specified Confidence Levels. *Working Paper*. Draft 2004-07-20. ([ojalgo.org](https://ojalgo.org/pdf/bl_steps_en.pdf?utm_source=openai))\n- Islam, P., Kannappan, A., Kiela, D., Qian, R., Scherrer, N., Vidgen, B. (2023). FinanceBench: A New Benchmark for Financial Question Answering. *arXiv*. arXiv:2311.11944. ([arxiv.org](https://arxiv.org/abs/2311.11944?utm_source=openai))\n- Kadavath, S. et al. (2022). Language Models (Mostly) Know What They Know. *arXiv*. arXiv:2207.05221. ([arxiv.org](https://arxiv.org/abs/2207.05221?utm_source=openai))\n- Kim, A. G., Muhn, M., Nikolaev, V. V. (2024). Financial Statement Analysis with Large Language Models. *Withdrawn Working Paper*. arXiv:2407.17866; SSRN:4835311. ([arxiv.org](https://arxiv.org/abs/2407.17866?utm_source=openai))\n- Kolari, J. W., Pynnönen, S. (2010). Event Study Testing with Cross-sectional Correlation of Abnormal Returns. *Review of Financial Studies*. DOI:10.1093/rfs/hhq072. ([academic.oup.com](https://academic.oup.com/rfs/article-abstract/23/11/3996/1605665?utm_source=openai))\n- Kuhn, L., Gal, Y., Farquhar, S. (2023). Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation. *ICLR 2023*. arXiv:2302.09664. ([arxiv.org](https://arxiv.org/abs/2302.09664?utm_source=openai))\n- Lee, Y., Kim, Y., Kim, S., Lee, Y. (2025). Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model. *arXiv*. arXiv:2504.14345. ([arxiv.org](https://arxiv.org/abs/2504.14345?utm_source=openai))\n- Liang, C. (2026). Look-Ahead Bias in Financial Forecasts Generated by Large Language Models. *SSRN Working Paper*. SSRN:6772819. ([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/6772819.pdf?abstractid=6772819&mirid=1&type=2&utm_source=openai))\n- Lin, T. Y.-L., Hu, J. Y.-C., Chiou, P. W., Lin, P. (2025). Latent Variable Estimation in Bayesian Black-Litterman Models. *ICML 2025, PMLR 267*. ([proceedings.mlr.press](https://proceedings.mlr.press/v267/lin25g.html?utm_source=openai))\n- Lopez-Lira, A., Tang, Y., Zhu, M. (2025/2026). The Memorization Problem: Can We Trust LLMs’ Economic Forecasts? *SSRN Working Paper*. SSRN:5217505. ([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5217505&utm_source=openai))\n- Meucci, A. (2008). The Black-Litterman Approach: Original Model and Extensions. *SSRN Working Paper*. SSRN:1117574. ([doi.org](https://doi.org/10.2139/ssrn.1117574?utm_source=openai))\n- Price, S. M., Doran, J., Peterson, D. R., Bliss, B. A. (2012). Earnings Conference Calls and Stock Returns: The Incremental Informativeness of Textual Tone. *Journal of Banking & Finance*. DOI:10.1016/j.jbankfin.2011.10.013. ([papers.ssrn.com](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1625863&utm_source=openai))\n- Sharma, M. et al. (2024). Towards Understanding Sycophancy in Language Models. *ICLR 2024*. arXiv:2310.13548. ([arxiv.org](https://arxiv.org/abs/2310.13548?utm_source=openai))\n- Siano, F. (2025). The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods. *Management Science, forthcoming*. DOI:10.1287/mnsc.2024.05417. ([papers.ssrn.com](https://papers.ssrn.com/sol3/Delivery.cfm/5198675.pdf?abstractid=5198675&mirid=1&type=2&utm_source=openai))\n- Tian, K. et al. (2023). Just Ask for Calibration: Strategies for Eliciting Calibrated Confidence Scores from Language Models Fine-Tuned with Human Feedback. *EMNLP 2023*. DOI:10.18653/v1/2023.emnlp-main.330. ([dblp.org](https://dblp.org/rec/conf/emnlp/TianMZSRYFM23.html?utm_source=openai))\n- Wei, J., Huang, D., Lu, Y., Zhou, D., Le, Q. V. (2023). Simple Synthetic Data Reduces Sycophancy in Large Language Models. *arXiv*. arXiv:2308.03958. ([arxiv.org](https://arxiv.org/abs/2308.03958?utm_source=openai))\n- Wu, Y., Akin, E. M., Martineau, C., Grégoire, V., Veneris, A. (2025). Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns. *arXiv*. arXiv:2509.24254. ([arxiv.org](https://arxiv.org/abs/2509.24254?utm_source=openai))\n- Xie, Q. et al. (2024). FinBen: A Holistic Financial Benchmark for Large Language Models. *NeurIPS 2024 Datasets and Benchmarks*. arXiv:2402.12659. ([papers.nips.cc](https://papers.nips.cc/paper_files/paper/2024/hash/adb1d9fa8be4576d28703b396b82ba1b-Abstract-Datasets_and_Benchmarks_Track.html?utm_source=openai))\n- Xiong, M., Hu, Z., Lu, X., Li, Y., Fu, J., He, J., Hooi, B. (2024). Can LLMs Express Their Uncertainty? An Empirical Evaluation of Confidence Elicitation in LLMs. *ICLR 2024*. arXiv:2306.13063. ([openreview.net](https://openreview.net/pdf?id=gjeQKFxFpZ&utm_source=openai))\n- Yu, Y. et al. (2024). FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design. *Proceedings of the AAAI Spring Symposium Series*. DOI:10.1609/aaaiss.v3i1.31290. ([ojs.aaai.org](https://ojs.aaai.org/index.php/AAAI-SS/article/view/31290?utm_source=openai))\n- Zhang, C. et al. (2024/2026). When AI Meets Finance (StockAgent): Large Language Model-based Stock Trading in Simulated Real-world Environments. *arXiv*. arXiv:2407.18957. ([arxiv.org](https://arxiv.org/abs/2407.18957?utm_source=openai))\n- Zhang, L., Zhou, G. (2026). AI Herding in Financial Market: An Experiment with Large Language Models. *SSRN Working Paper*. SSRN:6805805. ([doi.org](https://doi.org/10.2139/ssrn.6805805?utm_source=openai))"
+    }
+   ],
+   "phase": "final_answer",
+   "role": "assistant"
+  }
+ ],
+ "parallel_tool_calls": true,
+ "presence_penalty": 0.0,
+ "previous_response_id": null,
+ "prompt_cache_key": null,
+ "prompt_cache_retention": "24h",
+ "reasoning": {
+  "context": "all_turns",
+  "effort": "high",
+  "mode": "standard",
+  "summary": null
+ },
+ "safety_identifier": null,
+ "service_tier": "default",
+ "store": true,
+ "temperature": 1.0,
+ "text": {
+  "format": {
+   "type": "text"
+  },
+  "verbosity": "medium"
+ },
+ "tool_choice": "auto",
+ "tool_usage": {
+  "image_gen": {
+   "input_tokens": 0,
+   "input_tokens_details": {
+    "image_tokens": 0,
+    "text_tokens": 0
+   },
+   "output_tokens": 0,
+   "output_tokens_details": {
+    "image_tokens": 0,
+    "text_tokens": 0
+   },
+   "total_tokens": 0
+  },
+  "web_search": {
+   "num_requests": 13
+  }
+ },
+ "tools": [
+  {
+   "type": "web_search",
+   "return_token_budget": "default",
+   "search_content_types": [
+    "text"
+   ],
+   "search_context_size": "medium",
+   "user_location": {
+    "type": "approximate",
+    "city": null,
+    "country": "US",
+    "region": null,
+    "timezone": null
+   }
+  }
+ ],
+ "top_logprobs": 0,
+ "top_p": 0.98,
+ "truncation": "disabled",
+ "usage": {
+  "input_tokens": 153057,
+  "input_tokens_details": {
+   "cache_write_tokens": 35133,
+   "cached_tokens": 0
+  },
+  "output_tokens": 22008,
+  "output_tokens_details": {
+   "reasoning_tokens": 8005
+  },
+  "total_tokens": 175065
+ },
+ "user": null,
+ "metadata": {}
+}

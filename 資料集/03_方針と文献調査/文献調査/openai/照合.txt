@@ -1,0 +1,69 @@
+
+# LLM-BLM考察用\文献調査\openai\文献調査.md
+ok arXiv:2207.05221 → Language Models (Mostly) Know What They Know (2022; Kadavath, Conerly, Askell ほか)
+     本文: | Kadavath et al. (2022) | *Language Models (Mostly) Know What They Know* | arXivプレプリント | arXiv:2207.05221 | 選択式等では適切な形式で自己評価確率を取り出せるが、新しい課題
+ok arXiv:2302.09664 → Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation (2023; Kuhn, Gal, Farquhar)
+     本文: | Kuhn, Gal, Farquhar (2023) | *Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation* | IC
+ok arXiv:2306.13063 → Can LLMs Express Their Uncertainty? An Empirical Evaluation of Confidence Elicitation in LLMs (2023; Xiong, Hu, Lu ほか)
+     本文: 7. **回答のばらつきや自己申告の自信を、そのまま \(\Omega\) にする根拠はない。** 複数回答の一致度は誤答検出に役立つ場合があるが、手法・課題依存であり、言語化した自信は過信しやすい。金融予想では、実現誤差に対する時点外較正が必要である。([arxiv.org](
+ok arXiv:2308.03958 → Simple synthetic data reduces sycophancy in large language models (2023; Wei, Huang, Lu ほか)
+     本文: | Wei et al. (2023) | *Simple Synthetic Data Reduces Sycophancy in Large Language Models* | arXivプレプリント | arXiv:2308.03958 | モデル規模とinstructi
+ok arXiv:2310.13548 → Towards Understanding Sycophancy in Language Models (2023; Sharma, Tong, Korbak ほか)
+     本文: 10. **成績フィードバックで一律に強気になった結果は、sycophancy と整合するが、直接の金融先行研究は少ない。** 人間の好みに合わせるよう学習されたLLMが、正しさより利用者の見方に同調することは確立している。一方、「過去成績を見せると株価予想が強気になる」という直
+ok arXiv:2311.11944 → FinanceBench: A New Benchmark for Financial Question Answering (2023; Islam, Kannappan, Kiela ほか)
+     本文: | Islam et al. (2023) | *FinanceBench: A New Benchmark for Financial Question Answering* | arXivプレプリント | arXiv:2311.11944 | 10,231問の財務QA。評価し
+ok arXiv:2402.12659 → FinBen: A Holistic Financial Benchmark for Large Language Models (2024; Xie, Han, Chen ほか)
+     本文: | Xie et al. (2024) | *FinBen: A Holistic Financial Benchmark for Large Language Models* | NeurIPS 2024 Datasets and Benchmarks、査読済み | arXiv
+ok arXiv:2407.17866 → Financial Statement Analysis with Large Language Models (2024; Kim, Muhn, Nikolaev)
+     本文: | Kim, Muhn, Nikolaev (2024) | *Financial Statement Analysis with Large Language Models* | ワーキングペーパー、**後に取り下げ** | arXiv:2407.17866、SSRN:4835
+ok arXiv:2407.18957 → When AI Meets Finance (StockAgent): Large Language Model-based Stock Trading in Simulated Real-world Environments (2024; Zhang, Liu, Zhang ほか)
+     本文: | Zhang et al. (2024/2026) | *When AI Meets Finance (StockAgent)* | arXivプレプリント | arXiv:2407.18957 | LLM投資家の市場シミュレーションを構築し、テスト期間についての事前知識を遮断
+ok arXiv:2409.11540 → What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Return Forecasts (2024; Chen, Green, Gulen ほか)
+     本文: | Chen, Green, Gulen, Zhou (2024) | *What Does ChatGPT Make of Historical Stock Returns? Extrapolation and Miscalibration in LLM Stock Retur
+ok arXiv:2502.21206 → Chronologically Consistent Large Language Models (2025; He, Lv, Manela ほか)
+     本文: | He et al. (2025) | *Chronologically Consistent Large Language Models* | arXivプレプリント | arXiv:2502.21206 | 時点整合モデルは先読みを構造的に除く一方、利用できる学習量が減るた
+ok arXiv:2504.14345 → LLM-Enhanced Black-Litterman Portfolio Optimization (2025; Lee, Kim, Kim ほか)
+     本文: 8. **BLMは残しても副次的な配分器に限る。** 2025年のLLM×BLM研究は、わずか8か月、事後的に選ばれた大型50銘柄、回答分散を \(\Omega\) にする設計で、モデル間の結果も不安定だった。単純順位戦略との比較もない。BLMは信号の発見を担わず、検証済み信号の
+ok arXiv:2509.24254 → Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns (2025; Wu, Akin, Martineau ほか)
+     本文: | Wu et al. (2025) | *Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns* | arXivプレプリント | arXiv:2509.24
+題名? arXiv:2604.01719 → Mixed Consistent PINNs for Elliptic Obstacle Problems with Stability Analysis (2026; Khan, Mardal, Mishra)
+     本文: | 匿名著者 (2026) | *Pre-Registered Protocol: Replication of Eight Recent “AI-Finance” Return Claims…* | clawRxivプロトコル、未査読 | clawRxiv:2604.01719
+著者? arXiv:2604.13260 → Which Voices Move Markets? Speaker Identity and the Cross-Section of Post-Earnings Returns (2026; Sidhu, Fan, Pishgar)
+     本文: | Abedin et al. (2026) | *Which Voices Move Markets? Speaker Identity and the Cross-Section of Post-Earnings Returns* | arXivプレプリント | arXiv:
+著者? arXiv:2607.11889 → Scaling Point-in-Time Language Models: Enabling Economic Evaluation of Embeddings (2026; Kelly, Malamud, Schwab ほか)
+     本文: | Manela et al. (2026) | *Scaling Point-in-Time Language Models* | arXivプレプリント | arXiv:2607.11889 | 2013～2024年の月次チェックポイントを、時系列で選別した最大1兆トークン、
+ok doi:10.1016/0304-405X(85)90042-X → Using daily stock returns (1985, Journal of Financial Economics)
+ok doi:10.1016/j.jbankfin.2011.10.013 → Earnings conference calls and stock returns: The incremental informativeness of textual tone (2011, Journal of Banking & Finance)
+ok doi:10.1093/rfs/hhq072 → Event Study Testing with Cross-sectional Correlation of Abnormal Returns (2010, Review of Financial Studies)
+ok doi:10.1093/rfs/hhv059 → … and the Cross-Section of Expected Returns (2015, Review of Financial Studies)
+ok doi:10.1111/1475-679X.12394 → How Is Earnings News Transmitted to Stock Prices? (2017, Journal of Accounting Research)
+ok doi:10.1111/1911-3846.12832 → FinBERT : A Large Language Model for Extracting Information from Financial Text* (2022, Contemporary Accounting Research)
+ok doi:10.1111/j.1911-3846.2011.01130.x → Beyond the Numbers: Measuring the Information Content of Earnings Press Release Language* (2011, Contemporary Accounting Research)
+ok doi:10.1177/0021943608319388 → Are Investors Influenced By How Earnings Press Releases Are Written? (2008, Journal of Business Communication)
+ok doi:10.1287/mnsc.2024.05417 → The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods (2025, Management Science)
+ok doi:10.1609/aaaiss.v3i1.31290 → FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design (2024, Proceedings of the AAAI Symposium Series)
+ok doi:10.18653/v1/2023.emnlp-main.330 → Just Ask for Calibration: Strategies for Eliciting Calibrated Confidence Scores from Language Models Fine-Tuned with Human Feedback (2023, Conference on Empirical Methods in Natural Language Processing (EMNLP))
+ok doi:10.21314/JCF.2016.322 → The probability of backtest overfitting (2016, The Journal of Computational Finance)
+ok doi:10.2139/ssrn.1117574 → The Black-Litterman Approach: Original Model and Extensions (2008, SSRN Electronic Journal)
+ok doi:10.2139/ssrn.6805805 → AI Herding in Financial Market: An Experiment with Large Language Models (2026, SSRN Electronic Journal)
+ok doi:10.2308/accr-50684 → Tone Management (2013, The Accounting Review)
+ok doi:10.2469/faj.v48.n5.28 → Global Portfolio Optimization (1992, Financial Analysts Journal)
+ok doi:10.3905/jpm.2014.40.5.094 → The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality (2014, The Journal of Portfolio Management)
+src Cao, S., Jiang, W., Xu, H. (2026). Seeing the Goal, Missing the Truth: Human Accountability for AI Bias. *NBER Working Paper*. NBER WP 35142
+     → 検索ツールの出典に題名あり: Seeing the Goal, Missing the Truth: Human Accountability for AI Bias by Sean Cao, Wei Jiang, Hui Xu :: SSRN
+ok Gao, Z., Jiang, W., Yan, Y. (2026). Detecting Lookahead Bias in LLM Forecasts. *SSRN Working Paper*. SSRN:5985277. ([papers.ssrn.com](https:
+     → SSRN WORKING PAPER — De Lengocky (2026) [Crossref]  [一致 1.00]
+src He, G., Litterman, R. (1999/2002). The Intuition Behind Black-Litterman Model Portfolios. *Goldman Sachs Investment Management Research／SSRN
+     → 検索ツールの出典に題名あり: The Intuition Behind Black-Litterman Model Portfolios by Guangliang He, Robert Litterman :: SSRN
+ok He, S., Lv, L., Manela, A., Wu, J. (2025). Instruction Tuning Chronologically Consistent Language Models. *SSRN Working Paper*. SSRN:5348747
+     → SSRN WORKING PAPER — De Lengocky (2026) [Crossref]  [一致 1.00]
+src Hung, M.-C., Hsia, P.-H., Kuang, X.-J., Lin, S.-K. (2024). Intelligent Portfolio Construction via News Sentiment Analysis. *International Re
+     → 検索ツールの出典に題名あり: Intelligent portfolio construction via news sentiment analysis - ScienceDirect
+ok Idzorek, T. M. (2004). A Step-by-Step Guide to the Black-Litterman Model: Incorporating User-Specified Confidence Levels. *Working Paper*. D
+     → A Step-By-Step Guide to the Black-Litterman Model Incorporating User-specified Confidence Levels — Idzorek (2019) [Crossref]  [一致 1.00]
+ok Liang, C. (2026). Look-Ahead Bias in Financial Forecasts Generated by Large Language Models. *SSRN Working Paper*. SSRN:6772819. ([papers.ss
+     → SSRN WORKING PAPER — De Lengocky (2026) [Crossref]  [一致 1.00]
+src Lin, T. Y.-L., Hu, J. Y.-C., Chiou, P. W., Lin, P. (2025). Latent Variable Estimation in Bayesian Black-Litterman Models. *ICML 2025, PMLR 2
+     → 検索ツールの出典に題名あり: Latent Variable Estimation in Bayesian Black-Litterman Models
+ok Lopez-Lira, A., Tang, Y., Zhu, M. (2025/2026). The Memorization Problem: Can We Trust LLMs’ Economic Forecasts? *SSRN Working Paper*. SSRN:5
+     → SSRN WORKING PAPER — De Lengocky (2026) [Crossref]  [一致 1.00]

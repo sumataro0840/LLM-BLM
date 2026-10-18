@@ -1,0 +1,48 @@
+# LLM-BLM考察用\文献調査\deep\文献調査.md: 転送用の URL 24 件のうち 24 件を元の URL に直した
+
+# LLM-BLM考察用\文献調査\deep\文献調査.md
+ok arXiv:2504.14345 → LLM-Enhanced Black-Litterman Portfolio Optimization (2025; Lee, Kim, Kim ほか)
+     本文: | Lee, Y. et al. (2025) | Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model | プレプリント | arXiv:2
+著者? arXiv:2511.15214 → Corporate Earnings Calls and Analyst Beliefs (2025; Matera)
+     本文: | Siano (2025) | (Working Paper on Textual Embeddings and Analysts Beliefs) | プレプリント | arXiv:2511.15214 | 決算発表のナラティブ（語調）は、従来の定量ファンダメンタルズ（SUE
+ok arXiv:2512.23847 → Detecting Lookahead Bias in LLM Forecasts (2025; Gao, Jiang, Yan)
+     本文: | Gao, Z., Jiang, W., & Yan, Y. (2026) | Detecting Lookahead Bias in LLM Forecasts | プレプリント | arXiv:2512.23847 | Lookahead Propensity (LAP) 
+著者? arXiv:2601.13770 → Look-Ahead-Bench: a Standardized Benchmark of Look-ahead Bias in Point-in-Time LLMs for Finance (2026; Benhenda)
+     本文: | Li, M. et al. (2026) | Look-Ahead-Bench: Standardized Benchmark of Lookahead Bias in PiT LLMs | プレプリント | arXiv:2601.13770 | 通常のLLMは先読みによりバ
+題名? arXiv:2603.09219 → AlgoXpert Alpha Research Framework. A Rigorous IS WFA OOS Protocol for Mitigating Overfitting in Quantitative Strategies (2026; Pham, Nguyen, Thi)
+     本文: 13. [arxiv.org](https://arxiv.org/pdf/2603.09219)
+著者? arXiv:2604.24668 → The Price of Agreement: Measuring LLM Sycophancy in Agentic Financial Applications (2026; Zhao, Balagopalan, Agrawal ほか)
+     本文: | Fanous, M. et al. (2025) | The Price of Agreement: Measuring LLM Sycophancy in Agentic Financial Applications | プレプリント | arXiv:2604.24668 
+題名? arXiv:2605.24564 → Summoning the Oracle to Slay It: Mitigating Look-Ahead Bias in Financial Backtesting with Large Language Models (2026; Li, Wang, Ma)
+     本文: 4. [arxiv.org](https://arxiv.org/html/2605.24564)
+ok arXiv:2606.29734 → Fast Numbers, Slow Language: Bridging Quantitative and Qualitative Earnings Signals (2026; Yu, Liu, Zhang ほか)
+     本文: | Yu, D. et al. (2026) | Fast Numbers, Slow Language: Bridging Quantitative and Qualitative Earnings Signals | プレプリント | arXiv:2606.29734 | 数
+著者? arXiv:2607.11889 → Scaling Point-in-Time Language Models: Enabling Economic Evaluation of Embeddings (2026; Kelly, Malamud, Schwab ほか)
+     本文: | He, S. et al. (2025) | Chronologically consistent large language models | プレプリント | arXiv:2607.11889 | 指定期間以前のテキストのみで学習された「ChronoGPT」「Chron
+ok doi:10.1080/01490400.2026.2717277 → The Risks of Sycophantic GenAI in Community Sport and Leisure (2026, Leisure Sciences)
+src Anonymous (2024). LLM Stock Return Forecast Extrapolation, Anchoring, Miscalibration, Optimism Bias. ワーキングペーパー. URL: https://afajof.org/mana
+     → 検索ツールの出典に題名あり: https://afajof.org/management/viewp.php?n=170324
+src Anthis, J., et al. (2026). A Rational Analysis of the Effects of Sycophantic AI. 査読済論文. URL: https://www.researchgate.net/publication/400855
+     → 検索ツールの出典に題名あり: https://www.researchgate.net/publication/400855578_A_Rational_Analysis_of_the_Effects_of_Sycophantic_AI
+ok Bailey, D., et al. (2014). Pseudo-Mathematics and Financial Charlatanism: The Effects of Backtest Overfitting on Out-of-Sample Performance. 
+     → Pseudo-Mathematics and Financial Charlatanism: The Effects of Backtest Overfitting on Out-of-Sample Performance — Bailey, Borwein, López de Prado (2014) [Crossref]  [一致 1.00]
+ok Idzorek, T. (2007). A Step-by-Step Guide to the Black-Litterman Model. 査読済論文. URL: https://people.duke.edu/~charvey/Teaching/BA453_2006/Idzo
+     → A step-by-step guide to the Black-Litterman model — Idzorek (2007) [Crossref]  [一致 1.00]
+?? Jha, S., et al. (2024). (Thesis / Working Paper on Earnings Calls & Confidence). ワーキングペーパー. URL: http://arno.uvt.nl/show.cgi?fid=188469
+     → Essentials for the Development of a Working Paper as a Thesis in Economics — Vallejo (2005) [Crossref]  [一致 0.42]
+?? Kinlay, J. (2026). AlgoXpert Alpha Research Framework. ホワイトペーパー. URL: https://jonathankinlay.com/
+     → AlgoXpert Alpha Research Framework: A Rigorous IS-WFA-OOS Protocol for Mitigating Overfitting in Quantitative Strategies — Nguyen, Nguyen, Pham (2026) [Crossref]  [一致 0.44]
+ok Roncalli, T., et al. (2024). Risk Factor, Risk Premium and Black-Litterman Model. ワーキングペーパー. URL: https://research-center.amundi.com/article
+     → Risk Factor, Risk Premium and Black-Litterman Model — Abou Rjaily, Roncalli, Xu (2024) [Crossref]  [一致 1.00]
+src Statsig (2024). Power Analysis Determine Sample Size. 技術解説. URL: https://www.statsig.com/perspectives/power-analysis-determine-sample-size
+     → 検索ツールの出典に題名あり: https://www.statsig.com/perspectives/power-analysis-determine-sample-size
+src Wharton Behavioral Lab (2021). Guidelines for Stat Power & Sample Size. ガイドライン. URL: https://wbl.wharton.upenn.edu/wp-content/uploads/2021/1
+     → 検索ツールの出典に題名あり: https://wbl.wharton.upenn.edu/wp-content/uploads/2021/11/Guidelines-for-Stat-Power-Sample-Size-190122.pdf
+src Zhao, et al. (2021). Advanced Portfolio Optimization (Signal Processing Perspective). 査読済論文. URL: https://faculty.sist.shanghaitech.edu.cn/z
+     → 検索ツールの出典に題名あり: https://faculty.sist.shanghaitech.edu.cn/zhao/pubs/ZhaoZhouPalomarFeng-SPMag-PortOpt.pdf
+src [columbia.edu](http://www.columbia.edu/~mh2078/QRM/AssetAlloc-and-RiskMgmt_MasterSlides.pdf)
+     → 検索ツールの出典に題名あり: http://www.columbia.edu/~mh2078/QRM/AssetAlloc-and-RiskMgmt_MasterSlides.pdf
+src [upenn.edu](https://wbl.wharton.upenn.edu/wp-content/uploads/2021/11/Guidelines-for-Stat-Power-Sample-Size-190122.pdf)
+     → 検索ツールの出典に題名あり: https://wbl.wharton.upenn.edu/wp-content/uploads/2021/11/Guidelines-for-Stat-Power-Sample-Size-190122.pdf
+src [duke.edu](https://people.duke.edu/~charvey/Teaching/BA453_2006/Idzorek_onBL.pdf)
+     → 検索ツールの出典に題名あり: https://people.duke.edu/~charvey/Teaching/BA453_2006/Idzorek_onBL.pdf

@@ -10,7 +10,7 @@ H07: what a feedback LLM changes. Four new conditions on 100 stocks, against run
     python experiments/H07_feedback_llm/run.py evaluate
 
 Same model, temperature, number of answers and structured output as run 1. Decision rules:
-資料集/LLM-BLM_実験仮説.pdf, chapter H07.
+資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf, chapter H07.
 """
 import json
 import sys

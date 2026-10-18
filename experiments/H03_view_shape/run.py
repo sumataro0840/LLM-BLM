@@ -4,7 +4,7 @@ H03: view forms (absolute / relative / rank) under a diagonal and a Sigma-propor
     python experiments/H03_view_shape/run.py
 
 No API calls. Writes results/summary.json, results/performance.csv, results/monthly.csv.
-Decision rules: 資料集/LLM-BLM_実験仮説.pdf, chapter H03.
+Decision rules: 資料集/02_実験/実験1_仮説の検証/LLM-BLM_実験仮説.pdf, chapter H03.
 """
 import json
 import sys
