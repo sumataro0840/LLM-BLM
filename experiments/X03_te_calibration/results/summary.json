@@ -1,0 +1,69 @@
+{
+ "n_dates": 79,
+ "first_date": "2020-01-31",
+ "target": 0.03,
+ "ewma126": {
+  "mean_te": {
+   "calibrated": 0.03275131071630804,
+   "uncalibrated": 0.044411391438457806
+  },
+  "rmse_miss": {
+   "calibrated": 0.010200647666227414,
+   "uncalibrated": 0.018955673055263775
+  },
+  "miss_sq_diff": -0.00025526432816754235,
+  "miss_sq_t": -5.499052878314823,
+  "share_above_target": {
+   "calibrated": 0.5316455696202531,
+   "uncalibrated": 0.9367088607594937
+  },
+  "limit": {
+   "mean": 0.020749348237136978,
+   "min": 0.0195865828793231,
+   "max": 0.023208832775045637
+  },
+  "active_return_annual": {
+   "calibrated": 0.010659818184476907,
+   "uncalibrated": 0.014167733140518737
+  },
+  "information_ratio": {
+   "calibrated": 0.37120174459578026,
+   "uncalibrated": 0.36878379464692873
+  },
+  "status": {
+   "optimal": 79
+  }
+ },
+ "lw252": {
+  "mean_te": {
+   "calibrated": 0.03383231804585141,
+   "uncalibrated": 0.047892491389742296
+  },
+  "rmse_miss": {
+   "calibrated": 0.010310877324288942,
+   "uncalibrated": 0.02200180061202794
+  },
+  "miss_sq_diff": -0.00037776503897489727,
+  "miss_sq_t": -6.506597541022209,
+  "share_above_target": {
+   "calibrated": 0.6582278481012658,
+   "uncalibrated": 0.9493670886075949
+  },
+  "limit": {
+   "mean": 0.01928596492296114,
+   "min": 0.018226520322123903,
+   "max": 0.021805828049852087
+  },
+  "active_return_annual": {
+   "calibrated": 0.00960449656329154,
+   "uncalibrated": 0.011637676080444723
+  },
+  "information_ratio": {
+   "calibrated": 0.32383565203579273,
+   "uncalibrated": 0.27957877834933387
+  },
+  "status": {
+   "optimal": 79
+  }
+ }
+}
