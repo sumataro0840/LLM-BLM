@@ -49,6 +49,29 @@ def fig_e7_cumulative():
     fig.savefig(OUT / 'e7_cumulative.pdf')
 
 
+def fig_e9_cumulative():
+    """E9: the first (official) run, 2017-01 .. 2026-07, and the corrected run with the pre-registered 2016-03 start."""
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7.0, 4.4), height_ratios=[1.6, 1], sharex=True)
+    for sub, color, label in (('', BLUE, '主な実行（2017-01〜）'), ('corrected_dates', VIOLET, '日付を直した実行（2016-03〜）')):
+        d = pd.read_csv(EXP / 'E9_monthly_blm_long' / 'results' / sub / 'by_month.csv', parse_dates=['date'])
+        month = d.date.dt.to_period('M')
+        x = pd.DatetimeIndex([m.to_timestamp(how='end').normalize() for m in [month.iloc[0]] + list(month + 1)])
+        excess = np.r_[1, (1 + d.net).cumprod()] / np.r_[1, (1 + d.bench).cumprod()] - 1
+        ax1.plot(x, 100 * excess, color=color, lw=1.5, label=label)
+        if sub == '':
+            colors = [AQUA if v > 0 else ORANGE for v in d.active_net]
+            ax2.bar(x[1:], 100 * d.active_net.to_numpy(), width=20, color=colors)
+    ax1.axhline(0, color=INK2, lw=0.8)
+    ax1.axvline(pd.Timestamp('2023-10-31'), color=GRAY, lw=1, ls='--')
+    ax1.text(pd.Timestamp('2023-11-30'), ax1.get_ylim()[1] * 0.85, '見通しが版 2022 に\n切り替わる', fontsize=8, color=INK2)
+    ax1.set_ylabel('時価総額に対する\n累積の超過（%、費用の後）')
+    ax1.legend(frameon=False, fontsize=8.5, loc='upper left')
+    ax2.axhline(0, color=INK2, lw=0.8)
+    ax2.set_ylabel('月の超過（%）')
+    fig.tight_layout()
+    fig.savefig(OUT / 'e9_cumulative.pdf')
+
+
 def fig_e8_windows(e3, e8):
     m1 = e3['M1_main']
     p, s1 = e8['part1_regression']['P'], e8['part1_regression']['S1']
@@ -85,6 +108,7 @@ def fig_e8_daily():
 if __name__ == '__main__':
     OUT.mkdir(parents=True, exist_ok=True)
     fig_e7_cumulative()
+    fig_e9_cumulative()
     fig_e8_windows(load('E3_analyst_surprise'), load('E8_daily_blm'))
     fig_e8_daily()
     print('saved to', OUT)
