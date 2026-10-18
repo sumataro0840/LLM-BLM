@@ -796,6 +796,39 @@ gpt-4o-mini の点数が示した説明力（1 標準偏差あたり $+120$bp）
 & \textbf{補足}：時価総額や文章の長さで分けてドリフトを探す案（Gemini）は、分けるほど偶然の当たりを拾うので、関門の外の「探索」として報告するだけにする。\\
 \end{longtable}
 
+\section{関門を通ったときの BLM への入れ方}
+
+ドリフトの関門（実験 5）を通った場合、点数を BLM に入れる形は、これまでの実験でほぼ決まっている。どの部分も、LLM に数値を言わせない。
+
+\begin{itemize}
+\item \textbf{点数から期待リターンへ}：過去のイベントで、点数とその後のリターンの関係（較正の傾き）を測り、それで換算する（Grinold の $\alpha=\mathrm{IC}\cdot\sigma\cdot z$ の形）。
+\item \textbf{不確かさ $\Omega$}：LLM の回答のばらつきではなく、過去の当たり具合で決め、$\Sigma$ に比例させる（H04 で設計どおりに動いた形）。当たらない信号は、採用率が自動で 0 に近くなる。
+\item \textbf{相対ビューとベータの中立化}：同じセクターとの差のビューにし、能動ベータを 0 にする制約を置く（H03 で、相対ビューだけではベータの傾きが消えなかったため）。
+\item \textbf{ビューを持つ期間}：ドリフトが続く期間だけビューを持ち、その後は外す。
+\end{itemize}
+
+\section{まだ株価に入っていない情報の候補（未検証）}\label{sec:candidates}
+
+実験 2 で、LLM は決算発表文を正確に読めるが、その内容は 2 日で株価に入り切ることが分かった。BLM の価値につなぐには、LLM が「まだ株価に入っていない情報」を取り出せる必要がある。その候補を挙げる。\textbf{どれもまだ試していない。}どれを選ぶかは、前向きの再現とドリフトの関門の結果を見てから決め、選んだものは事前登録してから評価する。
+
+\begin{longtable}{p{2.7cm}p{6.0cm}p{5.4cm}}
+\toprule
+\textbf{候補} & \textbf{考え方} & \textbf{データと注意} \\
+\midrule
+\endfirsthead
+\bottomrule
+\endfoot
+\textbf{ゆっくり読まれる文書} & 10-K や 10-Q のリスクの記述や経営者による分析（MD\&A）は、決算発表文より長く、提出も遅く、注目されにくい。株価への織り込みが遅い可能性がある & EDGAR から無料で取れる。文書が長いので、gpt-4o-mini の費用は発表文より大きい。ChronoGPT は文脈が短く、全文は読めない \\
+\midrule
+\textbf{会社をまたぐ波及} & ある会社の決算の内容が、取引先や同業の株価に遅れて効く。投資家は、関係の深い他社の情報に注意を払いきれない & Yılkı（2026、arXiv:2606.29290、査読前の単著）は、10-K の MD\&A の FinBERT の埋め込みをサプライチェーンの関係で広げた信号が、\SP{} の 255 社（2011〜2025 年）で月次のリターンを予測すると報告している（要旨の範囲で確認、Newey--West の $t$ $-2.64$）。取引関係のデータは DB にない。10-K の主要な顧客の開示などから作る必要がある \\
+\midrule
+\textbf{セクター単位の集約} & 多くの会社の発表文から、業種全体の見通しやガイダンスの変化をまとめる。個々の会社の驚きはすぐ織り込まれても、業種全体の流れは遅れて効くかもしれない。BLM は、セクターや資産クラスの単位のビューと相性が良い & 既存の点数を集計するだけなので、追加の費用はない。セクターは 11 しかなく、月数も限られるので、検出力は低い（H05 と同じ問題） \\
+\midrule
+\textbf{リスクの側に使う} & 期待リターンではなく、不確かさが増える出来事（ガイダンスの取り下げ、リストラ、訴訟など）を読み、その銘柄の $\Sigma$ や $\Omega$ を大きくする。X01 で、実際の TE が上限の約 1.5 倍になった（リスクの変化に推定が追いつかない）問題にもつながる & H06 の gpt-4o-mini の点数には、すでにリスクの種類（\code{risk\_flags}）がある。評価は、リターンではなく、予測したリスクと実際のリスクの当たり具合（実現 $\div$ 予測、QLIKE）で行う \\
+\end{longtable}
+
+関門を通らなかった場合も、これらは次の実験の候補になる。そのときの結論は、「LLM は予言者としては価値がなく、読み手としては優秀だが、決算発表文の読み取りは BLM の価値にはならない」となる。これも、検証の確かさを目的とするこの研究にとっては、十分な結論である。
+
 \section{スケジュール}
 
 \begin{table}[H]
@@ -810,7 +843,7 @@ gpt-4o-mini の点数が示した説明力（1 標準偏差あたり $+120$bp）
 11 月 & 監査とガイダンスの数値の抽出、中立のプロンプト、ChronoGPT の埋め込みの実装、検出力の計算 & 抽出の精度が基準を満たすか \\
 12 月上旬 & 10〜11 月の発表を取得・点数化し、株価を更新して、前向きの再現を 1 回だけ実行 & 再現したか（支持／支持されず／判定不能） \\
 12 月中旬〜1 月 & ChronoGPT の埋め込みの検定、統制を強めた分析、ドリフトの関門 & 先読みのないモデルでも読めるか。BLM に進むか \\
-2〜3 月 & 関門を通れば BLM の比較。最終報告 & 結論を確定 \\
+2〜3 月 & 関門を通れば BLM の比較。通らなければ、候補（\secref{sec:candidates}）から 1 つを事前登録して試す。最終報告 & 結論を確定 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -915,6 +948,7 @@ LLM の価値を BLM に生かすには、「発表の後もしばらく株価�
 \item Loughran, T., McDonald, B. (2011). When Is a Liability Not a Liability? Journal of Finance 66(1).
 \item Siano, F. (2025). The News in Earnings Announcement Disclosures: Capturing Word Context Using LLM Methods. Management Science 71(11).
 \item Wu, Y., Akin, E. M., Martineau, C., Grégoire, V., Veneris, A. (2025). Extracting the Structure of Press Releases for Predicting Earnings Announcement Returns. arXiv:2509.24254.
+\item Yılkı, A. (2026). Supply Chain Propagation of Textual Signals: LLM Embeddings and Cross-Sectional Return Predictability. arXiv:2606.29290（査読前）.
 \end{itemize}
 
 \end{document}
