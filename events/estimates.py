@@ -17,7 +17,7 @@ from marketdb.db.market import now_utc
 
 URL = "https://www.alphavantage.co/query"
 SOURCE = "alphavantage:EARNINGS"
-WAIT_SECONDS = 15                 # stay well below any per-minute limit of the free key
+WAIT_SECONDS = 2             # stay well below any per-minute limit of the free key
 
 
 class LimitReached(Exception):
@@ -44,6 +44,10 @@ def fetch(symbol, api_key):
     if "Note" in data or "Information" in data:
         # rate-limit and premium messages come back with HTTP 200; their text can contain the key, so it is not shown
         raise LimitReached(next(k for k in ("Note", "Information") if k in data))
+    if not data:
+        # a completely empty answer ({}) came back when requests were sent too fast (2026-10-18); a symbol without
+        # data is answered with its name and empty lists instead, so {} is treated as "try again later"
+        raise LimitReached("empty answer")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data), encoding="utf-8")     # also caches "no data" answers (empty or an error message)
     return data, True
