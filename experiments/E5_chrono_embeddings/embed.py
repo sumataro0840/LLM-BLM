@@ -54,8 +54,11 @@ def load(vintage):
     """(accessions, float32 matrix) of a finished block."""
     d = OUT / f'v{vintage}'
     parts = [np.load(f, allow_pickle=True) for f in sorted(d.glob('part*.npz'))]
-    return (np.concatenate([p['accession'] for p in parts]),
-            np.concatenate([p['vectors'] for p in parts]).astype(np.float32))
+    acc = np.concatenate([p['accession'] for p in parts])
+    expected = json.loads((d / 'params.json').read_text(encoding='utf-8'))['n_releases']
+    if len(acc) != expected:
+        raise SystemExit(f'vintage {vintage}: {len(acc)} of {expected} releases embedded; run embed.py to finish')
+    return acc, np.concatenate([p['vectors'] for p in parts]).astype(np.float32)
 
 
 def main():
