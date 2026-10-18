@@ -53,6 +53,7 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | 実験 7（月次の BLM、結果を全部入れたもの）の事前登録と結果 | `experiments/E7_monthly_blm/preregistration.md`、`results/findings.md` |
 | 実験 8（発表の翌日と日次の BLM）の事前登録と結果 | `experiments/E8_daily_blm/preregistration.md`、`results/findings.md` |
 | 実験 9（ChronoGPT の見通しで月次の BLM を約 10 年）の事前登録と結果 | `experiments/E9_monthly_blm_long/preregistration.md`、`results/findings.md` |
+| 実験 10（ChronoGPT の LoRA の追加学習）の事前登録 | `experiments/E10_chrono_lora/preregistration.md` |
 | H01〜H07 の結果と、別のモデルによる確認 | `experiments/H0x_*/results/findings.md`、`experiments/robustness/results/` |
 
 `03_方針と文献調査/` の各フォルダにある `00_依頼.md` は、モデルに渡した依頼の文書。`<モデル名>/` が答え、`実行記録.jsonl` がモデル・トークン・時間の記録、`比較検討.md` が Claude による比較。
