@@ -47,7 +47,7 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | 共分散の窓・EWMA の比較（X02、実現の TE と QLIKE） | `experiments/X02_covariance_window/results/findings.md` |
 | TE の上限の校正（X03、過去の実現 ÷ 予測の比で割る） | `experiments/X03_te_calibration/results/findings.md` |
 | VIX で共分散の大きさを合わせる（X04） | `experiments/X04_vix_scaling/results/findings.md` |
-| 実験 5 の事前登録（ChronoGPT の埋め込み＋リッジ） | `experiments/E5_chrono_embeddings/preregistration.md` |
+| 実験 5（ChronoGPT の埋め込み＋リッジ）の事前登録と結果 | `experiments/E5_chrono_embeddings/preregistration.md`、`results/findings.md` |
 | 実験 6 の事前登録の案（10-K の文章と長い期間のリターン） | `experiments/E6_10k_risk_exposure/preregistration.md` |
 | 実験 7（月次の BLM、結果を全部入れたもの）の事前登録と結果 | `experiments/E7_monthly_blm/preregistration.md`、`results/findings.md` |
 | 実験 8（発表の翌日と日次の BLM）の事前登録と結果 | `experiments/E8_daily_blm/preregistration.md`、`results/findings.md` |
