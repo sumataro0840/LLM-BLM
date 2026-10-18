@@ -1,4 +1,4 @@
-# E10 を、このセッションや VS Code を閉じても止まらない別のプロセスで 1 回だけ動かす。
+﻿# E10 を、このセッションや VS Code を閉じても止まらない別のプロセスで 1 回だけ動かす。
 #   powershell -ExecutionPolicy Bypass -File experiments\E10_chrono_lora\start.ps1
 # 進み具合:  Get-Content data\cache\logs\e10.log -Tail 3
 # 学習 約 4.9 時間 + 予測 約 43 分。GPU を使うほかの作業 (ChronoGPT、FinBERT) は同時に動かさない。
