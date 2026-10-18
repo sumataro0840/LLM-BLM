@@ -30,6 +30,16 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | `06_中間発表と途中のメモ/` | 中間発表の PPTX、途中で書いた HTML のメモ、データ確認のノートブック | 〜10/13 |
 | `07_参考文献/` | 元論文（arXiv:2504.14345）などの PDF | — |
 
+## 資料集の外にある実験の記録
+
+文書の形にまとめていない実験の説明は、リポジトリの `experiments/` の各フォルダの `results/` にある。
+
+| 内容 | 場所 |
+|---|---|
+| 共分散のノイズ除去（Marcenko–Pastur と Ledoit–Wolf の比較）と、ノイズ除去が要る理由の図解 | `experiments/X01_covariance_denoise/results/解説_ノイズ除去.md`（結果は同じフォルダの `findings.md`） |
+| 実験 2 の事前登録と結果 | `experiments/E2_event_reaction/preregistration.md`、`results/findings.md` |
+| H01〜H07 の結果と、別のモデルによる確認 | `experiments/H0x_*/results/findings.md`、`experiments/robustness/results/` |
+
 `03_方針と文献調査/` の各フォルダにある `00_依頼.md` は、モデルに渡した依頼の文書。`<モデル名>/` が答え、`実行記録.jsonl` がモデル・トークン・時間の記録、`比較検討.md` が Claude による比較。
 
 ## 資料の中の古い場所の書き方
