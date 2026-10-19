@@ -71,10 +71,10 @@
   arr/.style={-{Stealth[length=2mm]},color=ink2,line width=0.6pt},
 }
 
-\title{LLM-BLM 実験 5\\[6pt]
+\title{LLM-BLM 実験 5・10\\[6pt]
   \large 先読みのない LLM（ChronoGPT）の内部の数値に、\\過去の反応で回帰を学習させる}
 \author{実験の結果の報告書}
-\date{2026 年 10 月 19 日}
+\date{2026 年 10 月 19 日（実験 10 を同日夜に追加）}
 
 \begin{document}
 \maketitle
@@ -90,6 +90,7 @@
 \item \textbf{先読みのないモデルでも、2016〜2023 年の決算発表への反応を説明できた（P1 支持）。}1 標準偏差あたり $+33.6$bp（$t$ 5.5、置換の $p=0.001$）。同じ回帰の TF-IDF＋リッジは $-2.9$bp に消え、説明力は TF-IDF の約 5 倍だった。
 \item \textbf{gpt-4o-mini の点数は、埋め込みのモデルに置き換えられない（P2 支持）。}同時に入れても $+111.6$bp（$t$ 8.9）で、実験 3 の 96\% が残った。
 \item \textbf{ただし 1.55B の埋め込み＋線形の回帰は、gpt-4o-mini（学習なし）にも、追加学習した FinBERT にも届かない。}2023 年 11 月以降で、単独の係数は $+50$bp（FinBERT $+71$bp、gpt-4o-mini $+116$bp）。
+\item \textbf{実験 10：ChronoGPT の中まで LoRA で学習させても、強くならなかった。}単独で $+29.5$bp（$t$ 2.4、P1 支持）と働きはしたが、線形のリッジ（$+50$bp）より弱く、追加学習した FinBERT と同時では $+0.4$bp に消えた（P2 支持されない）。学習の損失は最後まで「いつも平均を答える」水準のままだった。
 \end{itemize}
 \end{keybox}
 
@@ -220,6 +221,86 @@ S3 標本 B：埋め込み（学習なしの ChronoGPT と同時） & $+32.7$bp 
 \end{itemize}
 
 % ============================================================
+\chapter{実験 10：ChronoGPT を LoRA で反応に学習させる}\label{ch:e10}
+
+\section{目的と設計}
+
+実験 5 では、ChronoGPT の中は固定して、最後に線形のリッジだけを学習させた。それで効いたので、モデルの中まで反応に学習させれば、さらに強くなると考えた。「LLM 自体に学習させると、従来の NLP（追加学習した FinBERT）より強くなるか」を確かめる。事前登録（コミット \code{795da37}）の後に、1 回だけ実行した。
+
+\begin{table}[H]
+\centering
+\caption{LoRA の学習の設定（事前登録で固定）。学習の期間・目的変数・評価の標本は実験 4 の FinBERT と同じ。}
+\small
+\begin{tabular}{lp{10.6cm}}
+\toprule
+元のモデル & ChronoGPT の版 2022（2022 年末までの文章で学習）。重みはすべて固定 \\
+LoRA & 52 層すべての注意の \code{c\_q} と \code{c\_v} に、ランク 8 の小さな補正の行列を足し、それだけを学習（約 256 万個） \\
+出力 & 最後の層をトークンで平均した 1,536 個の数（実験 5 の埋め込みと同じ）に、線形の頭を 1 つ \\
+学習の標本 & 提出日 2015〜2022 年の 13,979 本の 2 日の反応（丸めて標準化） \\
+設定 & AdamW（LoRA の学習率 $2\times10^{-4}$、頭 $10^{-3}$）、1 エポック、実質のバッチ 16（873 歩）、最初の 10\% で学習率を上げてその後は直線で下げる \\
+時間 & 学習 7.6 時間、予測（7,524 本）75 分。この PC の GPU で、メモリの最大 5.63GB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+ChronoGPT は標準の形のモデルではないので、LoRA と、学習用の計算の流れは自分で書いた。LoRA を付けた直後の出力が、実験 5 の埋め込みと完全に一致すること（差 0.0）を、学習の前に確かめた。
+
+\section{学習の過程}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{e10_training.pdf}
+\caption{学習の損失（直近 400 本の 2 乗誤差の平均）と、LoRA の学習率。破線は、いつも平均を答えた場合の 2 乗誤差（標準化しているので 1.0）。}
+\label{fig:e10t}
+\end{figure}
+
+学習の損失は、873 歩の間ずっと 0.85〜1.16 の間を上下し、「いつも平均を答える」水準（1.0）からほとんど下がらなかった（\figref{fig:e10t}）。株価の反応は雑音がとても大きく、1 本ごとの 2 乗誤差はばらつきが大きい。そのうえ説明できる部分は 2〜3\% しかないので、損失の曲線では学習の進み具合がほとんど見えない。
+
+\section{結果}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{e10_compare.pdf}
+\caption{標本 A（5,374 本）。左：それぞれを単独で統制（実験 3 のモデルから gpt-4o-mini を除いたもの）に加えたときの係数。右：LoRA の係数を、追加学習した FinBERT、または実験 5 のリッジと同時に入れたとき。}
+\label{fig:e10c}
+\end{figure}
+
+\begin{verdict}
+\textbf{P1 支持、P2 支持されない。}LoRA の予測は単独で $+29.5$bp（95\% 区間 $+5.4$〜$+53.5$、$t=2.40$、Holm の $p=0.017$、置換の $p=0.001$）。追加学習した FinBERT と同時では $+0.4$bp（$t=0.03$、置換の $p=0.49$）。
+\end{verdict}
+
+\begin{table}[H]
+\centering
+\caption{統制に 1 つずつ加えたときの決定係数の増分（標本 A）。}
+\small
+\begin{tabular}{lr}
+\toprule
+gpt-4o-mini（学習なし） & $+2.01$ ポイント \\
+FinBERT（全体を追加学習、実験 4） & $+0.84$ ポイント \\
+ChronoGPT の埋め込み＋リッジ（実験 5） & $+0.31$ ポイント \\
+\textbf{ChronoGPT の LoRA（実験 10）} & $\mathbf{+0.13}$ ポイント \\
+LoRA と FinBERT の両方 & $+0.84$ ポイント \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+\item \textbf{LoRA は、線形のリッジより弱かった。}実験 5 のリッジと同時に入れると $-1.3$bp で、中まで学習させた上乗せはなかった（\figref{fig:e10c}）。2 つの予測の順位相関は 0.71。
+\item \textbf{追加学習した FinBERT の情報に、ほぼ含まれる。}FinBERT と同時では 0 になり、両方を入れた説明力は FinBERT だけと同じだった。
+\item \textbf{gpt-4o-mini は変わらない。}LoRA と同時でも $+116.7$bp（$t$ 9.35）。
+\end{itemize}
+
+\section{なぜ強くならなかったか}
+
+\begin{enumerate}
+\item \textbf{目的変数の雑音が大きすぎる。}1 エポック（1 本を 1 回ずつ）では、2〜3\% しかない信号を、約 256 万個の数に学ばせるには足りなかった。むしろ、元の埋め込みの良さを少し崩した可能性がある。
+\item \textbf{リッジとの違い。}リッジは四半期ごとに学習し直し、罰則の強さを 1 つ抜きの検証で選んでいた。LoRA は 2015〜2022 年で 1 回だけ、設定も固定だった。
+\item \textbf{設定は 1 つだけ。}エポック数や学習率を変えれば伸びる可能性はある。ただし、評価の結果を見て選び直すと過剰適合になる。試すなら、学習の期間の中に検証用の分割を作ってそこで選ぶ設計にして、別の事前登録で行う。
+\end{enumerate}
+
+「LLM 自体に学習させると、従来の NLP より強くなる」は、この設定（1.55B、LoRA、1 エポック）では支持されなかった。学習なしの gpt-4o-mini が、依然として最も強い。
+
+% ============================================================
 \chapter{考察と限界}\label{ch:discussion}
 
 \section{何が分かったか}
@@ -233,7 +314,7 @@ S3 標本 B：埋め込み（学習なしの ChronoGPT と同時） & $+32.7$bp 
 \section{次に行うこと}
 
 \begin{itemize}
-\item \textbf{ChronoGPT の中まで学習させる（LoRA）。}線形の回帰で効いたので、伸びる余地がある。版をそろえる設計はそのまま使える。
+\item \textbf{ChronoGPT の中まで学習させる（LoRA）。}実験 10 として行った（\chapref{ch:e10}）。強くはならなかった。
 \item \textbf{月次の BLM を約 10 年で確かめる。}実験 7 の月次の BLM は 31 か月しかなく、有意でなかった。2016 年からの予測ができたので、同じ BLM を長い期間で検定できる。ただし、実験 8 のとおり、決算の情報は発表日のうちに株価に入る。
 \end{itemize}
 
@@ -253,6 +334,7 @@ S3 標本 B：埋め込み（学習なしの ChronoGPT と同時） & $+32.7$bp 
 python experiments/E2_event_reaction/run.py       # 実験 2 の panel.csv
 python experiments/E5_chrono_embeddings/embed.py  # 埋め込み（GPU 約 4.3 時間）
 python experiments/E5_chrono_embeddings/run.py    # リッジと評価（1 回）
+python experiments/E10_chrono_lora/run.py         # LoRA（約 9 時間、1 回）
 cd 資料集/02_実験/実験5_ChronoGPTの埋め込み
 python 作成スクリプト/figs.py                      # この資料の図
 \end{verbatim}

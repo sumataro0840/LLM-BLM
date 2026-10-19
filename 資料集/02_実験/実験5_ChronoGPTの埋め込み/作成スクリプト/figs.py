@@ -86,9 +86,56 @@ def fig_sample_a(s, e3, e4):
     fig.savefig(OUT / 'sample_a.pdf')
 
 
+def fig_e10_training():
+    """E10's training loss (mean squared error of the last 400 releases, standardized target) and the learning rate."""
+    import pandas as pd
+    c = pd.read_csv(EXP / 'E10_chrono_lora' / 'results' / 'training_curve.csv')
+    total, warm = 874, 87                               # run.py: 873 steps planned as ceil(13979 / 16), 10 % warm-up
+    steps = np.arange(total)
+    lr = np.minimum((steps + 1) / warm, np.maximum(0, (total - steps) / (total - warm))) * 2e-4
+    fig, ax = plt.subplots(figsize=(7.0, 2.9))
+    ax.plot(c.step, c.loss_last_400, color=BLUE, lw=1.6, marker='o', ms=3, label='学習の損失（直近 400 本の平均）')
+    ax.axhline(1.0, color=ORANGE, lw=1.2, ls='--', label='いつも平均を答えた場合（1.0）')
+    ax.set_xlabel('学習の歩数（1 歩 = 16 本）')
+    ax.set_ylabel('2 乗誤差（標準化した反応）')
+    ax.set_ylim(0.6, 1.3)
+    ax2 = ax.twinx()
+    ax2.plot(steps, lr * 1e4, color=GRAY, lw=1.2, label='LoRA の学習率（右軸）')
+    ax2.set_ylim(0, 4.5)
+    ax2.set_ylabel('学習率（× 0.0001）', color=INK2)
+    ax2.grid(False)
+    ax2.spines['right'].set_visible(True)
+    h1, l1 = ax.get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    ax.legend(h1 + h2, l1 + l2, frameon=False, fontsize=8, loc='lower center', ncol=3, bbox_to_anchor=(0.5, 1.0))
+    fig.tight_layout()
+    fig.savefig(OUT / 'e10_training.pdf')
+
+
+def fig_e10_compare(e3, e4, e5, e10):
+    m1, ft, emb = e3['M1_main'], e4['secondary']['S1_ft_alone'], e5['block_A']['S1_emb_alone']
+    p1, p2, s2 = e10['P1_lora_alone'], e10['P2_lora_beyond_finetuned_finbert'], e10['S2_lora_beyond_ridge']
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.8, 3.0), width_ratios=[1.45, 1])
+    ax1.set_ylim(-35, 160)
+    bars(ax1, [('gpt-4o-mini\n学習なし', m1['coef_bp_per_sd'], m1['ci95_bp'], BLUE),
+               ('FinBERT\n全体を学習', ft['coef_bp_per_sd'], ft['ci95_bp'], AQUA),
+               ('ChronoGPT\nリッジ', emb['coef_bp_per_sd'], emb['ci95_bp'], VIOLET),
+               ('ChronoGPT\nLoRA', p1['coef_bp_per_sd'], p1['ci95_bp'], ORANGE)], '1 標準偏差あたり（bp、95% 区間）')
+    ax1.set_title('単独で入れたときの係数（標本 A）', fontsize=9.5, color=INK2)
+    ax2.set_ylim(-35, 160)
+    bars(ax2, [('単独', p1['coef_bp_per_sd'], p1['ci95_bp'], ORANGE),
+               ('FinBERT\nと同時', p2['coef_bp_per_sd'], p2['ci95_bp'], GRAY),
+               ('リッジ\nと同時', s2['coef_bp_per_sd'], s2['ci95_bp'], GRAY)], '')
+    ax2.set_title('LoRA の係数', fontsize=9.5, color=INK2)
+    fig.tight_layout()
+    fig.savefig(OUT / 'e10_compare.pdf')
+
+
 if __name__ == '__main__':
     OUT.mkdir(parents=True, exist_ok=True)
     s = load('E5_chrono_embeddings')
     fig_block_b(s)
     fig_sample_a(s, load('E3_analyst_surprise'), load('E4_finbert_finetune'))
+    fig_e10_training()
+    fig_e10_compare(load('E3_analyst_surprise'), load('E4_finbert_finetune'), s, load('E10_chrono_lora'))
     print('saved to', OUT)
