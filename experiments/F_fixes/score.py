@@ -7,6 +7,9 @@ each step skips what is already saved, so an interrupted run continues.
     python experiments/F_fixes/score.py finbert     # fixes 1-2: sentence probabilities of the cleaned text (3 readings)
     python experiments/F_fixes/score.py chrono_raw  # baseline: vintage 2015, raw text, releases filed after 2023-10-31
     python experiments/F_fixes/score.py chrono      # fixes 1 and 4: vintage 2015, cleaned text, 3 vectors per release
+    python experiments/F_fixes/score.py compress    # fix 5: LLMLingua-2 compression of the cleaned text (if stats says so)
+    python experiments/F_fixes/score.py finbert5    # fix 5: FinBERT (first 200 sentences) of the compressed text
+    python experiments/F_fixes/score.py chrono5     # fix 5: ChronoGPT vector (mean of the last layer) of the compressed text
     python experiments/F_fixes/score.py all
 
 Releases: E5's set (E2's base sample with a main-window reaction and a text; only whether the reaction exists is used).
@@ -34,6 +37,10 @@ PROMPT = '\nIn one word, this earnings release is'
 MID_LAYER = 26                   # output of the 26th of the 52 blocks (the last encoder block)
 OUTLOOK = re.compile(r'\b(outlook|guidance|expects?|expected|forecasts?)\b', re.I)
 FINBERT_MAX_SENTENCES = 1000     # cap for the whole-text reading
+COMPRESSOR = 'microsoft/llmlingua-2-xlm-roberta-large-meetingbank'
+COMPRESSOR_REVISION = 'ebaba9b0e874dadd3003ffcff828e4397e568089'      # MIT licence
+COMPRESS_TARGET = 1700           # GPT-2 tokens: below ChronoGPT's 1,780-token text window
+COMPRESS_INPUT_CHARS = 60000     # the compressor reads at most this much of the cleaned text
 CHUNK = 1000
 
 
@@ -207,8 +214,89 @@ def load_chrono(name, key):
     return np.concatenate([p['accession'] for p in parts]), np.concatenate([p[key] for p in parts]).astype(np.float32)
 
 
+# ---------- fix 5 ----------
+
+def compressed_texts():
+    df = pd.read_csv(OUT / 'compressed.csv', keep_default_na=False)
+    return dict(zip(df.accession, df.text))
+
+
+def step_compress(rel):
+    """LLMLingua-2 keeps the tokens it predicts to be informative, at the rate that brings the cleaned text to about
+    COMPRESS_TARGET GPT-2 tokens (sentence punctuation and line breaks are always kept). A cleaned text that already
+    fits is left as it is."""
+    check = json.loads((OUT / 'fix5_check.json').read_text(encoding='utf-8'))
+    if not check['run_fix5']:
+        print('fix 5 is not required by the check')
+        return
+    import tiktoken
+    from llmlingua import PromptCompressor
+    path = OUT / 'compressed.csv'
+    done = set(pd.read_csv(path, usecols=['accession']).accession) if path.exists() else set()
+    todo = rel[~rel.accession.isin(done)]
+    print(f'compress: {len(todo)} of {len(rel)}', flush=True)
+    enc = tiktoken.get_encoding('gpt2')
+    comp = PromptCompressor(model_name=COMPRESSOR, use_llmlingua2=True, device_map='cuda',
+                            model_config={'revision': COMPRESSOR_REVISION})
+    rows, t0 = [], time.time()
+    for k, r in enumerate(todo.itertuples(), 1):
+        c = cleaned(r.text_path)[:COMPRESS_INPUT_CHARS]
+        n = len(enc.encode(c))
+        if n > COMPRESS_TARGET:
+            c = comp.compress_prompt(c, rate=COMPRESS_TARGET / n, force_tokens=['\n', '.', '!', '?'],
+                                     drop_consecutive=True)['compressed_prompt']
+        rows.append({'accession': r.accession, 'n_tokens_in': n, 'text': c})
+        if k % 500 == 0 or k == len(todo):
+            pd.DataFrame(rows).to_csv(path, mode='a', header=not path.exists(), index=False)
+            rows = []
+            print(f'  compress {k}/{len(todo)} ({time.time() - t0:.0f}s)', flush=True)
+    del comp
+
+
+def step_finbert5(rel):
+    import torch
+    from huggingface_hub import model_info
+    from transformers import BertForSequenceClassification, BertTokenizer
+    from events.scorers.finbert import sentences
+    if not (OUT / 'compressed.csv').exists():
+        return
+    text_of = compressed_texts()
+    revision = model_info(config.FINBERT_MODEL).sha
+    tok = BertTokenizer.from_pretrained(config.FINBERT_MODEL, revision=revision)
+    model = BertForSequenceClassification.from_pretrained(config.FINBERT_MODEL, revision=revision).to('cuda').eval()
+    labels = {v.lower(): k for k, v in model.config.id2label.items()}
+    rows = []
+    for r in rel.itertuples():
+        sents = sentences(text_of[r.accession])          # the current scorer's rule (first 200 sentences)
+        v = None
+        if sents:
+            with torch.no_grad():
+                b = [tok(sents[i:i + 64], padding=True, truncation=True, max_length=512, return_tensors='pt').to('cuda')
+                     for i in range(0, len(sents), 64)]
+                pr = torch.cat([torch.softmax(model(**x).logits.float(), -1).cpu() for x in b]).numpy()
+            v = float((pr[:, labels['positive']] - pr[:, labels['negative']]).mean())
+        rows.append({'accession': r.accession, 'net_tone': v})
+    pd.DataFrame(rows).to_csv(OUT / 'finbert_compressed.csv', index=False)
+    print(f'finbert5: {len(rows)}', flush=True)
+
+
+def step_chrono5(rel):
+    import torch
+    if not (OUT / 'compressed.csv').exists():
+        return
+    text_of = compressed_texts()
+
+    def vec(chrono, model, tok, r):
+        prompt = tok.encode(PROMPT)
+        text = tok.encode(text_of[r.accession])[:chrono.CONTEXT - len(prompt)]
+        with torch.no_grad():
+            mean_last, _, _ = _forward(chrono, model, torch.tensor([text + prompt], device='cuda'), len(text))
+        return {'mean_last': mean_last}
+    _run_chrono(rel, OUT / 'chrono_comp_v2015', vec, 'chrono_comp')
+
+
 STEPS = {'stats': step_stats, 'dictionary': step_dictionary, 'finbert': step_finbert, 'chrono_raw': step_chrono_raw,
-         'chrono': step_chrono}
+         'chrono': step_chrono, 'compress': step_compress, 'finbert5': step_finbert5, 'chrono5': step_chrono5}
 
 
 def main():

@@ -16,8 +16,9 @@ Keep rule (3.4), for each split and model:
   2. it is not worse (delta >= 0) in either half of the development period;
   3. among several variants that pass, the best one by delta; a simpler passing variant replaces it when the best is
      not better than it by t >= 1 (simplicity: the order of the lists below).
-Order: fix 1 against the current reading; only if fix 1 is kept, the fix 2 / fix 4 variants against fix 1;
-fix 5 only if score.py's check says so; then fix 3 (aggregation) on the kept reading.
+Order: fix 1 against the current reading; only if fix 1 is kept, the fix 2 / fix 4 / fix 5 variants against fix 1
+(fix 5, the compressed text, only if score.py's check says so; it is the least simple); then fix 3 (aggregation)
+on the kept reading.
 """
 import json
 import sys
@@ -36,9 +37,11 @@ SCORES = C.CACHE / 'scores.csv'
 # reading variants of each model: (current, fix 1, {later fixes in order of simplicity})
 MODELS = {
     'dictionary': ('dictionary_net_tone', 'dict_clean', {}),
-    'finbert': ('finbert_net_tone', 'fb_head200', {'fix2_headtail': 'fb_headtail', 'fix2_all': 'fb_all'}),
+    'finbert': ('finbert_net_tone', 'fb_head200', {'fix2_headtail': 'fb_headtail', 'fix2_all': 'fb_all',
+                                                   'fix5': 'fb_comp'}),
     'tfidf': ('tfidf_pred', 'tfidf_clean', {}),
-    'chrono': ('chrono_base', 'chrono_mean', {'fix4_mid': 'chrono_mid', 'fix4_last': 'chrono_last'}),
+    'chrono': ('chrono_base', 'chrono_mean', {'fix4_mid': 'chrono_mid', 'fix4_last': 'chrono_last',
+                                              'fix5': 'chrono_comp'}),
 }
 
 
@@ -68,6 +71,9 @@ def assemble(conn):
     f = pd.read_csv(C.CACHE / 'finbert_clean.csv').set_index('accession')
     for k, c in [('head200', 'fb_head200'), ('headtail', 'fb_headtail'), ('all', 'fb_all')]:
         out[c] = p.accession.map(f[k]).to_numpy()
+    if (C.CACHE / 'finbert_compressed.csv').exists():
+        fc = pd.read_csv(C.CACHE / 'finbert_compressed.csv').set_index('accession').net_tone
+        out['fb_comp'] = p.accession.map(fc).to_numpy()
     print('tfidf on the cleaned text ...', flush=True)
     from events.scorers import tfidf as T
     path_of = dict(zip(p.accession, p.text_path))
@@ -75,8 +81,12 @@ def assemble(conn):
     print('ChronoGPT ridges ...', flush=True)
     raw = _chrono_matrix(p, [(lambda key: C.e5.emb.load(2015), None), ('chrono_raw_v2015_ext', 'mean_last')])
     out['chrono_base'] = C.rolling_ridge(p, raw).reindex(p.accession).to_numpy()
-    for key, col in [('mean_last', 'chrono_mean'), ('mean_mid', 'chrono_mid'), ('last_token', 'chrono_last')]:
-        X = _chrono_matrix(p, [('chrono_clean_v2015', key)])
+    sources = [('chrono_clean_v2015', 'mean_last', 'chrono_mean'), ('chrono_clean_v2015', 'mean_mid', 'chrono_mid'),
+               ('chrono_clean_v2015', 'last_token', 'chrono_last')]
+    if (C.CACHE / 'chrono_comp_v2015').exists():
+        sources.append(('chrono_comp_v2015', 'mean_last', 'chrono_comp'))
+    for folder, key, col in sources:
+        X = _chrono_matrix(p, [(folder, key)])
         out[col] = C.rolling_ridge(p, X).reindex(p.accession).to_numpy()
     out.to_csv(SCORES, index=False)
     return out
@@ -148,9 +158,8 @@ def run_split(p, split, sd, months, fix5):
         mlog = []
         reading = choose(('current', base), [('fix1', fix1)], firm, mlog)
         if reading[0] == 'fix1' and later:
-            reading = choose(reading, list(later.items()), firm, mlog)
-        if fix5:
-            mlog.append({'note': 'fix 5 required by the check but not implemented in this run'})
+            options = [(k, v) for k, v in later.items() if k != 'fix5' or fix5]
+            reading = choose(reading, options, firm, mlog)
         agg = choose(('latest92_cap', (reading[1], 'latest92_cap')),
                      [(h, (reading[1], h)) for h in C.AGGREGATIONS[1:]], sector, mlog)
         selection[model] = {'reading': reading[0], 'column': reading[1], 'aggregation': agg[1][1]}
