@@ -172,12 +172,14 @@ def logit_matrix(train, test, score_cols):
     Xtr, Xte = [], []
     for c in cols:
         a, b = train[c].astype(float), test[c].astype(float)
-        lo, hi = a.quantile([0.01, 0.99])
-        a, b = a.clip(lo, hi), b.clip(lo, hi)
-        mu = a.mean()
+        if a.notna().sum() > 1:
+            lo, hi = a.quantile([0.01, 0.99])
+            a, b = a.clip(lo, hi), b.clip(lo, hi)
+        mu = a.mean() if a.notna().any() else 0.0
         fa, fb = a.isna().astype(float), b.isna().astype(float)
         a, b = a.fillna(mu), b.fillna(mu)
-        sd = a.std() or 1.0
+        sd = a.std()
+        sd = sd if np.isfinite(sd) and sd > 0 else 1.0
         Xtr += [(a - mu) / sd]
         Xte += [(b - mu) / sd]
         if c in LOGIT_FEATURES and fa.std() > 0:
