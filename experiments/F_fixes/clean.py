@@ -3,7 +3,7 @@ Fix 1 of 資料集/03_方針と文献調査/今後の計画/修正の実験方�
 before it is cut to a model's window. Rules are fixed here (regular expressions, no model, no stock data).
 
 Removed, line by line:
-  - table fragments: a line without any letter, or with fewer than 4 words that does not end a sentence
+  - table fragments: a line without any letter, a single word, or fewer than 4 words that do not end a sentence
     (lone numbers, '(0.9', ')', 'U.S.', 'Int'l', 'n/m', column headings);
   - boilerplate: lines about forward-looking statements / safe harbor / risk factors of the 10-K, conference call or
     webcast notices, contact lines (telephone numbers, e-mail addresses, 'Media:' / 'Investors:'), and the company
@@ -26,7 +26,8 @@ def is_fragment(line):
     s = line.strip()
     if not LETTER.search(s):
         return True
-    return len(s.split()) < 4 and not SENTENCE_END.search(s)
+    words = len(s.split())
+    return words < 2 or (words < 4 and not SENTENCE_END.search(s))
 
 
 def clean(text):
