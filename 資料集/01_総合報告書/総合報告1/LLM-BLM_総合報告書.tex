@@ -1,6 +1,7 @@
 % ============================================================
 % LLM-BLM プロジェクト総合報告書
 % コンパイル：tectonic LLM-BLM_総合報告書.tex   （XeTeX 系。図は LLM-BLM_総合報告書_図/ にある）
+% Windows にはヒラギノがないので、2026-10-19 の PDF は jafont=haranoaji に替えた一時的な写しから作った（Kim ほか 2024 の取り下げの訂正）
 % ============================================================
 \documentclass[xelatex,ja=standard,jafont=hiragino-pron,a4paper,10pt]{bxjsreport}
 \setpagelayout*{left=25mm,right=25mm,top=28mm,bottom=28mm}
@@ -3180,12 +3181,12 @@ LLM の役割を文章に絞る & 数字は統計モデルに任せ、LLM には
 Lopez-Lira と Tang「Can ChatGPT Forecast Stock Price Movements?」 & ニュースの見出し & 見出しの良し悪しの採点が、その後のリターンと関係した。ただし、LLM が普及するにつれて効果は薄れている \\
 Anic、Barbon、Seiz、Zarattini（2025）「ChatGPT in Systematic Investing」 & 銘柄ごとのニュース & モメンタムで選んだ銘柄について「ニュースがその流れを支持するか」を判定させ、採否と比率に反映した。ふつうのモメンタム戦略を上回った \\
 Lehner と Lopez-Lira（2026）「ChatGPT as a Time Capsule」 & なし（モデルの知識そのもの） & 知識の期限が違う 12 個のモデルから銘柄の見通しの点数を作り、1 か月先のリターンと関係した \\
-Kim、Muhn、Nikolaev（2024）「Financial Statement Analysis with Large Language Models」 & 匿名にした財務諸表 & 手順を踏んで考えさせると、利益の増減の方向を約 60\% 当てた。アナリストを上回り、専用の機械学習モデルと同じ程度 \\
+Kim、Muhn、Nikolaev（2024）「Financial Statement Analysis with Large Language Models」\textbf{（2025 年 2 月に取り下げ）} & 匿名にした財務諸表 & 手順を踏んで考えさせると、利益の増減の方向を約 60\% 当て、アナリストを上回ったと報告していた。\textbf{後に著者が、データと分析の不整合を理由に取り下げた。根拠には使えない} \\
 \end{longtable}
 
 Anic ほかの形は、本プロジェクトの実験の結論と同じ方向である。数字（モメンタム）は統計で扱い、LLM には文章の判断だけをさせている。
 
-Kim ほかは、本プロジェクトの結果（財務の数字が使われない）と逆に見える。ただし、違いが 3 つある。予測するのがリターンではなく利益の方向であること、モデルが GPT-4 であること、数字を返す前に比率の計算と解釈を書かせていることである。
+Kim ほかは、本プロジェクトの結果（財務の数字が使われない）と逆に見えた。ただし、この論文は 2025 年 2 月に arXiv で取り下げられた（共著者が過去の分析を再現しようとして、データと分析の不整合を見つけたため）。本書の初版の時点ではこれを見落とし、成功例として引いていた。この論文の結果は、本プロジェクトの結論の根拠にも反証にも使わない（2026 年 10 月 19 日に訂正）。
 
 \section{未来の情報の混入}
 
@@ -4822,7 +4823,7 @@ def optimize_original(expected_returns, covariance, return_weight):
 \item A. Lopez-Lira, Y. Tang. Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models. arXiv:2304.07619.
 \item N. Anic, A. Barbon, R. Seiz, C. Zarattini. ChatGPT in Systematic Investing: Enhancing Risk-Adjusted Returns with LLMs. arXiv:2510.26228, 2025.
 \item S. Lehner, A. Lopez-Lira. ChatGPT as a Time Capsule: The Limits of Price Discovery. arXiv:2604.21433, 2026.
-\item A. G. Kim, M. Muhn, V. V. Nikolaev. Financial Statement Analysis with Large Language Models. arXiv:2407.17866, 2024.
+\item A. G. Kim, M. Muhn, V. V. Nikolaev. Financial Statement Analysis with Large Language Models. arXiv:2407.17866, 2024.（2025 年 2 月に取り下げ。データと分析の不整合のため）
 \item The Memorization Problem: Can We Trust LLMs' Economic Forecasts? arXiv:2504.14765, 2025.
 \item DatedGPT（知識の期限を固定したモデルで先読みを防ぐ研究）. arXiv:2603.11838, 2026.
 \item Look-Ahead-Bench. arXiv:2601.13770, 2026.
