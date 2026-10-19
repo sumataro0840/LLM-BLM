@@ -439,6 +439,77 @@ CREATE TABLE IF NOT EXISTS analyst_estimates (
 ) WITHOUT ROWID;
 
 -- ============================================================
+-- Additional data (see the design note of the additional data in the repository root). Values are kept as fetched; the time each became public is in a column
+-- or follows the rule of section 2 of the design.
+-- ============================================================
+
+-- Every SEC filing of the companies in tickers (form, 8-K items, acceptance time), from data.sec.gov/submissions
+CREATE TABLE IF NOT EXISTS filings (
+    accession    TEXT NOT NULL,
+    cik          INTEGER NOT NULL,
+    symbol       TEXT NOT NULL REFERENCES tickers(symbol),   -- two share classes of one company share its filings
+    form         TEXT NOT NULL,                 -- '8-K', '10-K', '10-Q', '4', 'SC 13G', ...
+    filing_date  TEXT NOT NULL,
+    accepted_at  TEXT,                          -- acceptance time as given by EDGAR (public from then on)
+    items        TEXT,                          -- 8-K items, e.g. '2.02,9.01'
+    primary_doc  TEXT,
+    fetched_at   TEXT NOT NULL,
+    PRIMARY KEY (accession, symbol)
+);
+CREATE INDEX IF NOT EXISTS filings_by_symbol ON filings (symbol, form, filing_date);
+
+-- Daily share volume (yfinance); public at the close of the day
+CREATE TABLE IF NOT EXISTS volumes (
+    symbol     TEXT NOT NULL,
+    date       TEXT NOT NULL,
+    volume     REAL NOT NULL,
+    fetched_at TEXT NOT NULL,
+    PRIMARY KEY (symbol, date)
+) WITHOUT ROWID;
+
+-- Fama-French factor returns (Kenneth French's data library), in decimals
+CREATE TABLE IF NOT EXISTS factor_returns (
+    dataset    TEXT NOT NULL,                   -- e.g. 'F-F_Research_Data_5_Factors_2x3_daily'
+    freq       TEXT NOT NULL,                   -- 'daily' / 'monthly'
+    date       TEXT NOT NULL,                   -- day, or last day of the month
+    factor     TEXT NOT NULL,                   -- 'Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA', 'RF', 'Mom'
+    value      REAL NOT NULL,
+    fetched_at TEXT NOT NULL,
+    PRIMARY KEY (dataset, freq, date, factor)
+) WITHOUT ROWID;
+
+-- FRED series as currently published (later revisions included); available_date follows the design's rule
+CREATE TABLE IF NOT EXISTS macro_series (
+    series_id      TEXT NOT NULL,
+    date           TEXT NOT NULL,
+    value          REAL,
+    available_date TEXT NOT NULL,
+    fetched_at     TEXT NOT NULL,
+    PRIMARY KEY (series_id, date)
+) WITHOUT ROWID;
+
+-- FINRA Reg SHO daily short-sale volume (consolidated NMS file); public after the day
+CREATE TABLE IF NOT EXISTS short_volume (
+    symbol              TEXT NOT NULL,
+    date                TEXT NOT NULL,
+    short_volume        REAL,
+    short_exempt_volume REAL,
+    total_volume        REAL,
+    fetched_at          TEXT NOT NULL,
+    PRIMARY KEY (symbol, date)
+) WITHOUT ROWID;
+
+-- Daily views of each company's English Wikipedia article (users only); public after the day
+CREATE TABLE IF NOT EXISTS pageviews (
+    symbol     TEXT NOT NULL,
+    article    TEXT NOT NULL,
+    date       TEXT NOT NULL,
+    views      INTEGER NOT NULL,
+    fetched_at TEXT NOT NULL,
+    PRIMARY KEY (symbol, date)
+) WITHOUT ROWID;
+
+-- ============================================================
 -- Views (computed when read; nothing is stored)
 -- ============================================================
 

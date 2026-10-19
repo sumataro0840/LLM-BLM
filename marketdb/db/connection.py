@@ -18,5 +18,5 @@ def connect(db_path):
 
 def init_db(conn):
     """Create the tables if they do not exist yet."""
-    conn.executescript(SCHEMA_PATH.read_text())
+    conn.executescript(SCHEMA_PATH.read_text(encoding='utf-8'))
     conn.commit()
