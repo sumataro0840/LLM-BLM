@@ -12,6 +12,11 @@ COLUMNS = {
     'macro_series': ['series_id', 'date', 'value', 'available_date'],
     'short_volume': ['symbol', 'date', 'short_volume', 'short_exempt_volume', 'total_volume'],
     'pageviews': ['symbol', 'article', 'date', 'views'],
+    'holdings_13f_parts': ['source_file', 'cusip', 'period', 'n_filers', 'shares', 'value', 'issuer_name'],
+    'cusip_map': ['cusip', 'symbol', 'figi_name', 'figi_ticker'],
+    'insider_transactions': ['accession', 'trans_sk', 'symbol', 'issuer_cik', 'form', 'filing_date', 'available_date',
+                             'trans_date', 'code', 'acquired_disposed', 'shares', 'price', 'shares_after',
+                             'direct_indirect', 'owner_cik', 'owner_relationship', 'owner_title'],
 }
 
 

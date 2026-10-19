@@ -499,6 +499,61 @@ CREATE TABLE IF NOT EXISTS short_volume (
     PRIMARY KEY (symbol, date)
 ) WITHOUT ROWID;
 
+-- Insider transactions in common stock (Forms 3/4/5, non-derivative table) from the SEC's Insider Transactions Data
+-- Sets; available_date = the day after filing (the data sets give the filing day only; filings has the exact time)
+CREATE TABLE IF NOT EXISTS insider_transactions (
+    accession          TEXT NOT NULL,
+    trans_sk           TEXT NOT NULL,           -- row id of the transaction in the data set
+    symbol             TEXT NOT NULL,
+    issuer_cik         INTEGER NOT NULL,
+    form               TEXT,                    -- '4', '4/A', '5', ...
+    filing_date        TEXT NOT NULL,
+    available_date     TEXT NOT NULL,
+    trans_date         TEXT,
+    code               TEXT,                    -- 'P' open-market purchase, 'S' sale, 'A' award, 'M' option exercise, 'F' tax ...
+    acquired_disposed  TEXT,                    -- 'A' / 'D'
+    shares             REAL,
+    price              REAL,
+    shares_after       REAL,
+    direct_indirect    TEXT,
+    owner_cik          TEXT,
+    owner_relationship TEXT,                    -- 'Director', 'Officer', 'TenPercentOwner', 'Other' (several joined by ';')
+    owner_title        TEXT,
+    fetched_at         TEXT NOT NULL,
+    PRIMARY KEY (accession, trans_sk, symbol)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS insider_by_symbol ON insider_transactions (symbol, available_date);
+
+-- 13F holdings summed per CUSIP and report period, one row per source file (since 2024 a period's filings can be
+-- spread over two files). Only original 13F-HR reports filed within 45 days of the period end, shares ('SH') only,
+-- no options. value is in dollars (filings before 2023-01-03 reported thousands and are multiplied by 1,000).
+CREATE TABLE IF NOT EXISTS holdings_13f_parts (
+    source_file  TEXT NOT NULL,
+    cusip        TEXT NOT NULL,
+    period       TEXT NOT NULL,                 -- end of the calendar quarter reported
+    n_filers     INTEGER NOT NULL,
+    shares       REAL,
+    value        REAL,
+    issuer_name  TEXT,
+    fetched_at   TEXT NOT NULL,
+    PRIMARY KEY (source_file, cusip, period)
+) WITHOUT ROWID;
+
+-- Totals per CUSIP and period; public 46 days after the period end (the deadline is 45 days)
+CREATE VIEW IF NOT EXISTS holdings_13f AS
+SELECT cusip, period, date(period, '+46 days') AS available_date, SUM(n_filers) AS n_filers,
+       SUM(shares) AS shares, SUM(value) AS value, MAX(issuer_name) AS issuer_name
+FROM holdings_13f_parts GROUP BY cusip, period;
+
+-- CUSIP -> symbol of tickers (from OpenFIGI)
+CREATE TABLE IF NOT EXISTS cusip_map (
+    cusip      TEXT PRIMARY KEY,
+    symbol     TEXT,                            -- NULL: not one of the tickers
+    figi_name  TEXT,
+    figi_ticker TEXT,
+    fetched_at TEXT NOT NULL
+);
+
 -- Daily views of each company's English Wikipedia article (users only); public after the day
 CREATE TABLE IF NOT EXISTS pageviews (
     symbol     TEXT NOT NULL,

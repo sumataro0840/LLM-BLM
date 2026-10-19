@@ -18,7 +18,7 @@ from marketdb.config import USER_AGENT, WIKIDATA_SPARQL_URL
 _lock, _last = threading.Lock(), {}
 
 
-def get(url, per_second=8.0, tries=5):
+def get(url, per_second=8.0, tries=5, agent=None):
     """GET with a per-host rate limit and retries; None for 403/404 (a file that does not exist)."""
     host = urllib.parse.urlparse(url).netloc
     for attempt in range(tries):
@@ -28,7 +28,7 @@ def get(url, per_second=8.0, tries=5):
                 time.sleep(wait)
             _last[host] = time.time()
         try:
-            req = urllib.request.Request(url, headers={'User-Agent': USER_AGENT, 'Accept-Encoding': 'identity'})
+            req = urllib.request.Request(url, headers={'User-Agent': agent or USER_AGENT, 'Accept-Encoding': 'identity'})
             with urllib.request.urlopen(req, timeout=120) as r:
                 return r.read()
         except urllib.error.HTTPError as e:
@@ -144,27 +144,155 @@ def short_volume_day(day, symbols):
     raw = get(FINRA.format(d=day.replace('-', '')), per_second=4)
     if raw is None:
         return None
-    df = pd.read_csv(io.BytesIO(raw), sep='|', dtype={'Date': str, 'Symbol': str})
+    # keep_default_na=False: a symbol such as 'NA' must not become a missing value
+    df = pd.read_csv(io.BytesIO(raw), sep='|', dtype=str, keep_default_na=False)
     df = df[df.Date.str.fullmatch(r'\d{8}', na=False)]          # the last line is a record count
     df['symbol'] = df.Symbol.map(finra_symbol)
     df = df[df.symbol.isin(symbols)]
-    return pd.DataFrame({'symbol': df.symbol, 'date': day, 'short_volume': df.ShortVolume.astype(float),
-                         'short_exempt_volume': df.ShortExemptVolume.astype(float),
-                         'total_volume': df.TotalVolume.astype(float)})
+    num = lambda c: pd.to_numeric(df[c], errors='coerce')
+    return pd.DataFrame({'symbol': df.symbol, 'date': day, 'short_volume': num('ShortVolume'),
+                         'short_exempt_volume': num('ShortExemptVolume'), 'total_volume': num('TotalVolume')})
+
+
+# ---------- SEC insider transactions (www.sec.gov needs SEC_USER_AGENT with a contact) ----------
+
+INSIDER = 'https://www.sec.gov/files/structureddata/data/insider-transactions-data-sets/{y}q{q}_form345.zip'
+
+
+def sec_agent():
+    import os
+    agent = os.environ.get('SEC_USER_AGENT')
+    if not agent:
+        raise SystemExit('SEC_USER_AGENT を LLM-BLM/.env に書いてください（www.sec.gov の求め）')
+    return agent
+
+
+def _date(s):
+    return pd.to_datetime(s, format='%d-%b-%Y', errors='coerce').dt.strftime('%Y-%m-%d')
+
+
+def insider_quarter(year, quarter, symbols_of_cik):
+    """Non-derivative transactions of one quarter's data set, for issuers in symbols_of_cik ({cik: [symbols]}).
+    None if the file does not exist (yet)."""
+    raw = get(INSIDER.format(y=year, q=quarter), per_second=1, agent=sec_agent())
+    if raw is None:
+        return None
+    z = zipfile.ZipFile(io.BytesIO(raw))
+    read = lambda name, cols: pd.read_csv(z.open(name), sep='\t', dtype=str, usecols=cols, on_bad_lines='skip')
+    sub = read('SUBMISSION.tsv', ['ACCESSION_NUMBER', 'FILING_DATE', 'DOCUMENT_TYPE', 'ISSUERCIK'])
+    sub['cik'] = pd.to_numeric(sub.ISSUERCIK, errors='coerce')
+    sub = sub[sub.cik.isin(list(symbols_of_cik))]
+    own = read('REPORTINGOWNER.tsv', ['ACCESSION_NUMBER', 'RPTOWNERCIK', 'RPTOWNER_RELATIONSHIP', 'RPTOWNER_TITLE'])
+    own = own[own.ACCESSION_NUMBER.isin(sub.ACCESSION_NUMBER)]
+    own = own.groupby('ACCESSION_NUMBER').agg(owner_cik=('RPTOWNERCIK', 'first'),
+                                              owner_relationship=('RPTOWNER_RELATIONSHIP',
+                                                                  lambda s: ';'.join(sorted(set(s.dropna())))),
+                                              owner_title=('RPTOWNER_TITLE', 'first'))
+    tr = read('NONDERIV_TRANS.tsv', ['ACCESSION_NUMBER', 'NONDERIV_TRANS_SK', 'TRANS_DATE', 'TRANS_CODE',
+                                     'TRANS_SHARES', 'TRANS_PRICEPERSHARE', 'TRANS_ACQUIRED_DISP_CD',
+                                     'SHRS_OWND_FOLWNG_TRANS', 'DIRECT_INDIRECT_OWNERSHIP'])
+    tr = tr.merge(sub, on='ACCESSION_NUMBER').join(own, on='ACCESSION_NUMBER')
+    filing = _date(tr.FILING_DATE)
+    out = pd.DataFrame({
+        'accession': tr.ACCESSION_NUMBER, 'trans_sk': tr.NONDERIV_TRANS_SK, 'issuer_cik': tr.cik.astype(int),
+        'form': tr.DOCUMENT_TYPE, 'filing_date': filing,
+        'available_date': (pd.to_datetime(filing) + pd.Timedelta(days=1)).dt.strftime('%Y-%m-%d'),
+        'trans_date': _date(tr.TRANS_DATE), 'code': tr.TRANS_CODE, 'acquired_disposed': tr.TRANS_ACQUIRED_DISP_CD,
+        'shares': pd.to_numeric(tr.TRANS_SHARES, errors='coerce'),
+        'price': pd.to_numeric(tr.TRANS_PRICEPERSHARE, errors='coerce'),
+        'shares_after': pd.to_numeric(tr.SHRS_OWND_FOLWNG_TRANS, errors='coerce'),
+        'direct_indirect': tr.DIRECT_INDIRECT_OWNERSHIP, 'owner_cik': tr.owner_cik,
+        'owner_relationship': tr.owner_relationship, 'owner_title': tr.owner_title})
+    out = out[out.filing_date.notna()]
+    # one row per symbol of the issuer (two share classes of one company get the same transactions)
+    out['symbol'] = out.issuer_cik.map(symbols_of_cik)
+    return out.explode('symbol')
+
+
+# ---------- SEC 13F data sets ----------
+
+THIRTEEN_F_PAGE = 'https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets'
+
+
+def thirteen_f_files():
+    """Links of every 13F data set (quarterly up to 2023, ranges of filing dates from 2024)."""
+    import re
+    page = get(THIRTEEN_F_PAGE, per_second=1, agent=sec_agent()).decode('utf-8', 'replace')
+    return sorted(set(re.findall(r'href="([^"]+form13f[^"]*\.zip)"', page)))
+
+
+def thirteen_f_parts(link):
+    """Sum of shares, value and filers per CUSIP and period in one data set (rules of holdings_13f_parts)."""
+    raw = get('https://www.sec.gov' + link, per_second=1, agent=sec_agent())
+    z = zipfile.ZipFile(io.BytesIO(raw))
+    sub = pd.read_csv(z.open('SUBMISSION.tsv'), sep='\t', dtype=str)
+    sub = sub[sub.SUBMISSIONTYPE == '13F-HR'].copy()
+    sub['filed'] = pd.to_datetime(sub.FILING_DATE, format='%d-%b-%Y', errors='coerce')
+    sub['period'] = pd.to_datetime(sub.PERIODOFREPORT, format='%d-%b-%Y', errors='coerce')
+    sub = sub[sub.filed <= sub.period + pd.Timedelta(days=45)]
+    info = pd.read_csv(z.open('INFOTABLE.tsv'), sep='\t', dtype=str, on_bad_lines='skip',
+                       usecols=['ACCESSION_NUMBER', 'NAMEOFISSUER', 'CUSIP', 'VALUE', 'SSHPRNAMT', 'SSHPRNAMTTYPE',
+                                'PUTCALL'])
+    info = info[(info.SSHPRNAMTTYPE == 'SH') & info.PUTCALL.isna()]
+    info = info.merge(sub[['ACCESSION_NUMBER', 'filed', 'period']], on='ACCESSION_NUMBER')
+    info['cusip'] = info.CUSIP.str.strip().str.upper()
+    info = info[info.cusip.str.fullmatch(r'[0-9A-Z]{9}', na=False)]
+    info['shares'] = pd.to_numeric(info.SSHPRNAMT, errors='coerce')
+    info['value'] = pd.to_numeric(info.VALUE, errors='coerce') * \
+        (info.filed < pd.Timestamp('2023-01-03')).map({True: 1000.0, False: 1.0})
+    info['period'] = info.period.dt.strftime('%Y-%m-%d')
+    g = info.groupby(['cusip', 'period'])
+    out = g.agg(n_filers=('ACCESSION_NUMBER', 'nunique'), shares=('shares', 'sum'), value=('value', 'sum'),
+                issuer_name=('NAMEOFISSUER', 'first')).reset_index()
+    return out.assign(source_file=link.rsplit('/', 1)[1])
+
+
+def openfigi_tickers(cusips):
+    """{cusip: (figi ticker, name)} for US equities from OpenFIGI's mapping API (no key: 10 per request,
+    25 requests a minute)."""
+    out = {}
+    cusips = list(cusips)
+    for i in range(0, len(cusips), 10):
+        body = json.dumps([{'idType': 'ID_CUSIP', 'idValue': c} for c in cusips[i:i + 10]]).encode()
+        for attempt in range(6):
+            time.sleep(2.5)
+            req = urllib.request.Request('https://api.openfigi.com/v3/mapping', data=body,
+                                         headers={'Content-Type': 'application/json'})
+            try:
+                with urllib.request.urlopen(req, timeout=60) as r:
+                    res = json.loads(r.read())
+                break
+            except urllib.error.HTTPError as e:
+                if e.code == 429:
+                    time.sleep(30)
+                    continue
+                raise
+        else:
+            raise RuntimeError('OpenFIGI kept refusing (429)')
+        for c, r in zip(cusips[i:i + 10], res):
+            data = [d for d in r.get('data', []) if d.get('exchCode') == 'US'] or r.get('data', [])
+            if data:
+                out[c] = (data[0].get('ticker'), data[0].get('name'))
+    return out
 
 
 # ---------- Wikipedia page views ----------
 
-def wikipedia_articles(ciks):
-    """{cik: English Wikipedia article title} from Wikidata (property P5531 = CIK), one query."""
-    values = ' '.join(f'"{c:010d}"' for c in ciks)
-    query = ('SELECT ?cik ?article WHERE { VALUES ?cik { ' + values + ' } ?item wdt:P5531 ?cik . '
-             '?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }')
-    raw = get(f'{WIKIDATA_SPARQL_URL}?format=json&query={urllib.parse.quote(query)}', per_second=1)
+def wikipedia_articles(ciks, batch=80):
+    """{cik: English Wikipedia article title} from Wikidata (property P5531 = CIK), 80 CIKs per query
+    (one query with all of them makes the URL too long)."""
     out = {}
-    for b in json.loads(raw)['results']['bindings']:
-        title = urllib.parse.unquote(b['article']['value'].rsplit('/wiki/', 1)[1])
-        out.setdefault(int(b['cik']['value']), title)
+    ciks = list(ciks)
+    for i in range(0, len(ciks), batch):
+        values = ' '.join(f'"{c:010d}"' for c in ciks[i:i + batch])
+        query = ('SELECT ?cik ?article WHERE { VALUES ?cik { ' + values + ' } ?item wdt:P5531 ?cik . '
+                 '?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }')
+        raw = get(f'{WIKIDATA_SPARQL_URL}?format=json&query={urllib.parse.quote(query)}', per_second=0.5)
+        if raw is None:
+            continue
+        for b in json.loads(raw)['results']['bindings']:
+            title = urllib.parse.unquote(b['article']['value'].rsplit('/wiki/', 1)[1])
+            out.setdefault(int(b['cik']['value']), title)
     return out
 
 
@@ -174,7 +302,7 @@ WIKIMEDIA = ('https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en
 
 def pageviews(title, start='20150701', end='20260930'):
     raw = get(WIKIMEDIA.format(title=urllib.parse.quote(title.replace(' ', '_'), safe=''), start=start, end=end),
-              per_second=10)
+              per_second=4)
     if raw is None:
         return pd.DataFrame(columns=['article', 'date', 'views'])
     items = json.loads(raw)['items']

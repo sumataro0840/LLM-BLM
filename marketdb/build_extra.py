@@ -7,6 +7,9 @@ Fetch the additional data of 設計_追加データ.md (stage 1) into the databa
     python marketdb/build_extra.py macro       # FRED series
     python marketdb/build_extra.py short       # FINRA daily short-sale volume (from 2019)
     python marketdb/build_extra.py pageviews   # Wikipedia page views (from 2015-07)
+    python marketdb/build_extra.py insiders    # SEC insider transactions (needs SEC_USER_AGENT)
+    python marketdb/build_extra.py 13f         # SEC 13F holdings per CUSIP (needs SEC_USER_AGENT)
+    python marketdb/build_extra.py cusips      # CUSIP -> ticker of the largest holdings (OpenFIGI)
     python marketdb/build_extra.py all
 
 What is already stored is skipped, so a step can be run again after an interruption.
@@ -110,15 +113,78 @@ def step_pageviews(conn):
     print(f'pageviews: {tickers.article.notna().sum()} of {len(tickers)} companies have an article', flush=True)
     done = db.done(conn, 'pageviews', 'symbol')
     todo = tickers[tickers.article.notna() & ~tickers.symbol.isin(done)]
-    with ThreadPoolExecutor(4) as pool:
-        for k, (symbol, df) in enumerate(pool.map(lambda r: (r.symbol, src.pageviews(r.article)), todo.itertuples()), 1):
-            db.save(conn, 'pageviews', df.assign(symbol=symbol))
+    def one(r):
+        try:
+            return r.symbol, src.pageviews(r.article)
+        except Exception as e:                      # one article failing does not stop the others
+            print(f'  {r.symbol} ({r.article}): {str(e)[:80]}', flush=True)
+            return r.symbol, None
+
+    with ThreadPoolExecutor(2) as pool:
+        for k, (symbol, df) in enumerate(pool.map(one, todo.itertuples()), 1):
+            if df is not None:
+                db.save(conn, 'pageviews', df.assign(symbol=symbol))
             if k % 100 == 0:
                 print(f'  {k}/{len(todo)}', flush=True)
 
 
+def step_insiders(conn):
+    """SEC Insider Transactions Data Sets, one file per quarter from 2014 Q1 (needs SEC_USER_AGENT)."""
+    from marketdb.build_fundamentals import PREVIOUS_CIKS
+    tickers = pd.read_sql('SELECT symbol, cik FROM tickers WHERE cik IS NOT NULL', conn)
+    of_cik = {}
+    for r in tickers.itertuples():
+        for cik in [int(r.cik), *PREVIOUS_CIKS.get(r.symbol, [])]:
+            of_cik.setdefault(cik, []).append(r.symbol)
+    done = {r[0] for r in conn.execute("SELECT DISTINCT substr(filing_date, 1, 4) || 'q' || "
+                                       "((CAST(substr(filing_date, 6, 2) AS INTEGER) + 2) / 3) FROM insider_transactions")}
+    for year in range(2014, 2027):
+        for q in range(1, 5):
+            key = f'{year}q{q}'
+            if key in done or (year, q) > (2026, 3):
+                continue
+            df = src.insider_quarter(year, q, of_cik)
+            if df is None:
+                print(f'insiders {key}: no file', flush=True)
+                continue
+            n = db.save(conn, 'insider_transactions', df)
+            print(f'insiders {key}: {len(df)} rows, {n} new', flush=True)
+
+
+def step_13f(conn):
+    """SEC Form 13F data sets (needs SEC_USER_AGENT); one file at a time, files already stored are skipped."""
+    links = src.thirteen_f_files()
+    done = db.done(conn, 'holdings_13f_parts', 'source_file')
+    todo = [l for l in links if l.rsplit('/', 1)[1] not in done]
+    print(f'13F: {len(todo)} of {len(links)} files to fetch', flush=True)
+    for link in todo:
+        df = src.thirteen_f_parts(link)
+        db.save(conn, 'holdings_13f_parts', df)
+        print(f'  {link.rsplit("/", 1)[1]}: {len(df)} CUSIP-periods, periods {sorted(df.period.unique())[-3:]}', flush=True)
+
+
+def step_cusips(conn, top=1500):
+    """Map the CUSIPs of the largest holdings (top `top` by value in each period) to tickers with OpenFIGI."""
+    h = pd.read_sql('SELECT cusip, period, value FROM holdings_13f', conn)
+    h['rank'] = h.groupby('period').value.rank(ascending=False)
+    cand = sorted(set(h[h['rank'] <= top].cusip) - db.done(conn, 'cusip_map', 'cusip'))
+    print(f'CUSIPs to map: {len(cand)}', flush=True)
+    symbols = {r[0] for r in conn.execute('SELECT symbol FROM tickers')}
+    for i in range(0, len(cand), 200):
+        part = cand[i:i + 200]
+        found = src.openfigi_tickers(part)
+        rows = []
+        for c in part:
+            ticker, name = found.get(c, (None, None))
+            sym = ticker.replace('/', '-').replace('.', '-') if ticker else None
+            rows.append({'cusip': c, 'symbol': sym if sym in symbols else None, 'figi_name': name, 'figi_ticker': ticker})
+        db.save(conn, 'cusip_map', pd.DataFrame(rows))
+        print(f'  {i + len(part)}/{len(cand)}', flush=True)
+
+
 STEPS = {'filings': step_filings, 'volumes': step_volumes, 'factors': step_factors, 'macro': step_macro,
-         'short': step_short, 'pageviews': step_pageviews}
+         'short': step_short, 'pageviews': step_pageviews, 'insiders': step_insiders, '13f': step_13f,
+         'cusips': step_cusips}
 
 
 def main():
@@ -130,8 +196,15 @@ def main():
     conn = connect(config.DB_PATH)
     conn.execute('PRAGMA busy_timeout = 60000')
     init_db(conn)
+    failed = []
     for name in (list(STEPS) if 'all' in names else names):
-        STEPS[name](conn)
+        try:
+            STEPS[name](conn)
+        except Exception as e:                      # one source failing does not stop the others
+            print(f'{name} failed: {str(e)[:200]}', flush=True)
+            failed.append(name)
+    if failed:
+        raise SystemExit(f'failed: {failed}')
 
 
 if __name__ == '__main__':
