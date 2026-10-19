@@ -21,7 +21,8 @@ _lock, _last = threading.Lock(), {}
 def get(url, per_second=8.0, tries=5, agent=None):
     """GET with a per-host rate limit and retries; None for 403/404 (a file that does not exist)."""
     host = urllib.parse.urlparse(url).netloc
-    for attempt in range(tries):
+    attempt, waits = 0, 0
+    while attempt < tries:
         with _lock:
             wait = _last.get(host, 0.0) + 1 / per_second - time.time()
             if wait > 0:
@@ -34,9 +35,14 @@ def get(url, per_second=8.0, tries=5, agent=None):
         except urllib.error.HTTPError as e:
             if e.code in (403, 404):
                 return None
+            if e.code == 429 and waits < 40:        # rate limited: wait as asked, without using up the tries
+                waits += 1
+                time.sleep(float(e.headers.get('retry-after') or 10) + 1)
+                continue
             time.sleep(2 ** attempt)
         except (urllib.error.URLError, TimeoutError, ConnectionError):
             time.sleep(2 ** attempt)
+        attempt += 1
     raise RuntimeError(f'failed: {url}')
 
 
@@ -302,7 +308,7 @@ WIKIMEDIA = ('https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en
 
 def pageviews(title, start='20150701', end='20260930'):
     raw = get(WIKIMEDIA.format(title=urllib.parse.quote(title.replace(' ', '_'), safe=''), start=start, end=end),
-              per_second=4)
+              per_second=1)
     if raw is None:
         return pd.DataFrame(columns=['article', 'date', 'views'])
     items = json.loads(raw)['items']

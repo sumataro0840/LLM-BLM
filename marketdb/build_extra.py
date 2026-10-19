@@ -120,7 +120,7 @@ def step_pageviews(conn):
             print(f'  {r.symbol} ({r.article}): {str(e)[:80]}', flush=True)
             return r.symbol, None
 
-    with ThreadPoolExecutor(2) as pool:
+    with ThreadPoolExecutor(1) as pool:
         for k, (symbol, df) in enumerate(pool.map(one, todo.itertuples()), 1):
             if df is not None:
                 db.save(conn, 'pageviews', df.assign(symbol=symbol))
