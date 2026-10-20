@@ -45,12 +45,22 @@ CHUNK = 1000
 
 
 def releases():
+    """The releases to score. Without the database (e.g. on a rented GPU), from the CSV that export_releases() wrote."""
+    import os
+    csv = os.environ.get('FIXES_RELEASES_CSV')
+    if csv:
+        return pd.read_csv(csv).sort_values(['filing_date', 'accession']).reset_index(drop=True)
     from marketdb.db import events as db
     from marketdb.db.connection import connect
     p = pd.read_csv(PANEL, usecols=['accession', 'filing_date', 'abn_r_0_1'])
     p = p[p.abn_r_0_1.notna()]
     rel = db.load_releases(connect(config.DB_PATH), with_text=True)[['accession', 'text_path', 'accepted_et']]
     return p.drop(columns='abn_r_0_1').merge(rel, on='accession').sort_values(['filing_date', 'accession']).reset_index(drop=True)
+
+
+def export_releases(path):
+    """Write the release list (accession, filing date, text path, acceptance time) for scoring without the database."""
+    releases().to_csv(path, index=False)
 
 
 def cleaned(text_path):

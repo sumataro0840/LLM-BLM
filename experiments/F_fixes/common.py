@@ -137,9 +137,12 @@ def quarters(p):
 
 
 def rolling_ridge(p, X):
-    """E5's rolling ridge. p and X aligned row by row."""
-    pred, _ = e5.rolling_ridge(p[['accession', 'accepted_et', 'window_end', 'abn_r_0_1']].reset_index(drop=True), X)
-    return pred
+    """E5's rolling ridge. p and X aligned row by row. A release whose vector is not finite (nothing was left of its
+    text after the cleaning) is left out of training and gets no prediction."""
+    ok = np.isfinite(X).all(axis=1)
+    pred, _ = e5.rolling_ridge(p.loc[ok, ['accession', 'accepted_et', 'window_end', 'abn_r_0_1']].reset_index(drop=True),
+                               X[ok])
+    return pred.reindex(p.accession.to_numpy())
 
 
 def rolling_tfidf(p, text_of):
