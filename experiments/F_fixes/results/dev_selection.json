@@ -1,0 +1,70 @@
+{
+ "code_commit": "ac0f458e3b55251040def49c19bb4681d994c3a8",
+ "fix5_run": true,
+ "B": {
+  "dictionary": {
+   "reading": "current",
+   "column": "dictionary_net_tone",
+   "aggregation": "latest92_cap"
+  },
+  "finbert": {
+   "reading": "current",
+   "column": "finbert_net_tone",
+   "aggregation": "latest92_cap"
+  },
+  "tfidf": {
+   "reading": "current",
+   "column": "tfidf_pred",
+   "aggregation": "latest92_cap"
+  },
+  "chrono": {
+   "reading": "current",
+   "column": "chrono_base",
+   "aggregation": "latest92_cap"
+  }
+ },
+ "A": {
+  "dictionary": {
+   "reading": "current",
+   "column": "dictionary_net_tone",
+   "aggregation": "latest92_cap"
+  },
+  "finbert": {
+   "reading": "current",
+   "column": "finbert_net_tone",
+   "aggregation": "latest92_cap"
+  },
+  "tfidf": {
+   "reading": "current",
+   "column": "tfidf_pred",
+   "aggregation": "latest92_cap"
+  },
+  "chrono": {
+   "reading": "current",
+   "column": "chrono_base",
+   "aggregation": "latest92_cap"
+  }
+ },
+ "C": {
+  "dictionary": {
+   "reading": "fix1",
+   "column": "dict_clean",
+   "aggregation": "latest92_cap"
+  },
+  "finbert": {
+   "reading": "current",
+   "column": "finbert_net_tone",
+   "aggregation": "latest92_cap"
+  },
+  "tfidf": {
+   "reading": "current",
+   "column": "tfidf_pred",
+   "aggregation": "latest92_cap"
+  },
+  "chrono": {
+   "reading": "current",
+   "column": "chrono_base",
+   "aggregation": "latest92_cap"
+  }
+ }
+}
