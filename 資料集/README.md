@@ -23,6 +23,7 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | `02_実験/実験3_アナリスト予想/` | 実験 3 のレポート（アナリスト予想との差を統制しても LLM の点数が残るか）と図 | 10/18 |
 | `02_実験/実験4_FinBERT追加学習/` | 実験 4 のレポート（反応で追加学習した FinBERT と LLM の比較）と図 | 10/18 |
 | `02_実験/実験5_ChronoGPTの埋め込み/` | 実験 5・10 のレポート（先読みのない ChronoGPT の埋め込み＋リッジ、LoRA の追加学習）と図 | 10/19 |
+| `02_実験/実験11_読ませ方とまとめ方の修正/` | 実験 11 のレポート（決算発表文の読ませ方とまとめ方の修正 1〜5、開発と最後の比較）と図 | 10/21 |
 | `02_実験/実験7・8_月次と日次のBLM/` | 実験 7・8 のレポート（LLM の見通しの月次の BLM、発表の翌日と日次の BLM）と図 | 10/18 |
 | `02_実験/補足実験_共分散とTE/` | 補足実験 X02〜X04 のレポート（共分散の窓、TE の上限の校正、VIX）と図 | 10/18 |
 | `02_実験/補足実験_αの大きさ/` | 補足実験 X05 のレポート（見通しの α の倍率、LLM と NLP の点数ごとの月次の BLM。探索）と図 | 10/19 |
@@ -55,6 +56,7 @@ TeX の文書は、その文書のフォルダで `tectonic -X compile <名前>.
 | 実験 8（発表の翌日と日次の BLM）の事前登録と結果 | `experiments/E8_daily_blm/preregistration.md`、`results/findings.md` |
 | 実験 9（ChronoGPT の見通しで月次の BLM を約 10 年）の事前登録と結果 | `experiments/E9_monthly_blm_long/preregistration.md`、`results/findings.md` |
 | 実験 10（ChronoGPT の LoRA の追加学習）の事前登録と結果 | `experiments/E10_chrono_lora/preregistration.md`、`results/findings.md` |
+| 実験 11（読ませ方とまとめ方の修正）の方針・事前登録・結果 | `資料集/03_方針と文献調査/今後の計画/修正の実験方針.md`、`experiments/F_fixes/preregistration.md`、`results/findings.md` |
 | H01〜H07 の結果と、別のモデルによる確認 | `experiments/H0x_*/results/findings.md`、`experiments/robustness/results/` |
 
 `03_方針と文献調査/` の各フォルダにある `00_依頼.md` は、モデルに渡した依頼の文書。`<モデル名>/` が答え、`実行記録.jsonl` がモデル・トークン・時間の記録、`比較検討.md` が Claude による比較。
