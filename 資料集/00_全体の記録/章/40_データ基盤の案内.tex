@@ -1,0 +1,92 @@
+\chapter{データ基盤の案内}\label{ch:data-guide}
+
+この部（第 VI 部）では、研究のすべての実験が使ったデータ基盤を説明する。データ基盤は 3 回に分けて作った。
+
+\begin{enumerate}
+\item \textbf{最初の DB}（10/10〜13、総合報告書 1）：2023-03〜2026-09 の \SP{} の構成銘柄、株価、財務諸表、LLM の予想、BLM の比率、月次レポート、セクターと銘柄の指標。次の 3 章（システムの構成、データ基盤、データベースの設計）。
+\item \textbf{2015 年への拡張とイベントのデータ}（10/15〜18、総合報告書 2）：DB を 2015 年までさかのぼり、決算発表文、受理時刻、驚き、点数、アナリスト予想を足した。「イベントスタディの設計」と「決算発表のデータと点数」の章。
+\item \textbf{追加のデータ}（10/19）：提出書類の索引、出来高、ファクター、マクロの系列、空売りの出来高、Wikipedia の閲覧数、内部者の取引。「追加したデータ」の章。
+\end{enumerate}
+
+\section{今の DB の中身}
+
+DB は SQLite の 1 つのファイル（\code{data/blm\_2015.sqlite}、約 1.7GB）で、Git には入れていない（データの提供元の利用規約と、大きさのため）。2026 年 10 月 21 日の時点の表と行数は次のとおりである。
+
+\begin{longtable}{P{4.2cm}r P{8.0cm}}
+\caption{DB の表と行数（2026-10-21）。}\label{tab:db-tables}\\
+\toprule
+\textbf{表} & \textbf{行数} & \textbf{中身} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{表} & \textbf{行数} & \textbf{中身} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\multicolumn{3}{l}{\textbf{銘柄と指数}} \\
+\code{tickers} & 762 & 銘柄（ティッカー、社名、セクター、サブ業種、CIK） \\
+\code{index\_changes} & 412 & \SP{} の入れ替えの履歴（Wikipedia） \\
+\code{index\_membership} & 751 & 銘柄ごとの在籍期間 \\
+\multicolumn{3}{l}{\textbf{株価と規模}} \\
+\code{prices} & 1,722,400 & 日次の株価（調整後終値、配当） \\
+\code{shares\_outstanding} & 323,112 & 発行済株式数（yfinance と EDGAR） \\
+\code{volumes} & 1,857,184 & 日次の出来高（追加） \\
+\multicolumn{3}{l}{\textbf{財務}} \\
+\code{financial\_facts} & 6,693,466 & XBRL の数値（項目・期間・提出日ごと） \\
+\code{financial\_items} & 9,891 & XBRL の項目の一覧 \\
+\code{filings} & 1,400,145 & SEC の提出書類の索引（追加） \\
+\multicolumn{3}{l}{\textbf{指標}} \\
+\code{sector\_metrics} & 12,117 & セクターの指標（総合報告書 1） \\
+\code{stock\_metrics} & 794,329 & 銘柄の指標（総合報告書 1） \\
+\multicolumn{3}{l}{\textbf{LLM の予想と BLM}} \\
+\code{llm\_runs} & 1 & 予想の集め方（実行 1） \\
+\code{llm\_views} & 440,640 & 実行 1 の回答（14,688 件 × 30 個） \\
+\code{portfolio\_runs} & 5 & BLM の計算の設定 \\
+\code{portfolio\_weights} & 73,270 & 月ごとの比率 \\
+\multicolumn{3}{l}{\textbf{決算発表（実験 2 以降）}} \\
+\code{earnings\_releases} & 28,447 & 8-K Item 2.02 の発表文（受理時刻、時間帯、day 0、本文の場所） \\
+\code{release\_surprises} & 28,447 & SUE と売上の驚き \\
+\code{analyst\_estimates} & 59,324 & アナリストの EPS の予想と実績（Alpha Vantage） \\
+\code{release\_score\_runs} & 7 & 点数の付け方（モデル、設定、反応を使うか） \\
+\code{release\_score\_calls} & 61,634 & 点数付けの呼び出しの記録 \\
+\code{release\_scores} & 627,032 & 発表 × 付け方 × 項目の点数 \\
+\multicolumn{3}{l}{\textbf{追加のデータ（10/19）}} \\
+\code{factor\_returns} & 127,342 & Fama--French のファクターの日次リターン \\
+\code{macro\_series} & 46,472 & FRED のマクロの系列（17 系列） \\
+\code{short\_volume} & 1,116,970 & FINRA の空売りの出来高（2019 年以降） \\
+\code{pageviews} & 2,375,563 & Wikipedia の記事の日次の閲覧数 \\
+\code{insider\_transactions} & 964,366 & SEC の内部者の取引（Form 4） \\
+\code{holdings\_13f\_parts}、\code{cusip\_map} & 0 & 13F の保有（コードはあるが、まだ取得していない） \\
+\multicolumn{3}{l}{\textbf{月次レポート}} \\
+\code{reports}、\code{report\_runs}、\code{report\_values} & 0 & 2015 年の DB では空。読み取りの結果は最初の DB（\code{blm.sqlite}）にある \\
+\end{longtable}
+
+このほか、9 つのビュー（\code{fundamentals\_quarterly}、\code{market\_caps}、\code{index\_weights}、\code{trading\_days}、\code{llm\_view\_stats}、\code{portfolio\_returns}、\code{sector\_metric\_scores}、\code{stock\_metric\_scores}、\code{holdings\_13f}）がある。
+
+\section{データの提供元}
+
+\begin{longtable}{P{3.4cm}P{5.4cm}P{5.6cm}}
+\toprule
+\textbf{提供元} & \textbf{取ったもの} & \textbf{注意} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+yfinance（Yahoo Finance） & 株価、配当、株式数、ETF、VIX & 上場を廃止した銘柄が取れないことが多い。個人の利用 \\
+SEC EDGAR & XBRL の財務諸表、8-K と EX-99.1、提出書類の索引、Form 4、13F & User-Agent に連絡先を入れる決まり。毎秒 10 回まで \\
+Wikipedia & 構成銘柄と入れ替えの履歴、記事の閲覧数 & 誰でも編集できる。閲覧数の API は回数の制限が厳しい（毎秒 1 回で取得） \\
+Alpha Vantage & アナリストの EPS の予想と実績 & 無料の鍵は 1 日 25 銘柄。値は再配布できないので Git に入れない \\
+EODHD & 上場廃止の銘柄の一覧（調査だけ） & 取れる期間は約 12 年 \\
+Kenneth French のサイト & ファクターのリターン & \\
+FRED（セントルイス連銀） & 金利、物価、景気の系列 & \\
+FINRA & 空売りの出来高 & 2019 年以降。「NA」というティッカーの扱いに注意 \\
+\end{longtable}
+
+\begin{projbox}
+\begin{itemize}
+\item すべての実験は、この DB を\textbf{読み取り専用}で開く。
+\item DB を大きく変える前には、日付つきの複製（\code{blm\_2015\_backup\_2026-10-17.sqlite} など）を残した。
+\item API の鍵などの秘密の情報は \code{.env} に置き、コードにも DB にも書かない。
+\end{itemize}
+\end{projbox}

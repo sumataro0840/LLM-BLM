@@ -1,0 +1,306 @@
+"""
+The order of LLM-BLM_全体の記録.
+
+Items:
+  ('part', name)                         a part
+  ('appendix',)                          start of the appendices
+  ('new', file)                          a chapter written for this book (章/<file>.tex)
+  ('imp', doc, title, opts)              a chapter of a source (doc in build.DOCS; title or its start)
+  ('md', path, title, opts)              a markdown file of the repository as a chapter
+  ('chap', title, [pieces], opts)        one chapter made of pieces (each 'imp' / 'md' / 'tex' piece becomes a section)
+opts: title (new heading), note (added to the source note), io (key of io_boxes.IO), label, intro (TeX after the heading).
+"""
+
+PREG = 'experiments/{}/preregistration.md'
+FIND = 'experiments/{}/results/findings.md'
+POL = '資料集/03_方針と文献調査/'
+
+
+def h(n, name, folder):
+    """Chapter of hypothesis H0n: the design written before, the result, and the detailed findings."""
+    return ('chap', f'H0{n}：{name}', [
+        ('imp', 'hyp', f'H0{n}：', {'title': '設計（実験の前に書いたもの）'}),
+        ('imp', 'hres', f'H0{n}：', {'title': '結果'}),
+        ('md', FIND.format(folder), '結果の詳細（記録のファイル）'),
+    ], {'io': f'H0{n}'})
+
+
+def all_of(doc, titles, ios=None):
+    ios = ios or {}
+    return [('imp', doc, t, {'io': ios[t]} if t in ios else {}) for t in titles]
+
+
+ORDER = [
+    ('new', '00_この本について'),
+
+    # ======================================================================
+    ('part', '全体の地図'),
+    ('new', '01_問いと答え'),
+    ('new', '02_経緯'),
+    ('new', '03_入出力の総覧'),
+
+    # ======================================================================
+    ('part', '金融工学の基礎'),
+    ('new', '10_リターンとリスク'),
+    ('new', '11_共分散の推定'),
+    ('new', '12_アクティブ運用'),
+    ('new', '13_決算発表とイベントスタディ'),
+
+    # ======================================================================
+    ('part', '平均分散最適化と Black--Litterman モデル'),
+    ('imp', 'r1', '理論', {'title': '理論の要約'}),
+    ('imp', 'blm', '平均分散最適化'),
+    ('imp', 'blm', '市場の均衡リターン'),
+    ('imp', 'blm', 'ビューの表し方'),
+    ('imp', 'blm', 'ベイズで混ぜる'),
+    ('imp', 'tips', '公式の 3 通りの導き方'),
+    ('imp', 'blm', 'He と Litterman の主結果'),
+    ('imp', 'blm', '実際に使うときの論点'),
+    ('imp', 'blm', 'まとめ', {'title': 'Black--Litterman モデルのまとめ'}),
+
+    # ======================================================================
+    ('part', 'ビュー・$\\Omega$・$\\tau$・リスクの設計'),
+    ('imp', 'tips', 'Black-Litterman の全体像'),
+    ('imp', 'tips', '事前分布'),
+    ('imp', 'tips', '$\\tau$ の意味'),
+    ('imp', 'tips', '$\\Omega$ の決め方の全体像'),
+    ('imp', 'tips', 'Idzorek'),
+    ('imp', 'tips', 'He--Litterman の $\\Omega$'),
+    ('imp', 'tips', '予想の当たり具合'),
+    ('imp', 'tips', 'ビューが多いとき'),
+    ('imp', 'tips', 'ビューの形'),
+    ('imp', 'tips', '政治と政策'),
+    ('imp', 'tips', 'テキストのセンチメント'),
+    ('imp', 'tips', 'マクロ経済'),
+    ('imp', 'tips', '財務と ESG'),
+    ('imp', 'tips', 'モメンタム'),
+    ('imp', 'tips', 'エントロピー'),
+    ('imp', 'tips', 'コピュラ'),
+    ('imp', 'tips', 'CVaR で最適化'),
+    ('imp', 'tips', 'トラッキングエラーと情報レシオ'),
+    ('imp', 'tips', '本プロジェクトの LLM のビュー'),
+    ('imp', 'tips', 'LLM に聞くときの質問'),
+    ('imp', 'tips', 'ビューとリスクのコツ'),
+    ('imp', 'tips', 'まとめ', {'title': 'ビューとリスクの設計のまとめ'}),
+
+    # ======================================================================
+    ('part', '統計・機械学習・言語モデルの基礎'),
+    ('new', '30_統計の道具'),
+    ('new', '31_予測と機械学習'),
+    ('new', '32_文章を数にする'),
+    ('new', '33_LLMの学習と計算'),
+    ('new', '34_データの時点と先読み'),
+
+    # ======================================================================
+    ('part', 'データ基盤'),
+    ('new', '40_データ基盤の案内'),
+    ('imp', 'r1', 'システムの構成'),
+    ('imp', 'r1', 'データ基盤'),
+    ('imp', 'r1', 'データベースの設計'),
+    ('md', '設計.md', 'イベントスタディの設計', {'note': '出典：リポジトリの 設計.md（2026-10-17〜、実験 2 以降のデータと点数の設計）'}),
+    ('chap', '決算発表のデータと点数', all_of('r2', ['設計', 'データと点数'])),
+    ('md', '設計_追加データ.md', '追加したデータ', {'note': '出典：リポジトリの 設計_追加データ.md（2026-10-19）'}),
+
+    # ======================================================================
+    ('part', '元論文の再現と検証（総合報告書 1）'),
+    ('imp', 'r1', '概要', {'title': '総合報告書 1 の概要'}),
+    ('imp', 'r1', 'はじめに'),
+    ('imp', 'r1', '対象論文とその公式実装'),
+    ('imp', 'r1', '概念実証の経緯'),
+    ('imp', 'r1', 'LLM による予想の収集', {'io': 'run1'}),
+    ('imp', 'r1', '比率の計算と最初の結果', {'io': 'blm1'}),
+    ('imp', 'blm', '本プロジェクトの計算', {'title': '元論文の計算を式で追う'}),
+    ('imp', 'r1', '元論文の計算の問題点'),
+    ('imp', 'r1', '設計の方針'),
+    ('imp', 'r1', '月次レポートの読み取り', {'io': 'reports'}),
+    ('imp', 'r1', 'セクターの指標', {'io': 'sector'}),
+    ('imp', 'r1', '銘柄の指標', {'io': 'stock'}),
+    ('imp', 'r1', '予測用プロンプトの入出力の設計'),
+    ('imp', 'r1', '実験の全体像', {'title': '実験 A〜G の全体像'}),
+    ('imp', 'r1', '実験 A', {'io': 'expA'}),
+    ('imp', 'r1', '実験 B', {'io': 'expB'}),
+    ('imp', 'r1', '実験 C', {'io': 'expC'}),
+    ('imp', 'r1', '実験 D', {'io': 'expD'}),
+    ('imp', 'r1', '実験 E', {'io': 'expE'}),
+    ('imp', 'r1', '実験 F', {'io': 'expF'}),
+    ('imp', 'r1', '実験 G', {'io': 'expG'}),
+    ('imp', 'r1', '実験の総合考察', {'title': '実験 A〜G の総合考察'}),
+    ('imp', 'r1', '先行研究', {'title': '先行研究（総合報告書 1 の時点）'}),
+    ('imp', 'r1', 'そのほかの調査と検討'),
+    ('imp', 'r1', '評価の観点から見た現状'),
+    ('imp', 'r1', '課題と今後の計画', {'title': '総合報告書 1 の時点の課題と計画'}),
+    ('imp', 'r1', '結論', {'title': '総合報告書 1 の結論'}),
+
+    # ======================================================================
+    ('part', '仮説 H01〜H07 の検証（実験 1）'),
+    ('chap', '実験 1 の目的と背景', all_of('hres', ['概要', '研究の目的と背景']) + all_of('hyp', [
+        'この資料について', '既存の研究で分かっていること']) + all_of('hres', ['既存の研究と実験の整理'])),
+    ('chap', '現行のアーキテクチャと数式', all_of('hyp', ['現行のアーキテクチャ']) + all_of('hres', [
+        '現行のアーキテクチャと、本研究で加えたもの']) + all_of('hyp', ['数式と、整合性'])),
+    ('chap', '仮説と共通の評価方法', all_of('hyp', ['仮説の全体像', '共通の評価方法']) + all_of('hres', [
+        '検証した仮説と実験の方法', '実験の条件と再現の手順'])),
+    h(1, '現行の計算の再現と整合性', 'H01_verification'),
+    h(2, 'LLM の数値予想と統計モデル', 'H02_statistical_baseline'),
+    h(3, 'ビューの形（$q$ と $P$）', 'H03_view_shape'),
+    h(4, '$\\Omega$ の設計と信頼度の較正', 'H04_omega_calibration'),
+    h(5, '市場とセクターを、文章だけ・数字だけで聞く', 'H05_text_vs_numbers'),
+    h(6, '決算発表文から LLM が取り出す情報', 'H06_earnings_text'),
+    h(7, 'フィードバックの LLM', 'H07_feedback_llm'),
+    ('chap', '実験 1 のまとめ', all_of('hres', [
+        '対照群と実験群の比較', 'API の利用量と費用', '別のモデルによる考察', '仮説ごとの判定', '失敗した実験',
+        'データ・期間・評価方法による限界', '次に行うべき実験', '推奨するアーキテクチャ']) + all_of('hyp', ['リスクと限界'])),
+
+    # ======================================================================
+    ('part', '方針の転換と文献調査'),
+    ('chap', '総合報告書 2 の位置づけ', all_of('r2', [
+        '概要', '総合報告書 1 の後に残っていた問い', '仮説と方法', '結果', '別のモデルによる確認'])),
+    ('chap', '3 者の方針の比較と文献調査', all_of('r2', ['3 者の方針の比較', '文献調査', '統合した方針']) + [
+        ('md', POL + '設計方針/比較検討.md', '設計方針の比較検討（Claude・GPT・Gemini）'),
+        ('md', POL + '文献調査/比較検討.md', '文献調査の比較検討（4 者）'),
+    ]),
+    ('imp', 'sum', '__all__', {'title': '文献調査と設計方針のまとめ（10 月 17 日朝の時点）'}),
+    ('chap', 'LLM のシナリオと CVaR の調査', [
+        ('md', POL + 'LLMシナリオとCVaR/比較検討.md', '調査の読み方と検討'),
+        ('md', POL + 'LLMシナリオとCVaR/deep/文献照合.md', '文献の照合'),
+    ]),
+    ('chap', '課題と今後の計画（総合報告書 2）', all_of('r2', ['課題と今後の計画']) + [
+        ('md', POL + '今後の計画/比較検討.md', '計画の比較検討（GPT・Gemini・Claude）'),
+    ]),
+    ('imp', 'r2', '道具と計算環境'),
+    ('imp', 'r2', '結論', {'title': '総合報告書 2 の結論'}),
+
+    # ======================================================================
+    ('part', '決算発表文を読む（実験 2〜5・10・11）'),
+    ('chap', '実験 2：決算発表文の点数と株価の反応', all_of('e2', [
+        '概要', '前回の結果と、問いの立て直し', 'データ', '点数の付け方', '評価の方法と事前登録', '結果', '考察',
+        '限界', '次に行うこと', '再現の手順と記録']) + all_of('r2', ['事前登録', '考察']), {'io': 'E2'}),
+    ('chap', '実験 3：アナリスト予想との差を統制する', all_of('e3', [
+        '概要', '目的', 'データ', '方法と事前登録', '結果', '考察と限界', '再現の手順']), {'io': 'E3'}),
+    ('chap', '実験 4：反応で追加学習した FinBERT と比べる', all_of('e4', [
+        '概要', '目的', '方法と事前登録', '結果', '考察と限界', '再現の手順']), {'io': 'E4'}),
+    ('chap', '実験 5：先読みのない ChronoGPT の埋め込み＋リッジ', all_of('e5', [
+        '概要', '目的', '方法と事前登録', '結果', '考察と限界', '再現の手順']), {'io': 'E5'}),
+    ('chap', '実験 10：ChronoGPT を LoRA で追加学習する', [
+        ('imp', 'e5', '実験 10', {'title': '実験 10 のレポート'}),
+        ('md', FIND.format('E10_chrono_lora'), '結果の詳細（記録のファイル）'),
+    ], {'io': 'E10'}),
+    ('chap', '議論：LLM に何が効いたか、どこを直すか', [
+        ('md', POL + '今後の計画/実験AとBの案_議論用.md', '議論用の案（実験 A と B）'),
+        ('md', POL + '読ませ方とまとめ方/比較検討.md', '読ませ方とまとめ方の調査の検討'),
+        # 読ませ方とまとめ方/deep/文献照合.md is only the traceback of a refcheck run that failed; not taken
+    ]),
+    ('md', POL + '今後の計画/修正の実験方針.md', '実験 11 の方針'),
+    ('chap', '実験 11：読ませ方とまとめ方の修正', all_of('e11', [
+        '概要', '目的と設計', '実行の記録', '開発の結果', '最後の比較', '考察と限界', '再現の手順']) + [
+        ('md', FIND.format('F_fixes'), '結果の詳細（記録のファイル）'),
+    ], {'io': 'E11'}),
+
+    # ======================================================================
+    ('part', 'ポートフォリオの実験（X01〜X05・実験 7〜9）'),
+    ('chap', 'X01：共分散のノイズ除去', [
+        ('imp', 'e2', '共分散のノイズ除去', {'title': '実験の要約'}),
+        ('md', 'experiments/X01_covariance_denoise/results/解説_ノイズ除去.md', 'ノイズ除去が要る理由（図解）'),
+        ('md', FIND.format('X01_covariance_denoise'), '結果の詳細（記録のファイル）'),
+    ], {'io': 'X01'}),
+    ('chap', 'X02〜X04：共分散の窓、TE の上限の校正、VIX', all_of('xte', [
+        '概要', '問題：TE の約束', 'X02', 'X03', 'X04', 'まとめと限界', '再現の手順'],
+        {'X02': 'X02', 'X03': 'X03', 'X04': 'X04'})),
+    ('chap', '実験 7〜9：月次と日次の BLM', all_of('e78', [
+        '概要', '目的', '実験 7', '実験 8', '実験 9', '考察と限界', '再現の手順'],
+        {'実験 7': 'E7', '実験 8': 'E8', '実験 9': 'E9'})),
+    ('chap', 'X05：$\\alpha$ の大きさ（探索）', all_of('x05', [
+        '概要', 'きっかけ', '方法', '結果', 'まとめと限界', '再現の手順']), {'io': 'X05'}),
+
+    # ======================================================================
+    ('part', '結論'),
+    ('new', '90_結論'),
+    ('new', '91_失敗と教訓'),
+    ('new', '92_残った問い'),
+    ('md', 'experiments/E6_10k_risk_exposure/preregistration.md', '実行しなかった案：実験 6（10-K と長い期間のリターン）'),
+
+    # ======================================================================
+    ('appendix',),
+    ('new', 'A1_費用と計算'),
+    ('new', 'A2_資料の対応と検討の記録'),
+    ('imp', 'r1', '用語集', {'title': '用語集（報告書）'}),
+    ('imp', 'tips', '用語集', {'title': '用語集（ビューとリスク）'}),
+    ('imp', 'blm', '行列の公式'),
+    ('imp', 'tips', '行列の公式と導出'),
+    ('imp', 'tips', 'Python での実装例'),
+    ('imp', 'tips', '練習問題と答え'),
+    ('imp', 'tips', '調査メモの主張の確認表'),
+    ('imp', 'tips', '論文の一覧'),
+    ('imp', 'r1', '設定の一覧'),
+    ('imp', 'r1', 'テーブルとビューの定義'),
+    ('imp', 'r1', 'プロンプトの全文'),
+    ('imp', 'r1', '月別の数値'),
+    ('imp', 'r1', '除外した銘柄'),
+    ('imp', 'r1', '実験 F のターン 1 の回答'),
+    ('imp', 'r1', '主要なコード', {'title': '主要なコード（総合報告書 1 の時点）'}),
+    ('imp', 'blm', '本プロジェクトのコード', {'title': 'BLM の計算のコード'}),
+    ('chap', '事前登録の原文', [
+        ('md', PREG.format('E2_event_reaction'), '実験 2'),
+        ('md', PREG.format('E3_analyst_surprise'), '実験 3'),
+        ('md', PREG.format('E4_finbert_finetune'), '実験 4'),
+        ('md', PREG.format('E5_chrono_embeddings'), '実験 5'),
+        ('md', PREG.format('E7_monthly_blm'), '実験 7'),
+        ('md', PREG.format('E8_daily_blm'), '実験 8'),
+        ('md', PREG.format('E9_monthly_blm_long'), '実験 9'),
+        ('md', PREG.format('E10_chrono_lora'), '実験 10'),
+        ('md', PREG.format('F_fixes'), '実験 11'),
+    ]),
+    ('chap', '結果の記録の原文（実験 2〜9、X02〜X05）', [
+        ('md', FIND.format('E2_event_reaction'), '実験 2'),
+        ('md', FIND.format('E3_analyst_surprise'), '実験 3'),
+        ('md', FIND.format('E4_finbert_finetune'), '実験 4'),
+        ('md', FIND.format('E5_chrono_embeddings'), '実験 5'),
+        ('md', FIND.format('E7_monthly_blm'), '実験 7'),
+        ('md', FIND.format('E8_daily_blm'), '実験 8'),
+        ('md', FIND.format('E9_monthly_blm_long'), '実験 9'),
+        ('md', FIND.format('X02_covariance_window'), 'X02'),
+        ('md', FIND.format('X03_te_calibration'), 'X03'),
+        ('md', FIND.format('X04_vix_scaling'), 'X04'),
+        ('md', FIND.format('X05_alpha_scale'), 'X05'),
+    ]),
+    ('chap', '別のモデルによるレビューの原文（実験 1）', [
+        ('md', 'experiments/robustness/results/external_review.md', '結果のレビュー'),
+        ('md', 'experiments/robustness/results/external_review_design.md', '設計のレビュー'),
+        ('md', 'experiments/robustness/results/external_review_code.md', 'コードのレビュー'),
+    ]),
+    ('chap', '設計方針の依頼と 3 者の回答', [
+        ('md', POL + '設計方針/00_依頼.md', '依頼（3 者に同じものを渡した）'),
+        ('md', POL + '設計方針/claude/設計方針.md', 'Claude の回答'),
+        ('md', POL + '設計方針/gpt/設計方針.md', 'GPT の回答'),
+        ('md', POL + '設計方針/gemini/設計方針.md', 'Gemini の回答'),
+    ]),
+    ('chap', '文献調査の依頼と 4 者の回答', [
+        ('md', POL + '文献調査/00_調査依頼.md', '依頼'),
+        ('md', POL + '文献調査/claude/文献調査.md', 'Claude の回答'),
+        ('md', POL + '文献調査/openai/文献調査.md', 'GPT の回答'),
+        ('md', POL + '文献調査/gemini/文献調査.md', 'Gemini の回答'),
+        ('md', POL + '文献調査/deep/文献調査.md', 'Gemini Deep Research の回答'),
+    ]),
+    ('chap', '今後の計画の依頼と回答', [
+        ('md', POL + '今後の計画/00_依頼.md', '依頼'),
+        ('md', POL + '今後の計画/openai/計画.md', 'GPT の回答'),
+        ('md', POL + '今後の計画/gemini/計画.md', 'Gemini の回答'),
+    ]),
+    ('chap', 'LLM のシナリオと CVaR の調査の原文', [
+        ('md', POL + 'LLMシナリオとCVaR/00_調査依頼.md', '依頼'),
+        ('md', POL + 'LLMシナリオとCVaR/deep/回答.md', 'Gemini Deep Research の回答'),
+    ]),
+    ('chap', '読ませ方とまとめ方の調査の原文', [
+        ('md', POL + '読ませ方とまとめ方/00_調査依頼.md', '依頼'),
+        ('md', POL + '読ませ方とまとめ方/deep/回答.md', 'Gemini Deep Research の回答'),
+    ]),
+    ('md', 'やること.md', '作業の一覧（やること.md）'),
+    ('md', '資料集/06_中間発表と途中のメモ/2025-01_sector_report.md', '途中のメモ：月次レポートの例'),
+    ('chap', 'ブランチ・コミット・資料の一覧', all_of('r2', ['ブランチとコミット', '資料の一覧']) + all_of('hres', [
+        'ブランチとコミット']) + all_of('r1', ['ファイルの一覧'])),
+    ('chap', '参考文献', [
+        ('imp', 'r1', '参考文献', {'title': '総合報告書 1 の参考文献'}),
+        ('imp', 'r2', '参考文献', {'title': '総合報告書 2 の参考文献'}),
+        ('imp', 'e2', '参考文献', {'title': '実験 2 の参考文献'}),
+        ('imp', 'tips', '参考文献', {'title': 'ビューとリスクの解説の参考文献'}),
+    ]),
+]

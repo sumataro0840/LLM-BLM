@@ -1,0 +1,182 @@
+% ============================================================
+% LLM-BLM 全体の記録
+% このファイルは 作成スクリプト/build.py が作る（手で直さない）。新しく書いた章は 章/、取り込んだ章は 取り込み/。
+% コンパイル：tectonic -X compile LLM-BLM_全体の記録.tex   （XeTeX 系。このフォルダで実行する）
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt,openany]{bxjsreport}
+\setpagelayout*{left=22mm,right=22mm,top=22mm,bottom=24mm,footskip=10mm}
+
+% characters that Latin Modern lacks (Greek, super/subscripts, ≈, circled numbers, box drawing, ○ ■ ✓ ✗) come from
+% the Japanese font
+\xeCJKDeclareCharClass{CJK}{"0391->"03C9, "2070->"209F, "2248, "221D, "2264->"2267, "2460->"24FF, "2500->"257F, "25A0->"25FF, "2713, "2717}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,multirow,longtable,tabularx}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+\pdfstringdefDisableCommands{\def\Omega{Ω}\def\tau{τ}\def\Sigma{Σ}\def\alpha{α}\def\SP{S&P500}\def\code#1{#1}}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{c2}{HTML}{EB6834}
+\definecolor{c3}{HTML}{1BAF7A}
+\definecolor{c4}{HTML}{EDA100}
+\definecolor{c7}{HTML}{6250D6}
+\definecolor{ink2}{HTML}{52514E}
+\definecolor{soft1}{HTML}{E4EEF9}
+\definecolor{soft2}{HTML}{FBEEDF}
+\definecolor{soft3}{HTML}{E3F3E9}
+\definecolor{soft4}{HTML}{EEE8FA}
+\definecolor{soft5}{HTML}{FDF3DA}
+\definecolor{soft6}{HTML}{F1F0EC}
+
+% values of the two 解説 (their keys do not overlap) and their generated tables
+\input{取り込み/表/blm/values.tex}
+\input{取り込み/表/tips/values.tex}
+\newcommand{\V}[1]{\ifcsname v@#1\endcsname\csname v@#1\endcsname\else\textbf{??#1??}\fi}
+\newcommand{\tabinD}[2]{\adjustbox{max width=\linewidth}{\input{取り込み/表/#1/tab_#2.tex}}}
+
+% \code: typewriter that may break after / _ - (long paths and model names overflow otherwise)
+\ExplSyntaxOn
+\tl_new:N \l_book_code_tl
+\NewDocumentCommand{\code}{m}{
+  \tl_set:Nn \l_book_code_tl {#1}
+  \tl_replace_all:Nnn \l_book_code_tl {/} {/\allowbreak}
+  \tl_replace_all:Nnn \l_book_code_tl {\_} {\_\allowbreak}
+  \tl_replace_all:Nnn \l_book_code_tl {-} {-\allowbreak}
+  \texttt{\l_book_code_tl}
+}
+\ExplSyntaxOff
+\newcommand{\term}[1]{\textsf{#1}}
+\newcommand{\SP}{S\&P500}
+\newcommand{\T}{^{\top}}
+\newcommand{\weq}{w_{\mathrm{eq}}}
+\newcommand{\wmkt}{w_{\mathrm{mkt}}}
+\newcommand{\mub}{\bar{\mu}}
+\newcommand{\muBL}{\mu_{\mathrm{BL}}}
+\newcommand{\Sp}{\Sigma_{p}}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\IC}{\mathrm{IC}}
+\newcommand{\IR}{\mathrm{IR}}
+\newcommand{\TE}{\mathrm{TE}}
+\newcommand{\VaR}{\mathrm{VaR}}
+\newcommand{\CVaR}{\mathrm{CVaR}}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\tr}{tr}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\newcommand{\chapref}[1]{第~\ref{#1}~章}
+\newcommand{\secref}[1]{\ref{#1}~節}
+\newcommand{\appref}[1]{付録~\ref{#1}}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{totalnumber}{4}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+
+\makeatletter
+\def\@makechapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \ifnum\c@secnumdepth>\m@ne\if@mainmatter{\Large\headfont\@chapapp\thechapter\@chappos}\par\nobreak\vskip0.4\Cvs\fi\fi
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.2\Cvs}}
+\def\@makeschapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.2\Cvs}}
+\makeatother
+
+\renewcommand{\lstlistingname}{リスト}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,keepspaces=true,
+  showstringspaces=false,frame=single,framerule=0.3pt,rulecolor=\color{black!25},backgroundcolor=\color{black!3},
+  xleftmargin=3pt,xrightmargin=3pt,aboveskip=8pt,belowskip=8pt,captionpos=t,
+  commentstyle=\color{ink2},keywordstyle=\color{c1},stringstyle=\color{c2!80!black}}
+
+\newcommand{\boxstyle}[2]{enhanced,breakable,colback=#1,colframe=#2,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{notebox}[1][注意]{enhanced,breakable,colback=soft2,colframe=c2,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{verdict}[1][判定]{enhanced,breakable,colback=soft4,colframe=c7,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{factbox}[1][資料で確認した事実]{enhanced,breakable,colback=soft3,colframe=c3,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{hypbox}[1][仮説]{enhanced,breakable,colback=soft4,colframe=c7,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{predbox}[1][実験前の予想]{enhanced,breakable,colback=soft5,colframe=c4!85!black,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{exbox}[1][計算例]{enhanced,breakable,colback=soft3,colframe=c3,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{thmbox}[1][結果]{enhanced,breakable,colback=soft4,colframe=c7,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{tipbox}[1][コツ]{enhanced,breakable,colback=soft5,colframe=c4!85!black,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{paperbox}[1][論文]{enhanced,breakable,colback=white,colframe=ink2,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{decision}[1][決めること]{enhanced,breakable,colback=soft4,colframe=c7,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newenvironment{plan}{\small\begin{longtable}{p{3.3cm}p{11.6cm}}\toprule\textbf{項目} & \textbf{内容} \\\midrule\endfirsthead
+\toprule\textbf{項目} & \textbf{内容} \\\midrule\endhead\bottomrule\endfoot}{\end{longtable}}
+
+% ---------- for this book ----------
+% the inputs and outputs of an experiment or a model (put under the heading of every experiment)
+\newtcolorbox{iobox}[1][入力と出力]{enhanced,breakable,colback=soft5,colframe=c4!85!black,boxrule=0.8pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={■ #1},fonttitle=\sffamily\bfseries,coltitle=black,
+  colbacktitle=c4!45}
+\newcommand{\iorow}[2]{\par\noindent\hangindent=6.6em\hangafter=1\makebox[6.6em][l]{\textbf{\sffamily #1}}#2\par\smallskip}
+% where an imported chapter comes from
+\newcommand{\srcnote}[1]{\par\noindent{\small\color{ink2}\sffamily #1}\par\medskip}
+% a short definition in the background chapters
+\newtcolorbox{defbox}[1][定義]{enhanced,breakable,colback=soft6,colframe=ink2,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+% where a concept is used in this project
+\newtcolorbox{projbox}[1][このプロジェクトでの使い方]{enhanced,breakable,colback=soft1!60,colframe=c1!70,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+% the book's tikz styles; an imported chapter sets the styles of its source and calls \booktikz at its end
+\newcommand{\booktikz}{\tikzset{
+  box/.style={draw=##1,fill=##1!8,rounded corners=2pt,align=center,font=\footnotesize,inner sep=4pt,
+              minimum height=10mm,text width=24mm},
+  box/.default=c1,
+  arr/.style={-{Stealth[length=2mm]},color=ink2,line width=0.6pt},
+  lab/.style={font=\scriptsize,color=ink2},
+  b/.style={draw=##1,fill=##1!8,rounded corners=2pt,align=center,font=\footnotesize,inner sep=3pt,minimum height=9mm},
+  io/.style={draw=c4!85!black,fill=soft5,rounded corners=2pt,align=center,font=\footnotesize,inner sep=4pt,
+             minimum height=9mm,text width=##1},
+  io/.default=26mm,
+  md/.style={draw=c7,fill=soft4,rounded corners=2pt,align=center,font=\footnotesize\bfseries,inner sep=4pt,
+             minimum height=9mm,text width=##1},
+  md/.default=26mm,
+}}
+\booktikz
+
+\title{LLM-BLM 全体の記録\\[8pt]
+  \Large LLM の見通しを Black--Litterman モデルに入れる研究：\\背景知識・データ・実験・結論\\[6pt]
+  \normalsize 2026 年 10 月 9 日〜21 日の作業のすべて}
+\author{小嶋 一輝}
+\date{2026 年 10 月}
+
+\begin{document}
+\maketitle
+\setcounter{tocdepth}{0}
+{\small\tableofcontents}
+
+%%BODY%%
+
+\end{document}

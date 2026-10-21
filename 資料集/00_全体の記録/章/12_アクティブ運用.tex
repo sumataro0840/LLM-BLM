@@ -1,0 +1,114 @@
+\chapter{アクティブ運用の考え方}\label{ch:active}
+
+BLM を使うのは、ベンチマーク（\SP{} や時価総額加重）を少しだけ上回ることを狙う\term{アクティブ運用}の場面である。この章では、アクティブ運用の成績の測り方と、見通しを比率に変える仕組みを説明する。実験 7〜9 と X02〜X05 は、すべてこの枠組みで評価した。
+
+\section{アクティブ・ウェイトとアクティブ・リターン}
+
+ポートフォリオの比率を $w$、ベンチマークの比率を $w_b$ とすると、差 $a = w - w_b$ を\term{アクティブ・ウェイト}と呼ぶ。合計は 0 である（$\one\T a = 0$）。アクティブ・リターンは
+\begin{equation}
+R_A = R_p - R_b = a\T R
+\end{equation}
+である。時価総額の比率より多く持った銘柄が上がれば正、少なく持った銘柄が上がれば負になる。
+
+\section{トラッキングエラー（TE）}
+
+アクティブ・リターンの標準偏差を\term{トラッキングエラー}（TE）と呼ぶ。
+
+\begin{description}[leftmargin=1.5em,style=nextline]
+\item[事前の TE（ex-ante）] 共分散の予測 $\hat\Sigma$ から計算する予測値 $\TE_{\text{ex-ante}} = \sqrt{a\T\hat\Sigma a}$。最適化の制約に使う。
+\item[事後の TE（ex-post、実現の TE）] 実際のアクティブ・リターンの標準偏差。日次の値から年率にする（$\times\sqrt{252}$）。
+\end{description}
+
+「TE 3\%」は、1 年のアクティブ・リターンが、おおむね $\pm3\%$ の範囲（1 標準偏差）に収まるという約束である。運用会社は、顧客にこの約束をする。事前の TE で 3\% に抑えたのに実現が 4.8\% になるなら、約束を破っている（\chapref{ch:cov}、X02・X03）。
+
+\section{情報レシオ（IR）}
+
+\begin{equation}
+\IR = \frac{\E[R_A]}{\TE}
+\end{equation}
+を\term{情報レシオ}と呼ぶ。年率で、0.5 なら良い運用、1 なら非常に良い運用とされる。
+
+\subsection{IR と検定の $t$}
+
+月次のアクティブ・リターンの平均を検定するときの $t$ 値は、およそ
+\begin{equation}
+t \approx \IR \times \sqrt{\text{年数}}
+\end{equation}
+になる。年率の IR が 0.5 の戦略を 31 か月（約 2.6 年）見ても、$t\approx0.8$ にしかならない。有意（片側 5\% で $t\ge1.65$）を期待できるのは、IR が 1 を大きく超える戦略だけである。実験 7 の事前登録では、検出力も考えて「IR が 2 を超えるほど強い場合だけ」と見積もった。逆に 10 年あれば、IR 0.5 で $t\approx1.6$ になる。期間の長さは、運用の検定で決定的に効く。
+
+\section{情報係数（IC）}
+
+\term{情報係数}（IC）は、予測（点数）と、その後に実現したリターンの相関である。銘柄の間の\textbf{順位}の相関（スピアマン）を使うことが多い。判断日ごとに計算して平均する。
+
+\begin{itemize}
+\item IC 0.05 は、実務では「十分に使える」水準とされる。0.1 を超えるのはまれである。
+\item IC は月ごとに大きくぶれる。30 か月の平均が 0.05 でも、標準偏差が 0.1 なら $t = 0.05/(0.1/\sqrt{30}) \approx 2.7$ である。
+\end{itemize}
+
+\section{アクティブ運用の基本法則}
+
+Grinold の\term{基本法則}は、IR を予測の質と回数に分ける。
+\begin{equation}
+\IR \approx \IC \times \sqrt{\text{BR}}
+\end{equation}
+BR（ブレッドス）は、1 年に行う独立な賭けの数である。IC 0.05 でも、500 銘柄に毎月独立に賭けられれば $\text{BR}=6000$、$\IR\approx0.05\times77\approx3.9$ になる計算である。しかし現実には、
+\begin{itemize}
+\item 銘柄の賭けは独立でない（同じセクターの銘柄は一緒に動く）。
+\item 制約（ロングのみ、TE の上限、売買の費用）のため、見通しを比率に完全には移せない。この割合を\term{移転係数}（TC）と呼び、$\IR \approx \mathrm{TC}\cdot\IC\cdot\sqrt{\text{BR}}$ と書く。ロングのみの運用では TC が 0.3〜0.5 程度に落ちる。
+\end{itemize}
+ので、実際の IR はずっと小さい。
+
+\section{点数から期待リターンへ：Grinold の $\alpha$}
+
+予測が「点数」の形で出てくるとき、それを期待リターンの単位に直す標準の方法が、Grinold の式
+\begin{equation}
+\alpha_i = \IC \times \sigma_i \times z_i
+\label{eq:grinold}
+\end{equation}
+である。$z_i$ は点数を銘柄の間で標準化したもの（平均 0、標準偏差 1）、$\sigma_i$ は銘柄のボラティリティ、$\IC$ は予測の質である。点数の高い銘柄ほど、ボラティリティの大きい銘柄ほど、予測の質が高いほど、大きな $\alpha$ になる。
+
+\begin{notebox}[$\sigma_i$ の期間]
+$\sigma_i$ は\textbf{予測する期間}のボラティリティでなければならない。1 か月先の見通しなら、$\alpha_{\text{月}} = \IC\times\sigma_{\text{月}}\times z$ である。実験 7・9 は、均衡も共分散も日次の単位で計算していたので、見通しも日次の単位で作る必要があった。月の $\alpha$ を日次の単位（1 日あたり）に直すと
+\[ \frac{\alpha_{\text{月}}}{21} = \frac{\IC\times\sqrt{21}\,\sigma_{\text{日}}\times z}{21} = \frac{\IC\times\sigma_{\text{日}}\times z}{\sqrt{21}} \]
+になる。実験 7・9 は $\IC\times\sigma_{\text{日}}\times z$ を使ったので、$\alpha$ は期間に合った大きさの $\sqrt{21}\approx4.6$ 倍だった（X05）。
+\end{notebox}
+
+\section{TE の上限つきの最適化}
+
+BLM で求めた期待リターン $\mu$ を使い、比率を
+\begin{equation}
+\max_{w}\; \mu\T w - \frac{\delta}{2}\,w\T\Sigma w
+\quad\text{s.t.}\quad \one\T w = 1,\; w\ge0,\; (w-w_b)\T\Sigma(w-w_b) \le \TE_{\max}^2
+\end{equation}
+で決める。$\delta$ はリスク回避度である。
+
+\subsection{上限が効いているとき、$\alpha$ の大きさは関係ない}
+
+$\alpha$ が十分に大きいと、最適化は TE の上限いっぱいまで比率を傾ける（上限が\term{効いている}、binding）。このとき、目的関数の中で $\alpha$ による項がリスクの項より支配的になり、解は「上限の範囲で、$\alpha$ の\textbf{向き}に最も沿う傾け方」でほぼ決まる。$\alpha$ を何倍しても向きは同じなので、比率は変わらない。
+
+X05 はこれを確かめた。$\alpha$ の倍率を 0.03〜2 倍のどこにしても、どの点数でも、ポートフォリオはまったく同じだった。上限が効かなくなるのは倍率が 0.02 程度より小さいときだけだった。実験 7・9 の $\sqrt{21}$ の誤りが結果に影響しなかったのは、このためである。逆に言えば、上限が効いている運用で成績を決めるのは、IC の値ではなく、\textbf{点数の順位の質と、TE の上限の大きさ}である。
+
+\section{回転率と取引費用}
+
+毎期、新しい比率 $w_t$ に組み替える。前期の比率を値動きで動かしたもの $\tilde w_{t-1}$ との差の合計の半分
+\begin{equation}
+\text{回転率（片道）} = \frac{1}{2}\sum_i \left| w_{t,i} - \tilde w_{t-1,i} \right|
+\end{equation}
+が、売買した額の割合である。取引費用を片道 $c$（このプロジェクトでは 0.1\%）とすると、その期の費用は約 $2c\times$ 回転率になる（買いと売りの両方に掛かる）。
+
+\begin{exbox}
+月次で回転率 25\% なら、費用は月 $2\times0.1\%\times25\% = 0.05\%$、年約 0.6\%。日次で回転率 42\% なら、1 日 0.084\%、年約 21\% になる。実験 8 の日次の BLM が費用の前の +1.3\% から費用の後の $-20\%$ に落ちたのは、この計算どおりである。
+\end{exbox}
+
+\section{アクティブ運用は全体では損をする}
+
+市場の全員の比率を合わせると、時価総額の比率になる。したがって、費用の前のアクティブ・リターンを市場の全員で合計すると、ちょうど 0 である（Sharpe の算術）。誰かが勝てば、誰かが負ける。費用の後では全体でマイナスになる。アクティブ運用で勝つには、ほかの参加者より早く、または正しく情報を読む必要がある。
+
+\begin{projbox}
+\begin{itemize}
+\item \textbf{実験 7・9 の BLM}：均衡 $\Pi=\delta\Sigma\wmkt$（$\delta=2.5$）、見通し $q_i = \Pi_i + \IC\,\sigma_i\,z_i$（$\IC=0.05$ に固定、データから選ばない）、$\Omega=\tau\diag(P\Sigma P\T)$（$\tau=0.025$）、TE の上限は 3\% を X03 の比で割った値、片道 0.1\% の費用、翌月末まで持つ。
+\item \textbf{判定}：費用の後の月次のアクティブ・リターンの平均を、Newey--West の $t$ で片側検定（\chapref{ch:stat}）。
+\item \textbf{点数を混ぜた対照}：同じ判断日に $z$ を銘柄の間で並べ替えた BLM。比率を動かすこと自体の損（費用、TE）と、点数の中身の価値を分ける。
+\item \textbf{結果}：実験 7 は IR 0.55（31 か月、$t$ 1.22）、実験 9 は IR 0.01（約 10 年）。日次（実験 8）は費用で年 $-20\%$。
+\end{itemize}
+\end{projbox}

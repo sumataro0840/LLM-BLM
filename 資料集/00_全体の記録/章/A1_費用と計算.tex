@@ -1,0 +1,91 @@
+\chapter{費用と計算の記録}\label{app:cost}
+
+この付録には、API の費用、GPU の時間、外部のモデルへの依頼の記録をまとめる。値は各実験の記録（\code{findings.md}、\code{summary.json}、実行記録の \code{jsonl}）から取った。記録のないものは「記録なし」と書いた。
+
+\section{gpt-4o-mini の費用}
+
+価格は入力 100 万トークンあたり 0.15 ドル、出力 0.60 ドル（\code{gpt-4o-mini-2024-07-18}）。
+
+\begin{longtable}{P{4.4cm}rrrP{2.4cm}}
+\toprule
+\textbf{実行} & \textbf{リクエスト} & \textbf{入力トークン} & \textbf{出力トークン} & \textbf{費用（ドル）} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+実行 1（30 か月、$n=30$） & 14,688 & — & — & 約 1.75 \\
+実験 A〜G & 各 2,067 以下 & — & — & 記録なし \\
+H05 文章だけ（T） & 540 & 103,782 & 16,200 & 0.025 \\
+H05 数字だけ（N） & 540 & 154,508 & 16,200 & 0.033 \\
+H06 決算発表文の読み取り & 5,429 & 21,443,558 & 162,118 & 3.314 \\
+H07 F0$'$ & 2,917 & 1,398,390 & 1,186,858 & 0.922 \\
+H07 F1 & 2,917 & 1,499,802 & 1,012,707 & 0.833 \\
+H07 F2 & 2,917 & 1,611,496 & 1,098,408 & 0.901 \\
+H07 F3 & 2,917 & 1,384,970 & 799,419 & 0.687 \\
+H05 の温度の確認 & 60 & 11,558 & 60 & 0.002 \\
+\midrule
+実験 1 の合計 & 18,237 & 27,608,064 & 4,291,970 & 6.717 \\
+実験 2〜11 & 0 & & & 0（H06 の点数を流用） \\
+\end{longtable}
+
+実行 1 の費用は、OpenAI の利用画面で確かめた額である。総合報告書 1 の時点の予算の上限は 5 万円（300 ドル強）だった。
+
+\section{外部のモデルへの依頼}
+
+方針・文献調査・計画・レビューを、別のモデルにも作らせて比べた（第 IX 部、付録の原文）。
+
+\begin{longtable}{P{2.4cm}P{3.6cm}P{4.0cm}r}
+\toprule
+\textbf{日付} & \textbf{依頼} & \textbf{モデル} & \textbf{時間（秒）} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+10/17 & 設計方針 & GPT・Gemini（Claude と独立に） & 記録なし \\
+10/17 & 文献調査 & gpt-5.6 & 373.9 \\
+10/17 & 文献調査 & gemini-3.1-pro-preview & 111.9 \\
+10/17 & 文献調査 & Gemini Deep Research（deep-research-preview-04-2026） & 862.9 \\
+10/17 & 実験 1 のレビュー & gpt-5.5、gemini-3.1-pro-preview & 記録なし \\
+10/18 & 今後の計画 & gpt-5.6 & 115.7 \\
+10/18 & 今後の計画 & gemini-3.1-pro-preview & 58.2 \\
+10/18 & LLM のシナリオと CVaR & Gemini Deep Research & 541.7 \\
+10/19 & 読ませ方とまとめ方 & Gemini Deep Research & 846.4 \\
+\end{longtable}
+
+Deep Research は 1 回数ドルかかる。どの回答にも文献の誤り（別の論文の番号、著者の取り違え、要旨にない数値）があったので、\code{refcheck.py} で arXiv・OpenAlex・Crossref と照合してから使った。10/19 の「読ませ方とまとめ方」では、arXiv の API が混み合って（429・時間切れ）スクリプトが止まったので、arXiv の番号は各論文の要旨のページで手で確かめた（結果は比較検討の文書にある）。スクリプトの記録（\code{deep/文献照合.md}）には止まったときの出力しか残っていないので、この本には取り込まなかった。
+
+\section{GPU の時間}
+
+すべて、この PC の NVIDIA GeForce RTX 5050 Laptop（8GB）で計算した。
+
+\begin{longtable}{P{5.6cm}P{5.0cm}r}
+\toprule
+\textbf{作業} & \textbf{規模} & \textbf{時間} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+実験 2 の点数付け（FinBERT、ChronoGPT の選択肢ほか） & 28,108 本 & 約 13 時間 \\
+実験 4 の FinBERT の追加学習 & 13,979 本、2 エポック、1,748 歩 & 756 秒 \\
+実験 5 の ChronoGPT の埋め込み & 版 2015 で 15,721 本、版 2022 で 21,428 本 & 約 4.3 時間 \\
+実験 10 の LoRA の学習 & 13,979 本、1 エポック、873 歩 & 7.6 時間 \\
+実験 10 の予測 & 7,524 本 & 75 分 \\
+実験 11 の点数付け（掃除・圧縮・埋め込み・FinBERT） & 2016〜2026 年の発表 & 約 19 時間 \\
+\end{longtable}
+
+RunPod で借りた GPU は、実験 11 の点数付けの途中で、結果をダウンロードする前に止めて消えた。その費用は数ドルで、結果は使っていない。
+
+\section{データの取得}
+
+\begin{longtable}{P{4.4cm}P{10.0cm}}
+\toprule
+\textbf{データ} & \textbf{取得の制約} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+SEC EDGAR & 毎秒 10 回まで。User-Agent に連絡先を入れる \\
+Alpha Vantage & 無料の鍵の回数の制限がある。速く呼びすぎると空の答えが返るので、空の答えは保存せずに後で取り直した。581 銘柄の予想を取得した \\
+Wikipedia の閲覧数 & 回数の制限（429）が厳しく、毎秒 1 回、待つように指示されたら待つ \\
+FINRA の空売り & 2019 年以降の日次のファイル \\
+\end{longtable}

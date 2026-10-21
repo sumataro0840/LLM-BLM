@@ -1,0 +1,147 @@
+\chapter{入力と出力の総覧}\label{ch:io}
+
+この章は、この研究で使ったすべてのモデルと実験について、\textbf{何を入れて、何を学習させ、何が出てきて、どう判定したか}を表にまとめたものである。各実験の章の見出しの下にも、同じ内容の囲みがある。
+
+\section{データの流れ}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=5mm and 7mm]
+\node[io=27mm] (px) {株価・配当\\（yfinance、2015〜）};
+\node[io=27mm,below=of px] (fin) {財務諸表\\（SEC XBRL）};
+\node[io=27mm,below=of fin] (rel) {決算発表文\\（SEC 8-K EX-99.1）};
+\node[io=27mm,below=of rel] (est) {アナリスト予想\\（Alpha Vantage）};
+\node[io=27mm,below=of est] (rep) {月次レポート\\（PDF）};
+\node[box=ink2,text width=26mm,right=12mm of fin] (db) {SQLite の DB\\（時点つき）};
+\node[md=30mm,right=12mm of db,yshift=14mm] (llm) {言語モデル\\gpt-4o-mini／ChronoGPT\\FinBERT／辞書／TF-IDF};
+\node[box=c3,text width=30mm,right=12mm of db,yshift=-14mm] (stat) {統計の計算\\リターン・共分散・\\指標・反応};
+\node[io=28mm,right=10mm of llm] (score) {点数・予想};
+\node[box=c7,text width=28mm,right=10mm of stat] (eval) {評価\\回帰・BLM};
+\draw[arr] (px) -- (db); \draw[arr] (fin) -- (db); \draw[arr] (rel.east) -- (db);
+\draw[arr] (est.east) -- (db); \draw[arr] (rep.east) -- (db);
+\draw[arr] (db) -- (llm); \draw[arr] (db) -- (stat);
+\draw[arr] (llm) -- (score); \draw[arr] (score) -- (eval); \draw[arr] (stat) -- (eval);
+\end{tikzpicture}
+\caption{データの流れ。すべてのデータは「いつ知られたか」の時刻つきで DB に入り、判断日より後の情報は使わない。}
+\label{fig:io-flow}
+\end{figure}
+
+\section{使ったモデル}
+
+\begin{longtable}{P{2.9cm}P{4.0cm}P{4.0cm}P{3.6cm}}
+\caption{この研究で使ったモデル。}\label{tab:io-models}\\
+\toprule
+\textbf{モデル} & \textbf{中身} & \textbf{学習} & \textbf{使った実験} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{モデル} & \textbf{中身} & \textbf{学習} & \textbf{使った実験} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+gpt-4o-mini & OpenAI の LLM（\code{gpt-4o-mini-2024-07-18}）。API で使う。知識は 2023 年 10 月まで & \textbf{学習させていない}。質問しただけ & 実行 1、A〜G、H02〜H07、実験 2〜4・7・8・11 \\
+ChronoGPT-Instruct & He・Lv・Manela・Wu の LLM（1.55B、文脈 1,792 トークン）。\textbf{版}ごとに、その年末までの文章だけで学習されている（先読みがない） & 選択肢の確率（実験 2）と埋め込み（実験 5・9・11）では\textbf{学習させていない}。実験 10 では LoRA で反応を学習 & 実験 2・5・9・10・11 \\
+リッジ回帰 & 埋め込み（1,536 次元）や TF-IDF から反応を予測する線形モデル & \textbf{反応を学習}。四半期ごとに、過去の発表だけで学び直す & 実験 2・5・9・11 \\
+FinBERT & \code{yiyanghkust/finbert-tone}（金融の文章で学習した BERT） & 学習なし（文ごとの語調）と、\textbf{全体を反応で追加学習}（実験 4・11） & 実験 2・4・11 \\
+辞書 & Loughran--McDonald の金融の語の辞書 & 学習なし（語数を数える） & 実験 2・11 \\
+TF-IDF & 語の重みのベクトル（語彙 2 万） & リッジで\textbf{反応を学習} & 実験 2・5・11 \\
+LLMLingua-2 & 文章を圧縮するモデル（XLM-RoBERTa） & 学習させていない & 実験 11（修正 5） \\
+ロジスティック回帰 & 数字だけ（驚き、予想との差など）から反応の符号の確率を出す & 四半期ごとに過去だけで学習 & 実験 11 \\
+BLM ＋ 最適化 & Black--Litterman と平均分散最適化（Clarabel） & 学習なし（共分散の推定だけ） & 総合報告書 1、H01〜H04、実験 7〜9、X01〜X05 \\
+\end{longtable}
+
+\section{実験ごとの入力と出力}
+
+\begin{small}
+\begin{longtable}{P{1.2cm}P{3.3cm}P{2.2cm}P{2.2cm}P{2.2cm}P{2.5cm}}
+\caption{すべての実験の入力・モデル・学習・出力・結果。}\label{tab:io-all}\\
+\toprule
+\textbf{実験} & \textbf{入力} & \textbf{モデル} & \textbf{学習させたもの} & \textbf{出力} & \textbf{結果} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{実験} & \textbf{入力} & \textbf{モデル} & \textbf{学習させたもの} & \textbf{出力} & \textbf{結果} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\multicolumn{6}{l}{\textbf{総合報告書 1（第 VII 部）}} \\
+実行 1 & 銘柄の情報と、判断月の日次リターン（約 20 個） & gpt-4o-mini、温度 1.0 & なし & 翌月の平均日次リターン 30 個 & 入力をなぞる（相関 0.89） \\
+BLM & 実行 1 の平均と分散、時価総額、共分散 & BLM＋SLSQP & なし & 比率 & 99.9\% がビュー。最適化が途中で止まる \\
+A & 月次レポートの PDF 39 本 & gpt-4o-mini & なし & 数字と判断 & GDP は 15〜16/18 が正しい \\
+B & ETF の株価 & 自作の計算 & なし & セクターの指標 & 公表値と相関 0.93〜0.97 \\
+C & 最新の四半期の提出日 & 自作の計算 & なし & 決算の古さ & 中央値 89 日。不具合を修正 \\
+D & 値動き 5 と財務 7 の指標 & gpt-4o-mini & なし & 翌月のリターン & 財務を渡しても変わらない \\
+E & D ＋ 考慮する比率の指示 & gpt-4o-mini & なし & 翌月のリターン & なぞりは減らない \\
+F & 3 ターンの会話 & gpt-4o-mini & なし & 数字か 5 段階 & 当てる力は出ない \\
+G & 市場の状態とレポート（銘柄の数字なし） & gpt-4o-mini（確率） & なし & 7 リスク・11 セクターの 1〜5 & 市場の値動きをなぞる \\
+\midrule
+\multicolumn{6}{l}{\textbf{実験 1：H01〜H07（第 VIII 部）}} \\
+H01 & 保存した予想と比率 & BLM、3 つの解法 & なし & 再現の誤差 & 整合。SLSQP は不安定 \\
+H02 & 予想と入力の要約 & 順位の回帰 & 回帰の係数 & 固有部分の IC & $-0.004$。固有の力なし \\
+H03 & 予想 & 絶対・相対ビューの BLM & なし & 能動ベータ & 傾きは 6\% しか減らない \\
+H04 & 予想と過去の当たり & 校正した $\Omega$ & 傾き（過去だけ） & 超過リターン & 置換と区別できない \\
+H05 & 文章だけ／数字だけ & gpt-4o-mini & なし & 市場・セクターの点数 & 文章だけでなぞりが消える \\
+H06 & 決算発表文の先頭 15,000 字 & gpt-4o-mini、温度 0 & なし & 語調・見通し・ガイダンス & 翌月は説明しない \\
+H07 & 予想 ＋ 過去の成績 & gpt-4o-mini & なし（プロンプトで渡す） & 翌月のリターン & IC の差 +0.011（有意でない） \\
+\midrule
+\multicolumn{6}{l}{\textbf{決算発表文（第 X 部）。目的変数はすべて発表をはさむ 2 取引日の超過リターン}} \\
+実験 2 & 決算発表文（標本 A 5,374 本、B 14,204 本） & gpt-4o-mini ほか 4 つ & TF-IDF＋リッジだけ反応を学習 & 合成点数 & \textbf{+120bp}（$t$ 9.4） \\
+実験 3 & 実験 2 ＋ アナリスト予想との差 & gpt-4o-mini & なし & 係数 & \textbf{+116bp}（97\% 残る） \\
+実験 4 & 先頭 512 トークン、学習 13,979 本 & FinBERT ＋ 回帰の頭 & \textbf{全体を反応で追加学習} & 反応の予測 & LLM は FinBERT と同時で +102bp \\
+実験 5 & 先頭 1,792 トークン & ChronoGPT の埋め込み ＋ リッジ & \textbf{リッジが反応を学習} & 反応の予測 & \textbf{+33.6bp}（$t$ 5.5） \\
+実験 10 & 学習 13,979 本 & ChronoGPT ＋ LoRA & \textbf{LoRA で中まで学習} & 反応の予測 & +29.5bp。FinBERT を超えない \\
+実験 11 & 掃除・範囲・層・圧縮を変えた文章 & ChronoGPT、NLP 3 つ ほか & リッジ、ロジスティック、BERT & 反応の予測、セクターの点数 & 修正は残らず。ChronoGPT は NLP を超える（\textbf{+34bp}） \\
+\midrule
+\multicolumn{6}{l}{\textbf{ポートフォリオ（第 XI 部）}} \\
+X01 & 252 日の日次リターン & 3 つの共分散 & 推定だけ & 実現リスク & ノイズ除去は効かない \\
+X02 & 日次リターン & 窓 63〜504、EWMA & なし & 実現の TE & 1.4 倍のまま \\
+X03 & 過去 36 か月の実現÷予測 & 上限の校正 & 比の平均 & 実現の TE & \textbf{3.38\%} \\
+X04 & VIX & 共分散の $k$ 倍 & なし & 実現の TE & 改善しない \\
+X05 & 6 種類の点数、$\alpha$ の倍率 & 月次の BLM & なし & 超過リターン & 倍率は関係ない \\
+実験 7 & gpt-4o-mini の点数 & 月次の BLM & なし & 31 か月の運用 & +0.10\%／月（$t$ 1.2） \\
+実験 8 & day 0 までの情報 & 回帰、日次の BLM & なし & day 1、日次の運用 & +3.6bp。年 −20\% \\
+実験 9 & ChronoGPT のリッジの予測 & 月次の BLM & リッジ（実験 5） & 約 10 年の運用 & +0.003\%／月 \\
+\end{longtable}
+\end{small}
+
+\section{何を何に学習させたか}
+
+この研究で、モデルの\textbf{重み}を学習させたのは次の 4 か所だけである。それ以外のモデル（gpt-4o-mini、学習なしの FinBERT、辞書、ChronoGPT の選択肢と埋め込み）は、できあがったものを使っただけで、学習はしていない。
+
+\begin{longtable}{P{3.0cm}P{3.6cm}P{3.6cm}P{4.4cm}}
+\toprule
+\textbf{学習したもの} & \textbf{入力 $x$} & \textbf{正解 $y$} & \textbf{学習の範囲} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+リッジ回帰（実験 2・5・9・11） & TF-IDF のベクトル、または ChronoGPT の埋め込み（1,536 次元） & 発表をはさむ 2 取引日の超過リターン（標準化） & 四半期ごとに、その四半期が始まる前に反応の窓が閉じた発表だけ。罰則の強さは、実験 2 の TF-IDF では 10 に固定、実験 5 以降は学習の標本の中の交差検証で選ぶ \\
+FinBERT の追加学習（実験 4・11） & 決算発表文の先頭 512 トークン & 同上 & 実験 4 は 2015〜2022 年の 13,979 本、2 エポック。実験 11 は切り方ごとに学び直す \\
+ChronoGPT の LoRA（実験 10） & 決算発表文の先頭 1,792 トークン & 同上 & 2015〜2022 年の 13,979 本、1 エポック。約 256 万の重み（モデル全体の約 0.17\%） \\
+ロジスティック回帰（実験 11） & 数字の統制（驚き、予想との差、発表前のリターン、時価総額） ＋ 点数 & 反応の符号（上がったか） & 四半期ごとに過去だけ \\
+\end{longtable}
+
+どの学習でも、\textbf{評価する発表より前に反応が確定した発表だけ}を使った。これを守らないと、未来の株価を見て学習したモデルで過去を評価することになる（\chapref{ch:pit}）。
+
+\section{目的変数}
+
+株価に関する目的変数は 4 種類ある。どれも、判断の時点より後のリターンである。
+
+\begin{longtable}{P{4.0cm}P{6.2cm}P{4.4cm}}
+\toprule
+\textbf{目的変数} & \textbf{定義} & \textbf{使った実験} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+翌月のリターン & 判断日（月末）の終値から翌月末の終値まで。順位にして IC を計算する & 実行 1、A〜G、H02〜H07 \\
+発表への反応 & 発表日（day 0）の前日の終値から day 1 の終値までの 2 取引日。セクター ETF のリターンを引いた超過リターン。上下 1\% で丸める & 実験 2〜5・10・11 \\
+発表の後のドリフト & day 2〜21 の超過リターン。day 1 だけ、day 1〜5 も見た & 実験 2・3・8 \\
+ポートフォリオの超過リターン & BLM の比率で翌月（または翌日）持ったときのリターン − 時価総額加重のリターン。費用を引く & H04、実験 7〜9、X05 \\
+\end{longtable}
+
+\section{費用と計算の規模}
+
+API の費用、GPU の時間、件数の詳しい一覧は\appref{app:cost}にある。gpt-4o-mini の費用は、記録が残っているものだけで約 8.5 ドル（実行 1 の 1.75 ドルと、実験 1 の 6.72 ドル）。実験 2 以降は、実験 1（H06）で付けた 5,429 本の点数を使い回したので、gpt-4o-mini の費用は増えていない。GPU（この PC の RTX 5050 Laptop、8GB）を最も長く使ったのは、実験 11 の点数付け（約 19 時間）と実験 10 の LoRA の学習（7.6 時間）である。

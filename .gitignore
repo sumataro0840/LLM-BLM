@@ -13,3 +13,7 @@ experiments/E2_event_reaction/results/panel.csv
 
 # macOS folder metadata
 .DS_Store
+
+# The overall record: rebuilt from the other documents by 資料集/00_全体の記録/作成スクリプト/make.sh
+資料集/00_全体の記録/取り込み/
+資料集/00_全体の記録/LLM-BLM_全体の記録.tex
