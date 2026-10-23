@@ -14,6 +14,27 @@ SPECIAL = {"&": r"\&", "%": r"\%", "#": r"\#", "_": r"\_", "~": r"\textasciitild
 # key -> what was checked by hand when the automatic match was weak or wrong
 NOTES = {
     "hlz2016": "題名が短く、別の論文（Lewellen）に一致した。RFS 29(1) の論文として実在を確かめた",
+    "mop2012": "著者名を加えて Crossref で一致（SSRN の版、Moskowitz・Ooi・Pedersen）",
+    "hlwz2020": "著者名を加えて Crossref で一致（SSRN の版、Huang・Li・Wang・Zhou）",
+    "fama1984": "Crossref で一致（Journal of Monetary Economics, 1984）",
+    "kmpv2018": "Crossref で一致（NBER の版、Koijen・Moskowitz・Pedersen・Vrugt）",
+    "cgsss2009": "Crossref で一致（SSRN の版、著者 5 人。要旨も確かめた）",
+    "peadtxt": "Crossref で一致（SSRN の版、Meursault・Liang・Routledge・Scanlon）",
+    "shleifer1986": "Crossref で一致（Journal of Finance, 1986）",
+    "jlw2012": "Crossref で一致（Journal of Finance, 2012）",
+    "avellanedastoikov2008": "Crossref で一致（Quantitative Finance, 2008）",
+    "cmn2020": "候補は正しい（題名が短いので一致の度合いが低く出た）",
+    "markowitz1952": "Crossref で一致（Journal of Finance, 1952）",
+    "blacklitterman1992": "Crossref で一致（Financial Analysts Journal, 1992）",
+    "cederburg2020": "Crossref で一致（Journal of Financial Economics, 2020）",
+    "athl2005": "業界誌 Risk の記事で、DB には見つからない。分野で広く引かれる文献",
+    "deephedging2019": "Crossref で一致（SSRN の版、Buehler・Gonon・Teichmann・Wood）",
+    "malkielsaha2005": "Crossref で一致（Financial Analysts Journal, 2005）",
+    "pedersen2015": "書籍（Princeton University Press）。候補は同書の前付け",
+    "ilmanen2011": "書籍（Wiley）。候補は正しい",
+    "lopezdeprado2018": "書籍（Wiley）。DB では同じ著者の講義資料に一致",
+    "bouchaud2018": "Crossref で一致（Cambridge University Press, 2018）",
+    "grinoldkahn2000": "書籍。Crossref に同書の書評（Journal of Finance, 1996）がある",
 }
 
 
@@ -39,7 +60,7 @@ def main():
     weak = [r for r in rows if r[0] != "ok" or r[1] in NOTES]
     if weak:
         out += ["", "ok でなかったもの、ok でも自分で確かめ直したものを次に示す。", "",
-                r"{\footnotesize", r"\begin{longtable}{@{}cP{0.17\linewidth}P{0.39\linewidth}P{0.33\linewidth}@{}}",
+                r"{\footnotesize", r"\begin{longtable}{@{}cP{0.22\linewidth}P{0.35\linewidth}P{0.32\linewidth}@{}}",
                 r"\toprule 結果 & キー & 照合の候補 & 自分で確かめた結果 \\ \midrule \endhead \bottomrule \endfoot"]
         for mark, key, body, detail in weak:
             cand = detail.lstrip("→ ").strip() or body

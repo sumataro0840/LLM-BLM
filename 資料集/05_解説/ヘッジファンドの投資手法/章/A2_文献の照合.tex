@@ -7,6 +7,8 @@
 
 \input{章/A2_照合の集計}
 
+一致が弱かった 20 本は、著者名を加えて Crossref で照合し直し（上の表の右の列）、書籍と業界誌の記事を含めて、すべての実在を確かめた。照合の後に一覧に加えた Hafsi・Vittori は、Crossref の DOI の記録で確かめた（\ref{sec:othermodel} 節）。
+
 \section{Deep Research の答えの誤りと、確かめられなかった記述}
 
 第 II 部を書くときに見つけた、Deep Research の答え（\code{03\_方針と文献調査/ヘッジファンドの手法/deep/}）の誤りと、原典で確かめられなかった記述を並べる。「確かめた」は、論文の要旨（Crossref・arXiv・NBER のページ）または原典の PDF で確かめたことを指す。
@@ -66,5 +68,6 @@
 \end{itemize}
 
 \section{別のモデルによる点検}
+\label{sec:othermodel}
 
 書き上げた本文の全章を Gemini（gemini-3.1-pro-preview）に 1 回だけ送り、事実の誤り（著者・年・結果の取り違え、数値、定義、歴史）を探させた（\code{照合/gemini\_査読.md}）。指摘は 1 件だけで、「Hafsi・Vittori の論文は実在しない生成 AI の捏造だ」というものだった。しかし、Crossref の DOI（10.1109/acdsa67686.2026.11467851）の記録で、IEEE の 2026 年 2 月の会議録の論文（著者 Yadh Hafsi・Edoardo Vittori、9 ページ）として実在を確かめた。Gemini の知識より新しい文献を「架空」と判定した誤りと考えられる。LLM による照合は、新しい文献の実在の判定には使えない。

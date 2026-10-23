@@ -1,1 +1,31 @@
-（照合の集計は、照合が終わってから作る。）
+照合した 209 本のうち、題名がほぼ一致した（ok）ものが 189 本、一致が弱い（??）ものが 20 本、見つからない（NG）ものが 0 本、照合できなかった（--）ものが 0 本だった。
+
+ok でなかったもの、ok でも自分で確かめ直したものを次に示す。
+
+{\footnotesize
+\begin{longtable}{@{}cP{0.22\linewidth}P{0.35\linewidth}P{0.32\linewidth}@{}}
+\toprule 結果 & キー & 照合の候補 & 自分で確かめた結果 \\ \midrule \endhead \bottomrule \endfoot
+ok & \code{hlz2016} & The Cross Section of Expected Stock Returns — Lewellen (2014) [Crossref]  [一致 0.88] & 題名が短く、別の論文（Lewellen）に一致した。RFS 29(1) の論文として実在を確かめた \\
+?? & \code{mop2012} & Boundaries of Time Series Momentum — Suominen (2021) [Crossref]  [一致 0.74] & 著者名を加えて Crossref で一致（SSRN の版、Moskowitz・Ooi・Pedersen） \\
+?? & \code{hlwz2020} & Boundaries of Time Series Momentum — Suominen (2021) [Crossref]  [一致 0.61] & 著者名を加えて Crossref で一致（SSRN の版、Huang・Li・Wang・Zhou） \\
+?? & \code{fama1984} & Spot and forward exchange rates and the forward premium puzzle —  (None) [Crossref]  [一致 0.47] & Crossref で一致（Journal of Monetary Economics, 1984） \\
+?? & \code{kmpv2018} & Tax loss carry-forwards and optimal leverage — François (2006) [Crossref]  [一致 0.35] & Crossref で一致（NBER の版、Koijen・Moskowitz・Pedersen・Vrugt） \\
+?? & \code{cgsss2009} & The Post-Earnings-Announcement Drift and Liquidity Risk — Sadka, Sadka (2004) [Crossref]  [一致 0.69] & Crossref で一致（SSRN の版、著者 5 人。要旨も確かめた） \\
+?? & \code{peadtxt} & A survey on post-earnings announcement drift (PEAD) — Lisheng Yu (2009) [Crossref]  [一致 0.73] & Crossref で一致（SSRN の版、Meursault・Liang・Routledge・Scanlon） \\
+?? & \code{shleifer1986} & Do International Investors' Demand Curves for Stocks Slope Down Too? — Chakrabarti, Huang, Jayaraman (2002) [Crossref]  [一致 0.73] & Crossref で一致（Journal of Finance, 1986） \\
+?? & \code{jlw2012} & Hedge Funds, Regulation and Mutual Funds —  (None) [Crossref]  [一致 0.55] & Crossref で一致（Journal of Finance, 2012） \\
+?? & \code{avellanedastoikov2008} & Essays on dynamic Limit Order Book modeling and High-Frequency Trading — Gbenro (None) [Crossref]  [一致 0.39] & Crossref で一致（Quantitative Finance, 2008） \\
+?? & \code{cmn2020} & Lazy Prices — COHEN, MALLOY, NGUYEN (2020) [Crossref]  [一致 0.54] & 候補は正しい（題名が短いので一致の度合いが低く出た） \\
+?? & \code{markowitz1952} & 13. Applications to Portfolio Selection —  (2017) [Crossref]  [一致 0.67] & Crossref で一致（Journal of Finance, 1952） \\
+?? & \code{blacklitterman1992} & Exact Computation of Global Minima of a Nonconvex Portfolio Optimization Problem — Kallrath (2004) [Crossref]  [一致 0.53] & Crossref で一致（Financial Analysts Journal, 1992） \\
+?? & \code{cederburg2020} & Understanding Volatility-Managed Portfolios — Cejnek, Mair (2020) [Crossref]  [一致 0.74] & Crossref で一致（Journal of Financial Economics, 2020） \\
+?? & \code{athl2005} & Direct Financial Market: Islamic Equity Market (Bursa Saham dalam Islam) — Yulianti (2010) [Crossref]  [一致 0.51] & 業界誌 Risk の記事で、DB には見つからない。分野で広く引かれる文献 \\
+?? & \code{deephedging2019} & Deep Hedging —  (2026) [Crossref]  [一致 0.53] & Crossref で一致（SSRN の版、Buehler・Gonon・Teichmann・Wood） \\
+?? & \code{malkielsaha2005} & What do we know about the risk and return characteristics of hedge funds? — Viebig (2012) [Crossref]  [一致 0.42] & Crossref で一致（Financial Analysts Journal, 2005） \\
+ok & \code{grinoldkahn2000} & Active Portfolio Management: A Quantitative Approach to Providing Superior Returns and Controlling Risk — Connor (2000) [Crossref]  [一致 0.97] & 書籍。Crossref に同書の書評（Journal of Finance, 1996）がある \\
+?? & \code{pedersen2015} & Frontmatter —  (2015) [Crossref]  [一致 0.24] & 書籍（Princeton University Press）。候補は同書の前付け \\
+?? & \code{ilmanen2011} & Expected Returns — Ilmanen (2011) [Crossref]  [一致 0.40] & 書籍（Wiley）。候補は正しい \\
+?? & \code{lopezdeprado2018} & Advances in Financial Machine Learning: Lecture 3/10 (seminar slides) — López de Prado (2018) [Crossref]  [一致 0.73] & 書籍（Wiley）。DB では同じ著者の講義資料に一致 \\
+?? & \code{bouchaud2018} & The Ecology of Financial Markets —  (None) [Crossref]  [一致 0.48] & Crossref で一致（Cambridge University Press, 2018） \\
+\end{longtable}
+}
