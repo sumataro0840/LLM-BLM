@@ -4,6 +4,7 @@ of the main database plus the sc_* tables below); the main database is not touch
 SEC_USER_AGENT (environment or .env), as for run_events.py.
 
     python -m smallcap.build population        # XBRL frames: public float of every filer, 2015-2025 -> sc_float, sc_band
+    python -m smallcap.build add_year 2014     # one more year of floats, the stored years untouched (for the 2015 universe)
     python -m smallcap.build submissions       # EDGAR submissions of every company ever in the band -> sc_companies, sc_filings
     python -m smallcap.build prices            # yfinance: band companies listed now + index and ETFs -> tickers, prices
     python -m smallcap.build select [--n 1000] # random sample of companies with prices and earnings releases -> sc_sample
@@ -77,6 +78,8 @@ CREATE TABLE IF NOT EXISTS sc_shares (          -- dei:EntityCommonStockSharesOu
 
 def open_db():
     conn = connect(DB_PATH)
+    # several processes write here (scoring, gpt-4o-mini, fetching): wait up to a minute for another writer
+    conn.execute('PRAGMA busy_timeout = 60000')
     init_db(conn)
     conn.executescript(SC_SCHEMA)
     return conn
@@ -113,6 +116,31 @@ def cmd_population(conn, args):
     conn.commit()
     print(f'{len(f)} company-years ({(f.valid == 0).sum()} not used: below 1 million, above 4 trillion or 200x off); band: '
           f'{band.in_band.sum()} company-years, {band[band.in_band == 1].cik.nunique()} companies')
+
+
+def cmd_add_year(conn, args):
+    """Add one more year of public floats (sc_float, sc_band) without touching the years already stored: the same
+    cleaning (the 200x check against the company's median over all stored years) and the same ranks."""
+    year = args.year
+    if conn.execute('SELECT COUNT(*) FROM sc_float WHERE year = ?', (year,)).fetchone()[0]:
+        raise SystemExit(f'{year} is already stored')
+    rows = [{'cik': r['cik'], 'year': year, 'entity_name': r.get('entityName'), 'loc': r.get('loc'), 'float_end': r['end'],
+             'public_float': float(r['val']), 'accn': r.get('accn')}
+            for q in range(1, 5) for r in frame('EntityPublicFloat', 'USD', year, q)]
+    f = pd.DataFrame(rows).sort_values('float_end').drop_duplicates(['cik', 'year'], keep='last')
+    old = pd.read_sql('SELECT cik, public_float FROM sc_float WHERE valid = 1', conn)
+    both = pd.concat([old, f[(f.public_float >= FLOAT_MIN) & (f.public_float <= FLOAT_MAX)][['cik', 'public_float']]])
+    med = both.groupby('cik').public_float.median()
+    ratio = f.public_float / f.cik.map(med)
+    f['valid'] = ((f.public_float >= FLOAT_MIN) & (f.public_float <= FLOAT_MAX)
+                  & ((ratio < 200) & (ratio > 1 / 200))).astype(int)
+    f.to_sql('sc_float', conn, if_exists='append', index=False)
+    band = f[(f.valid == 1) & f['loc'].fillna('').str.startswith('US')].copy()
+    band['float_rank'] = band.public_float.rank(ascending=False, method='first').astype(int)
+    band['in_band'] = band.float_rank.between(*BAND).astype(int)
+    band[['year', 'cik', 'float_rank', 'in_band']].to_sql('sc_band', conn, if_exists='append', index=False)
+    conn.commit()
+    print(f'{year}: {len(f)} companies ({(f.valid == 0).sum()} not used), band {band.in_band.sum()}')
 
 
 # ---------- submissions ----------
@@ -341,6 +369,8 @@ def main():
     sub = p.add_subparsers(dest='cmd', required=True)
     for name in ['population', 'submissions', 'prices', 'shares', 'fundamentals', 'surprise', 'status']:
         sub.add_parser(name)
+    ay = sub.add_parser('add_year')
+    ay.add_argument('year', type=int)
     s = sub.add_parser('select')
     s.add_argument('--n', type=int, default=1000)
     s.add_argument('--seed', type=int, default=0)
