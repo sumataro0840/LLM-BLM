@@ -1,0 +1,174 @@
+\chapter{ポートフォリオ構築}
+\label{ch:pc}
+
+予測（期待リターン）とリスク（共分散）が手に入ったとして、それをどのような比率の組 $\bm w$ にするか。これがポートフォリオ構築である。予測が弱く誤差が大きい世界では、この工程の作り方で成績が大きく変わる。
+
+\section{平均分散最適化}
+
+\subsection{Markowitz の問題}
+
+Markowitz（1952）\cite{markowitz1952} は、ポートフォリオの期待リターンと分散のトレードオフを最適化の問題にした。$N$ 資産の期待超過リターンを $\bm\mu$、共分散を $\Sigma$ とすると、
+\begin{equation}
+\max_{\bm w}\ \bm w\T \bm\mu - \frac{\lambda}{2}\,\bm w\T \Sigma \bm w
+\end{equation}
+制約がなければ、解は
+\begin{equation}
+\bm w^* = \frac{1}{\lambda}\,\Sigma^{-1}\bm\mu
+\label{eq:mvo}
+\end{equation}
+である。$\lambda$ はリスクを嫌う度合い。すべての $\lambda$ の解は、同じ方向 $\Sigma^{-1}\bm\mu$ に比例し（接点ポートフォリオ）、$\lambda$ はレバレッジだけを決める。
+
+\subsection{推定誤差の問題}
+
+式~\eqref{eq:mvo} は、$\bm\mu$ と $\Sigma$ が正確に分かっていれば最適だが、実際には推定値しかない。
+
+\begin{itemize}
+\item \textbf{期待リターンの誤差}：月次のリターンの平均を、標準誤差 1/10 の精度で推定するには、何百年ものデータが要る。期待リターンの推定値は、ほとんど雑音である。
+\item \textbf{逆行列による増幅}：$\Sigma^{-1}$ は、共分散の小さな固有値の方向を大きく増幅する。相関の高い 2 資産の小さなリターンの差が、巨大なロングとショートになる。
+\end{itemize}
+Michaud（1989）\cite{michaud1989} は、平均分散最適化を「誤差の最大化」と呼んだ。推定誤差の最も大きい資産に、最も大きな比率をつけてしまうからである。DeMiguel・Garlappi・Uppal（2009）\cite{dgu2009} は、多くのデータで、推定に基づく最適化が、すべての資産に等しい比率をつける $1/N$ のポートフォリオに、標本外で安定して勝てないことを示した。
+
+\subsection{対策}
+
+\begin{enumerate}
+\item \textbf{期待リターンを縮める}：推定値を、全体の平均や均衡のリターンに向けて縮める（ベイズ、James--Stein、Black--Litterman）。
+\item \textbf{共分散を安定させる}：縮小推定やファクター・モデル（\chapref{ch:risk}）。
+\item \textbf{制約をかける}：比率の上限、ロングのみ、TE の上限。Jagannathan・Ma（2003）\cite{jagannathanma2003} は、空売りの禁止が共分散の縮小と同じ働きをすることを示した。
+\item \textbf{期待リターンを使わない}：最小分散、リスクパリティ。
+\end{enumerate}
+
+\section{Black--Litterman}
+\label{sec:bl}
+
+Black・Litterman（1992）\cite{blacklitterman1992} は、平均分散の不安定さを、ベイズの考え方で解決した。LLM-BLM の中心の道具なので、ここで要点をまとめる。
+
+\subsection{均衡のリターン}
+
+すべての投資家が平均分散で最適化した結果が、時価総額加重の市場ポートフォリオ $\bm w_{\text{mkt}}$ だと考えると、式~\eqref{eq:mvo} を逆に解いて、市場が「暗に」想定している期待リターンが得られる。
+\begin{equation}
+\bm\pi = \delta\,\Sigma\,\bm w_{\text{mkt}}
+\end{equation}
+$\delta$ は市場全体のリスク回避度（2.5 前後がよく使われる）。これを事前分布の平均とし、その不確かさを $\tau\Sigma$ とする（$\tau$ は 0.01〜0.05 程度の小さな数）。
+
+\subsection{見通しとの合成}
+
+運用者の見通しを、$P\bm\mu = \bm q + \bm\varepsilon$、$\bm\varepsilon \sim N(0, \Omega)$ の形で書く。$P$ は見通しの対象（どの資産、あるいはどの組み合わせ）、$\bm q$ は見通しの値、$\Omega$ は見通しの不確かさ。ベイズの公式で、事後の期待リターンは
+\begin{equation}
+\bm\mu_{\mathrm{BL}} = \big[(\tau\Sigma)^{-1} + P\T\Omega^{-1}P\big]^{-1}\big[(\tau\Sigma)^{-1}\bm\pi + P\T\Omega^{-1}\bm q\big]
+\end{equation}
+となる。見通しのない資産は、均衡のリターン $\bm\pi$ のままで、相関を通じて少しだけ動く。見通しが確かなほど（$\Omega$ が小さいほど）、事後は見通しに近づく。He・Litterman（1999）\cite{helitterman1999} は、$\Omega$ を $\mathrm{diag}(P\,\tau\Sigma\,P\T)$ とする置き方を示し、広く使われている。
+
+\subsection{見通しの大きさ}
+
+見通しの値 $\bm q$ を、予測の点数からどう作るか。Grinold・Kahn の考え方では、標準化した点数 $z$ を、IC と資産の変動の大きさでリターンの単位に直す。
+\begin{equation}
+\alpha_i = \IC \times \sigma_i \times z_i
+\end{equation}
+IC が 0.05、年率の変動が 30\%、点数が $+1$ 標準偏差なら、見通しは年 1.5\% の超過リターンである。予測が弱いほど、見通しは小さく、ポートフォリオは市場の比率に近くなる。これは、予測の誤差を自動的に考慮した、合理的な縮め方である。
+
+\begin{projbox}
+LLM-BLM の実験 7・9 と S1 の追記で使った BLM は、この形（$\delta = 2.5$、$\tau = 0.025$、He--Litterman の $\Omega$、$\IC = 0.05$）である。見通しの単位を、保有期間 $h$ 日に合わせて日次で $\IC \times \sigma_{\text{日}} \times z / \sqrt{h}$ にするのは、予測の期間と共分散の期間をそろえるためである（単位を取り違えると、見通しが何十倍にもなる）。
+\end{projbox}
+
+\section{期待リターンを使わない方法}
+
+\subsection{最小分散}
+
+$\min_{\bm w} \bm w\T\Sigma\bm w$ s.t. $\bm 1\T\bm w = 1$。解は $\bm w \propto \Sigma^{-1}\bm 1$。期待リターンを推定しないので、推定誤差の影響が小さい。結果として、変動の小さい・相関の低い資産に偏り、低ボラティリティのファクターを持つ。
+
+\subsection{逆ボラティリティとリスクパリティ}
+
+\begin{itemize}
+\item \textbf{逆ボラティリティ}：$w_i \propto 1/\sigma_i$。相関を無視した簡単な方法。
+\item \textbf{リスクパリティ}（等リスク寄与）：各資産がポートフォリオのリスクに寄与する量をそろえる。資産 $i$ のリスク寄与は
+\begin{equation}
+\mathrm{RC}_i = w_i\,\frac{(\Sigma\bm w)_i}{\sqrt{\bm w\T\Sigma\bm w}}, \qquad \sum_i \mathrm{RC}_i = \sqrt{\bm w\T\Sigma\bm w}
+\end{equation}
+で、すべての $\mathrm{RC}_i$ が等しくなる $\bm w$ を数値的に求める（Maillard・Roncalli・Teïletche 2010 \cite{mrt2010}）。
+\end{itemize}
+
+株式と債券の 60/40 のポートフォリオでは、リスクの 9 割前後が株式から来る。リスクパリティは、債券の比率を大きくし（必要ならレバレッジをかけて）、株と債券のリスクをそろえる。Bridgewater の All Weather などがこの考え方で知られる。
+
+\subsection{階層的リスクパリティ}
+
+López de Prado（2016）\cite{hrp2016} の階層的リスクパリティ（HRP）は、共分散の逆行列を使わない。
+\begin{enumerate}
+\item 相関から資産の間の距離 $d_{ij} = \sqrt{(1-\rho_{ij})/2}$ を作り、階層的にクラスタリングする。
+\item 似た資産が隣り合うように、共分散の行と列を並べ替える。
+\item 木の上から、二つの枝にリスクの逆数に比例して資金を分け、再帰的に下へ進む。
+\end{enumerate}
+逆行列の不安定さを避けるので、資産の数が多く、共分散が不安定なときに頑健だとされる。
+
+\section{レバレッジの決め方}
+
+\subsection{ケリー基準}
+
+繰り返し賭けて資産の対数の期待値（長期の複利の成長率）を最大にする賭けの割合が、ケリー基準である（Kelly 1956 \cite{kelly1956}）。連続時間で、期待超過リターン $\mu$、変動 $\sigma$ の資産一つなら、
+\begin{equation}
+f^* = \frac{\mu}{\sigma^2}, \qquad \text{多資産なら}\ \bm f^* = \Sigma^{-1}\bm\mu
+\end{equation}
+このときの成長率は $g = r + \frac{1}{2}\SR^2$（$r$ は安全資産の金利）である。$f^*$ の 2 倍賭けると成長率は $r$ まで下がり、それ以上ではマイナスになる。
+
+$\mu$ の推定の誤差が大きいので、ケリー基準どおりに賭けると、実際には賭けすぎになりやすい。実務では、その半分（ハーフ・ケリー）以下にすることが多い。ハーフ・ケリーは、成長率を 3/4 に保ちながら、変動を半分にする。
+
+\subsection{ボラティリティ・ターゲット}
+
+ポートフォリオの予測した変動 $\hat\sigma_t$ が、目標 $\sigma^*$ になるように、全体の規模を毎日調整する。
+\begin{equation}
+L_t = \frac{\sigma^*}{\hat\sigma_t}
+\end{equation}
+変動が大きいときに規模を落とす。トレンドフォローやリスクパリティでは標準的な方法で、急落の時期に変動が高まると自動的にポジションを減らす。ただし、多くの運用者が同時に同じことをすると、変動が上がったときに一斉に売ることになり、下げを加速しうる。
+
+\section{制約}
+
+\subsection{よく使われる制約}
+
+\begin{table}[H]
+\centering\small
+\caption{ポートフォリオの制約}
+\label{tab:constraints}
+\begin{tabular}{@{}P{0.25\linewidth}P{0.4\linewidth}P{0.27\linewidth}@{}}
+\toprule
+制約 & 式の例 & 目的 \\
+\midrule
+予算 & $\bm 1\T\bm w = 1$（ロング・ショートなら $= 0$） & 資金の全額を使う／ドル・ニュートラル \\
+ロングのみ & $w_i \geq 0$ & 規制・約款 \\
+比率の上限 & $|w_i - w_{b,i}| \leq c$ & 集中を防ぐ \\
+トラッキングエラー & $(\bm w - \bm w_b)\T\Sigma(\bm w - \bm w_b) \leq \TE^2$ & 指数から離れすぎない \\
+ベータ・ニュートラル & $\bm\beta\T\bm w = 0$ & 市場の動きを打ち消す \\
+ファクター・ニュートラル & $B\T\bm w = \bm 0$ & 業種・スタイルのリスクを打ち消す \\
+グロス・レバレッジ & $\sum_i |w_i| \leq G$ & 借入れの上限 \\
+回転率 & $\sum_i |w_i - w_{i}^{\text{前}}| \leq u$ & 取引コストを抑える \\
+流動性 & $|w_i - w_i^{\text{前}}|\,A \leq k \cdot \mathrm{ADV}_i$ & 売買高に比べて取引を小さく \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+これらの制約は、ほとんどが線形か二次なので、ポートフォリオの問題は\textbf{凸の二次計画}（または二次錐計画）になり、数千銘柄でも速く解ける（CVXPY、MOSEK、Gurobi など）。
+
+\subsection{制約の費用}
+
+制約は、予測を比率に移す効率（移転係数 TC、\ref{sec:flam} 節）を下げる。特に\textbf{ロングのみ}の制約は大きい。時価総額加重の指数では、小さな銘柄の比率は 0.01\% 程度しかないので、「悪い」と予測しても、比率をゼロにする分（$-0.01\%$）しか賭けられない。良いと予測した銘柄を買う側にしか、まともに賭けられないのである。Clarke・de Silva・Thorley（2002）\cite{cdt2002} は、ロングのみの制約で TC が 1 を大きく下回り、予測の価値の多くが失われることを、数値例で示した。
+
+\subsection{ロング・ショートの比率}
+
+ヘッジファンドのロング・ショートでは、次の言葉を使う。
+\begin{itemize}
+\item \textbf{グロス}：買いと売りの金額の和を、自己資本で割ったもの。マーケット・ニュートラルの株式では 3〜6 倍程度のことが多い。
+\item \textbf{ネット}：買い − 売り。ゼロならドル・ニュートラル。
+\item \textbf{130/30}：買い 130\%、売り 30\% のポートフォリオ。ロングのみの制約を少しだけ緩め、TC を上げる。
+\end{itemize}
+
+\section{多期間とコスト}
+
+ここまでは 1 期間の問題だった。実際には、毎期の取引コストがかかり、予測は時間とともに減衰する。Gârleanu・Pedersen（2013）\cite{garleanupedersen2013} は、コストが売買の量の二乗に比例するとき、最適な売買は「現在の比率と、将来の目標の比率の加重平均へ、少しずつ近づく」ことであり、目標の比率も、減衰の遅い予測を重く、速い予測を軽く見るべきことを示した（「目標に向けて部分的に売買し、目標の先を狙う」）。取引コストの扱いは \chapref{ch:cost} で詳しく扱う。
+
+\begin{exbox}[同じ予測、違う構築]
+IC 0.05 の同じ予測を、次の 3 通りで比率にしたとする（概念的な比較）。
+\begin{enumerate}
+\item \textbf{ロングのみ、TE 3\%}：悪い銘柄を空売りできない。TC は低く、予測の価値の多くが失われる。LLM-BLM の設計。
+\item \textbf{130/30、TE 3\%}：悪い銘柄を少し空売りできる。TC が上がる。
+\item \textbf{マーケット・ニュートラル、グロス 4 倍}：予測を両側に使い、市場のリスクを打ち消す。TC は高いが、空売りの費用・借入れの費用・レバレッジのリスクを負う。
+\end{enumerate}
+どれが良いかは、予測の質だけでなく、空売りの費用と、許されるリスクで決まる。
+\end{exbox}

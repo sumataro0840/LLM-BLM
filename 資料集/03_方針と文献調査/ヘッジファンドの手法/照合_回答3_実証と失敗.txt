@@ -1,0 +1,73 @@
+# LLM-BLM\資料集\03_方針と文献調査\ヘッジファンドの手法\deep\回答3_実証と失敗.md: 転送用の URL 60 件のうち 60 件を元の URL に直した
+
+# LLM-BLM\資料集\03_方針と文献調査\ヘッジファンドの手法\deep\回答3_実証と失敗.md
+題名? arXiv:2105.01380 → Why and how systematic strategies decay (2021; Falck, Rej, Thesmar)
+     本文: 31. [arxiv.org](https://arxiv.org/pdf/2105.01380)
+ok doi:10.1080/0015198X.2021.1913040 → Volmageddon and the Failure of Short Volatility Products (2021, Financial Analysts Journal)
+ok doi:10.1080/0015198X.2021.1996200 → Capacity Constraints in Hedge Funds: The Relation between Fund Performance and Cohort Size (2022, Financial Analysts Journal)
+ok Fung, W., & Hsieh, D. (2004). Hedge Fund Benchmarks: A Risk-Based Approach. *Financial Analysts Journal*, 60(5), 65-80. URL: https://www.eco
+     → The financial analysts journal — Federation (1960)  [一致 0.93]
+ok Berk, J. B., & Green, R. C. (2004). Mutual Fund Flows and Performance in Rational Markets. *Journal of Political Economy*, 112(6), 1269-1295
+     → Journal of Political Economy —  (2015)  [一致 1.00]
+ok Khandani, A. E., & Lo, A. W. (2011). What Happened to the Quants in August 2007? Evidence from Factors and Transactions Data. *Journal of Fi
+     → Journal of Financial Markets and Governance —  (2021)  [一致 0.79]
+ok McLean, R. D., & Pontiff, J. (2016). Does Academic Research Destroy Stock Return Predictability? *The Journal of Finance*, 71(1), 5-32. URL:
+     → The Journal of Finance — Association (2010)  [一致 1.00]
+ok Jacobs, H., & Müller, S. (2020). Anomalies across the globe: Once public, no longer existent? *Journal of Financial Economics*, 135(1), 213-
+     → JOURNAL OF FINANCIAL ECONOMICS — Schwert, Simon, Sensoy (2014)  [一致 1.00]
+ok Yang, F., Havranek, T., Irsova, Z., & Novak, J. (2022). Hedge Fund Performance: A Quantitative Survey. *IES Working Papers 15/2022*, Charles
+     → Working Papers 2025 — David, Funk (2025)  [一致 0.80]
+src Ben-David, I., Birru, J., & Rossi, A. (2023). The Performance of Hedge Fund Performance Fees. *NBER Working Paper*. URL: https://www.institu
+     → 検索ツールの出典に題名あり: https://www.institutionalinvestor.com/article/2bsx491489ltkechxqu4g/corner-office/hedge-funds-might-charge-2-and-20-but-
+ok Blitz, D. (2021). The Quant Crisis of 2018–2020: Cornered by Big Growth. *The Journal of Portfolio Management*, 47(7), 1-15. (Robeco Report)
+     → The Journal of Portfolio Management —  (2019)  [一致 1.00]
+ok Hasanhodzic, T., & Lo, A. W. (2007). Can Hedge-Fund Returns Be Replicated?: The Linear Case. *Journal of Investment Management*, 5(2), 5-45.
+     → Journal of Investment and Management —  (2023)  [一致 0.94]
+src Sun, Z., Wang, A., & Zheng, L. (2016). Only Winners in Hard Times Sleep Well: Hedge Fund Performance Conditioning on Market Market Environme
+     → 検索ツールの出典に題名あり: https://www.federalreserve.gov/econresdata/feds/2016/files/2016030pap.pdf
+ok Pastor, Ľ., Stambaugh, R. F., & Taylor, L. A. (2020). Fund Tradeoffs. *Journal of Financial Economics*, 138(3), 614-634. URL: https://www.ca
+     → JOURNAL OF FINANCIAL ECONOMICS — Schwert, Simon, Sensoy (2014)  [一致 1.00]
+src Agarwal, V., Fos, V., & Jiang, W. (2013). Inferring Reporting-Related Biases in Hedge Fund Databases from Hedge Fund Equity Holdings. *Manag
+     → 検索ツールの出典に題名あり: https://business.columbia.edu/sites/default/files-efs/pubfiles/4131/Inferring%20Reporting%20Related%20biases%20in%20Hedg
+ok Ipatova, E., Parhi, M., Mishra, T., & Doctor, K. (2022). Luck or Skill: What Drives Hedge Fund Performance Persistence? *SSRN Electronic Jou
+     → SSRN Electronic Journal — bajpai (2026)  [一致 1.00]
+ok Jorion, P. (2000). Risk Management Lessons from Long-Term Capital Management. *European Financial Management*, 6(3), 277-300. URL: https://w
+     → European Financial Management —  (2010)  [一致 1.00]
+ok Chincarini, L. B. (2007). The Amaranth Debacle: Failure of Risk Measures or Failure of Risk Management? *SSRN Electronic Journal*. URL: http
+     → SSRN Electronic Journal — bajpai (2026)  [一致 1.00]
+ok Till, H. (2007). The Amaranth Collapse: What Happened and What Have We Learned Thus Far? *EDHEC Risk and Asset Management Research Centre*. 
+     → EDHEC RISK AND ASSET MANAGEMENT RESEARCH CENTRE — Géhin (2004)  [一致 1.00]
+src Ennis, R. M. (2024). Hedge Funds: A Poor Choice for Most Long-Term Investors? *Enterprising Investor, CFA Institute*. URL: https://rpc.cfain
+     → 検索ツールの出典に題名あり: https://rpc.cfainstitute.org/blogs/enterprising-investor/2024/hedge-funds-a-poor-choice-for-most-long-term-investors
+src European Central Bank (ECB) (2016). Hedge fund commonality and financial stability. *ECB Working Paper No. 1658*. URL: https://www.ecb.europ
+     → 検索ツールの出典に題名あり: https://www.ecb.europa.eu/pub/pdf/scpwps/ecbwp1658.pdf
+src [ulb.ac.be](https://dipot.ulb.ac.be/dspace/bitstream/2013/97544/1/wp11041.pdf)
+     → 検索ツールの出典に題名あり: https://dipot.ulb.ac.be/dspace/bitstream/2013/97544/1/wp11041.pdf
+src [federalreserve.gov](https://www.federalreserve.gov/econresdata/feds/2016/files/2016030pap.pdf)
+     → 検索ツールの出典に題名あり: https://www.federalreserve.gov/econresdata/feds/2016/files/2016030pap.pdf
+src [mq.edu.au](https://figshare.mq.edu.au/articles/thesis/Hedge_fund_performance_capacity_constraints_and_relative_skill/19438856)
+     → 検索ツールの出典に題名あり: https://figshare.mq.edu.au/articles/thesis/Hedge_fund_performance_capacity_constraints_and_relative_skill/19438856
+src [cambridge.org](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/8673D7E04C2F35E3F1A226782AEA5CC5/S0022109022000618a.
+     → 検索ツールの出典に題名あり: https://www.cambridge.org/core/services/aop-cambridge-core/content/view/8673D7E04C2F35E3F1A226782AEA5CC5/S00221090220006
+src [aei.org](https://www.aei.org/wp-content/uploads/2011/10/20060515_SahaNPSTFinal.pdf)
+     → 検索ツールの出典に題名あり: https://www.aei.org/wp-content/uploads/2011/10/20060515_SahaNPSTFinal.pdf
+src [alliancebernstein.com](https://www.alliancebernstein.com/post/en/2012/12/rooting-out-biases-in-hedge-fund-data)
+     → 検索ツールの出典に題名あり: https://www.alliancebernstein.com/post/en/2012/12/rooting-out-biases-in-hedge-fund-data
+src [cfainstitute.org](https://rpc.cfainstitute.org/blogs/enterprising-investor/2024/hedge-funds-a-poor-choice-for-most-long-term-investors)
+     → 検索ツールの出典に題名あり: https://rpc.cfainstitute.org/blogs/enterprising-investor/2024/hedge-funds-a-poor-choice-for-most-long-term-investors
+src [lancs.ac.uk](https://wp.lancs.ac.uk/fofi2018/files/2018/03/FoFI-2018-0174-Sebastian-M%C3%BCller2.pdf)
+     → 検索ツールの出典に題名あり: https://wp.lancs.ac.uk/fofi2018/files/2018/03/FoFI-2018-0174-Sebastian-M%C3%BCller2.pdf
+src [aeaweb.org](https://www.aeaweb.org/conference/2022/preliminary/paper/bFN7k78F)
+     → 検索ツールの出典に題名あり: https://www.aeaweb.org/conference/2022/preliminary/paper/bFN7k78F
+src [europa.eu](https://www.ecb.europa.eu/press/financial-stability-publications/fsr/focus/2007/pdf/ecb~8b4e5b1675.fsrbox200712_03.pdf)
+     → 検索ツールの出典に題名あり: https://www.ecb.europa.eu/press/financial-stability-publications/fsr/focus/2007/pdf/ecb~8b4e5b1675.fsrbox200712_03.pdf
+src [researchgate.net](https://www.researchgate.net/publication/314379129_What_Happened_to_the_Quants_in_August_2007_Evidence_from_Factors_and_T
+     → 検索ツールの出典に題名あり: https://www.researchgate.net/publication/314379129_What_Happened_to_the_Quants_in_August_2007_Evidence_from_Factors_and_
+src [quantmemo.com](https://quantmemo.com/concepts/quant-quake-2007)
+     → 検索ツールの出典に題名あり: https://quantmemo.com/concepts/quant-quake-2007
+src [robeco.com](https://www.robeco.com/docm/docu-202102-the-quant-crisis-of-2018-2020-cornered-by-big-growth.pdf)
+     → 検索ツールの出典に題名あり: https://www.robeco.com/docm/docu-202102-the-quant-crisis-of-2018-2020-cornered-by-big-growth.pdf
+src [researchgate.net](https://www.researchgate.net/publication/228209724_The_Amaranth_Debacle_Failure_of_Risk_Measures_or_Failure_of_Risk_Manag
+     → 検索ツールの出典に題名あり: https://www.researchgate.net/publication/228209724_The_Amaranth_Debacle_Failure_of_Risk_Measures_or_Failure_of_Risk_Mana
+src [cfainstitute.org](https://rpc.cfainstitute.org/research/financial-analysts-journal/2021/volmageddon-failure-short-volatility-products)
+     → 検索ツールの出典に題名あり: https://rpc.cfainstitute.org/research/financial-analysts-journal/2021/volmageddon-failure-short-volatility-products

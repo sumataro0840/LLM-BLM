@@ -1,0 +1,92 @@
+\chapter{調査の方法}
+\label{ch:method}
+
+第 II 部は、Gemini の Deep Research（多数のウェブ検索をして長い報告を書くエージェント）に文献を調べさせ、その答えを照合したうえで、自分の知識と合わせて整理したものである。この章では、その手順と、Deep Research の答えの質についての所見をまとめる。
+
+\section{3 つの依頼}
+
+同じテーマ（ヘッジファンドの投資の方法とアルゴリズムの研究）を、切り口を変えて 3 回依頼した。依頼文は \code{03\_方針と文献調査/ヘッジファンドの手法/00\_依頼*.md} にある。
+
+\begin{table}[H]
+\centering\small
+\caption{Deep Research への 3 つの依頼と実行の記録（2026-10-23、モデル deep-research-preview-04-2026）}
+\label{tab:requests}
+\begin{tabular}{@{}P{0.2\linewidth}P{0.4\linewidth}rrr@{}}
+\toprule
+依頼 & 切り口 & 検索の回数 & 時間（秒） & 出力（トークン） \\
+\midrule
+1 戦略 & 戦略の種類ごとに、中心の論文、収益の源泉、実証の数値、崩れた例、再現の可否 & 38 & 765 & 57,094 \\
+2 方法 & クオンツの運用の工程（予測、シグナルの組み合わせ、リスクモデル、構築、執行、検証、テキスト、強化学習）ごとの方法と比較の研究 & 27 & 560 & 37,670 \\
+3 実証と失敗 & ヘッジファンドの成績の実証、データの偏り、手数料、混雑、有名な失敗、公表の後の減衰、小規模な研究への教訓 & 17 & 552 & 37,423 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+どの依頼にも、次の答え方を求めた。
+
+\begin{itemize}
+\item 日本語で答える。
+\item 文献は、著者・題名・年・掲載先・DOI か URL を書く。存在を確かめられないものは挙げない。数値は、どの論文のどの値かが分かるように書く。
+\item 確立した結果と、少数の研究・業界の主張を分けて書く。
+\item 最後に、全文献の一覧を付ける。
+\end{itemize}
+
+背景として、LLM-BLM の研究の状況（LLM の読み取りを Black--Litterman に入れたが、時価総額加重に勝てなかった）を伝えた。
+
+\section{照合の手順}
+
+\begin{enumerate}
+\item 答えの中の、検索ツールの転送用の URL を、元の URL に直した（\code{refcheck.py --resolve}）。
+\item 答えに挙がった文献と、自分が本文で引こうとする文献を一つの一覧（\code{照合/文献の一覧.md}、約 190 本）にまとめ、題名で OpenAlex・Crossref・arXiv と照合した（\code{照合/照合の結果.txt}）。
+\item 本文に書く数値のうち、確信の持てないものは、論文の要旨（Crossref・arXiv・NBER のページ）や原典の PDF で確かめた。確かめられなかった数値は書かないか、「確かめられなかった」と明記した。
+\item Deep Research の答えの誤り・確かめられなかった記述を、付録~\ref{ch:verify} に一覧にした。
+\end{enumerate}
+
+\section{答えの質についての所見}
+
+\begin{itemize}
+\item \textbf{主な論文の選び方は妥当}だった。3 本の答えが挙げた中心の論文（Fama・French、Moskowitz・Ooi・Pedersen、Gu・Kelly・Xiu、McLean・Pontiff、Khandani・Lo、Ben-David ほか など）は、どれも実在し、分野の標準的な文献である。
+\item \textbf{数値の多くは正しかった}が、誤りも混じっていた。例えば、Greenwood・Sammon の指数の効果（7.6\% → 0.8\%）、Ben-David ほかの実効の成功報酬（約 50\%、投資家の取り分 36 セント）、Korajczyk・Sadka の容量（約 50 億ドル）、Yang ほかのメタ分析の平均のアルファ（月 0.36\%）は要旨・原典と一致した。一方、2007 年 8 月の「25 標準偏差」を Khandani・Lo の結果としたこと、Menkveld の論文に要旨にない数値をつけたこと、Jacobs・Müller のアノマリーの数（241 を 231）などの誤りがあった。
+\item \textbf{文献の一覧の質は低かった}。答え 2 の文献の一覧の番号は本文の引用の番号と対応しておらず、URL の多くは原典ではなく、解説のブログ、Wikipedia、別の論文の PDF を指していた。答え 3 では、論文の題名を誤ったもの（Sun・Wang・Zheng）、URL が別の論文を指すもの（Jorion 2000 が Amaranth の論文を、Pástor ほかが別の論文を指す）があった。
+\item \textbf{学術論文でない出典}（業界の統計のサイト、修士論文、運用会社のブログ）も、「確立された定説」として混じっていた。
+\item \textbf{取引できるかの区別が落ちる}ことがあった。Lopez-Lira・Tang の「約 90\% の的中」は、取引できない最初の反応についての値だが、答え 2 はその区別を書いていなかった。
+\end{itemize}
+
+これまでの LLM-BLM の文献調査（\code{03\_方針と文献調査/}）でも、GPT・Gemini・Deep Research のどれにも、番号・著者の取り違えや、要旨にない数値があった。今回も同じ傾向で、Deep Research は「何を読むべきかの地図」としては役に立つが、「数値の出典」としては照合なしに使えない。
+
+\section{第 II 部の見取り図}
+
+第 II 部の戦略の章の内容を、先に一つの表にまとめる。
+
+{\footnotesize
+\begin{longtable}{@{}P{0.13\linewidth}P{0.16\linewidth}P{0.23\linewidth}P{0.19\linewidth}P{0.17\linewidth}@{}}
+\caption{戦略ごとの研究のまとめ}\label{tab:overview}\\
+\toprule
+戦略 & 収益の源泉 & 中心の証拠 & 崩れた例・弱点 & 個人・研究での再現 \\
+\midrule
+\endfirsthead
+\toprule
+戦略 & 収益の源泉 & 中心の証拠 & 崩れた例・弱点 & 個人・研究での再現 \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+株式ファクター（第 \ref{ch:equityfactor} 章） & リスクと行動の偏りの両説 & Fama・French、Jegadeesh・Titman、Asness ほか（2013）、Frazzini・Pedersen & モメンタムの急落、割安の長い低迷、公表の後の減衰 & 検証は容易。小型株に依存するものはコストで消える \\
+統計的裁定（第 \ref{ch:statarb} 章） & 流動性の供給 & Lehmann、Gatev ほか、Avellaneda・Lee、Nagel & 2007 年 8 月の解消の連鎖。収益の長期の低下 & 日次の検証は容易。実運用は速さとコストで難しい \\
+トレンドフォロー（第 \ref{ch:trend} 章） & 反応の不足と行き過ぎ、ヘッジの需要 & Moskowitz・Ooi・Pedersen、Hurst ほか & 方向のない相場、急な反転。量の調整の寄与への批判 & 先物のデータで検証は可能。分散には資金が要る \\
+キャリー（第 \ref{ch:macro} 章） & 急落のリスクの対価 & Fama（1984）、Lustig ほか、Koijen ほか & 2008 年の円の急騰などの急落 & 公開のデータで検証は可能 \\
+イベント（第 \ref{ch:event} 章） & 注目の不足、裁定の限界、リスクの引き受け & Bernard・Thomas、Womack、Mitchell・Pulvino & PEAD の消滅（Martineau）、指数の効果の消滅 & 決算・推奨のデータで可能。合併裁定は案件の一覧が要る \\
+レラティブ・バリュー（第 \ref{ch:rv} 章） & 流動性・資金の制約の対価 & Duarte ほか、Mitchell ほか & LTCM、2008 年、2020 年 3 月 & ほぼ不可能（レバレッジと与信が要る） \\
+ボラティリティ（第 \ref{ch:rv} 章） & 変動・急落のリスクの対価 & Coval・Shumway、Bakshi・Kapadia、Carr・Wu & 2018 年 2 月 & オプションのデータがあれば検証は可能 \\
+高頻度（第 \ref{ch:hft} 章） & スプレッド、速さ & Menkveld、Brogaard ほか、Budish ほか & フラッシュ・クラッシュ & 不可能 \\
+\end{longtable}
+}
+
+\section{第 II 部の書き方}
+
+\begin{itemize}
+\item 戦略の章（第 \ref{ch:equityfactor}〜\ref{ch:hft} 章）は、主に答え 1 の構成に沿い、答え 1 が挙げなかった中心の論文（Jegadeesh・Titman、Gatev ほか、Avellaneda・Lee、Koijen ほか など）を自分の知識で補った。
+\item 方法の章（第 \ref{ch:ml}〜\ref{ch:pcresearch} 章）は、主に答え 2 の構成に沿った。
+\item 成績と失敗の章（第 \ref{ch:hfperf}・\ref{ch:failures} 章）は、主に答え 3 の構成に沿った。
+\item 論文の要旨は「論文」の枠（\textsf{paperbox}）に、LLM-BLM との関係は「この研究との関係」の枠に分けた。
+\end{itemize}

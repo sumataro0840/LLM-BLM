@@ -1,0 +1,45 @@
+# LLM-BLM\資料集\03_方針と文献調査\ヘッジファンドの手法\deep\回答1_戦略.md: 転送用の URL 56 件のうち 56 件を元の URL に直した
+
+# LLM-BLM\資料集\03_方針と文献調査\ヘッジファンドの手法\deep\回答1_戦略.md
+題名? arXiv:2606.01477 → Avellaneda-Stoikov and Cartea-Jaimungal as One Framework: A Forced Uniqueness Theorem for Inventory Market Making (2026; Feys)
+     本文: 50. [arxiv.org](https://arxiv.org/html/2606.01477v1)
+ok doi:10.1080/0015198X.2021.1913040 → Volmageddon and the Failure of Short Volatility Products (2021, Financial Analysts Journal)
+ok doi:10.1111/j.1540-6261.2012.01724.x → Hedge Funds and Chapter 11 (2012, The Journal of Finance)
+src [scribd.com](https://www.scribd.com/document/373593490/5-Fama-French-2015-International-Tests-of-a-Five-Factor-Asset-Pricing-Model)
+     → 検索ツールの出典に題名あり: https://www.scribd.com/document/373593490/5-Fama-French-2015-International-Tests-of-a-Five-Factor-Asset-Pricing-Model
+src [tryvantage.co](https://tryvantage.co/insights/paper-trail-asness-moskowitz-pedersen-2013)
+     → 検索ツールの出典に題名あり: https://tryvantage.co/insights/paper-trail-asness-moskowitz-pedersen-2013
+src [elmwealth.com](https://elmwealth.com/wp-content/uploads/2017/06/The-Case-for-Value-Momentum.pdf)
+     → 検索ツールの出典に題名あり: https://elmwealth.com/wp-content/uploads/2017/06/The-Case-for-Value-Momentum.pdf
+src [unl.pt](https://run.unl.pt/bitstream/10362/15775/1/Laranjo_2015.pdf)
+     → 検索ツールの出典に題名あり: https://run.unl.pt/bitstream/10362/15775/1/Laranjo_2015.pdf
+src [efmaefm.org](https://www.efmaefm.org/0EFMAMEETINGS/EFMA%20ANNUAL%20MEETINGS/2019-Azores/papers/EFMA2019_0474_fullpaper.pdf)
+     → 検索ツールの出典に題名あり: https://www.efmaefm.org/0EFMAMEETINGS/EFMA%20ANNUAL%20MEETINGS/2019-Azores/papers/EFMA2019_0474_fullpaper.pdf
+src [uni.lu](https://orbilu.uni.lu/bitstream/10993/50082/1/SSRN-id3762043.pdf)
+     → 検索ツールの出典に題名あり: https://orbilu.uni.lu/bitstream/10993/50082/1/SSRN-id3762043.pdf
+src [cambridge.org](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/5EB217BB68B5FB054FE38541BAAC4679/S0022109022001181a.
+     → 検索ツールの出典に題名あり: https://www.cambridge.org/core/services/aop-cambridge-core/content/view/5EB217BB68B5FB054FE38541BAAC4679/S00221090220011
+src [mfaalts.org](http://www.mfaalts.org/wp-content/uploads/2012/05/HedgeFundsAndChapter11.pdf)
+     → 検索ツールの出典に題名あり: http://www.mfaalts.org/wp-content/uploads/2012/05/HedgeFundsAndChapter11.pdf
+src [repec.org](https://ideas.repec.org/a/eee/corfin/v39y2016icp121-138.html)
+     → 検索ツールの出典に題名あり: https://ideas.repec.org/a/eee/corfin/v39y2016icp121-138.html
+src [lowenstein.com](https://www.lowenstein.com/media/nlylrdxy/2019-alternative-data_better-investment-strategies.pdf)
+     → 検索ツールの出典に題名あり: https://www.lowenstein.com/media/nlylrdxy/2019-alternative-data_better-investment-strategies.pdf
+src [repec.org](https://ideas.repec.org/a/bla/jfinan/v67y2012i2p513-560.html)
+     → 検索ツールの出典に題名あり: https://ideas.repec.org/a/bla/jfinan/v67y2012i2p513-560.html
+src [federalreserve.gov](https://www.federalreserve.gov/econres/feds/files/2021038pap.pdf)
+     → 検索ツールの出典に題名あり: https://www.federalreserve.gov/econres/feds/files/2021038pap.pdf
+src [duke.edu](https://sites.duke.edu/thefinregblog/2021/07/13/hedge-fund-trading-and-funding-during-the-march-2020-us-treasury-market-dislocati
+     → 検索ツールの出典に題名あり: https://sites.duke.edu/thefinregblog/2021/07/13/hedge-fund-trading-and-funding-during-the-march-2020-us-treasury-market-
+src [Link](https://engineering.nyu.edu/sites/default/files/2019-01/CarrReviewofFinStudiesMarch2009-a.pdf)
+     → 検索ツールの出典に題名あり: https://engineering.nyu.edu/sites/default/files/2019-01/CarrReviewofFinStudiesMarch2009-a.pdf
+src [cfainstitute.org](https://rpc.cfainstitute.org/research/financial-analysts-journal/2021/volmageddon-failure-short-volatility-products)
+     → 検索ツールの出典に題名あり: https://rpc.cfainstitute.org/research/financial-analysts-journal/2021/volmageddon-failure-short-volatility-products
+src [cfainstitute.org](https://rpc.cfainstitute.org/research/financial-analysts-journal/2021/0015198x-2021-1913040)
+     → 検索ツールの出典に題名あり: https://rpc.cfainstitute.org/research/financial-analysts-journal/2021/0015198x-2021-1913040
+src [repec.org](https://ideas.repec.org/a/eee/finmar/v16y2013i4p712-740.html)
+     → 検索ツールの出典に題名あり: https://ideas.repec.org/a/eee/finmar/v16y2013i4p712-740.html
+src [repec.org](https://ideas.repec.org/p/tin/wpaper/20110076.html)
+     → 検索ツールの出典に題名あり: https://ideas.repec.org/p/tin/wpaper/20110076.html
+src [northernfinanceassociation.org](https://portal.northernfinanceassociation.org/viewp.php?n=2240190148)
+     → 検索ツールの出典に題名あり: https://portal.northernfinanceassociation.org/viewp.php?n=2240190148

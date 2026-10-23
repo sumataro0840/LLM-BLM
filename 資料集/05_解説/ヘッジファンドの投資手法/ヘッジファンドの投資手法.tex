@@ -1,0 +1,136 @@
+% ============================================================
+% ヘッジファンドの投資手法とアルゴリズム：基本と研究の整理
+% コンパイル：tectonic -X compile ヘッジファンドの投資手法.tex   （XeTeX 系。このフォルダで実行する）
+% 章は 章/。第 II 部は Gemini Deep Research の 3 本の調査（../../03_方針と文献調査/ヘッジファンドの手法/）を照合して書いた。
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt,openany]{bxjsreport}
+\setpagelayout*{left=22mm,right=22mm,top=22mm,bottom=24mm,footskip=10mm}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,multirow,longtable,tabularx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+\usepackage{xurl}
+\pdfstringdefDisableCommands{\def\Omega{Ω}\def\Sigma{Σ}\def\alpha{α}\def\beta{β}}
+\xeCJKDeclareCharClass{CJK}{"0391->"03C9, "2248, "2264->"2267, "2460->"24FF, "25A0->"25FF}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{c2}{HTML}{EB6834}
+\definecolor{c3}{HTML}{1BAF7A}
+\definecolor{c4}{HTML}{EDA100}
+\definecolor{c7}{HTML}{6250D6}
+\definecolor{ink2}{HTML}{52514E}
+\definecolor{soft1}{HTML}{E4EEF9}
+\definecolor{soft2}{HTML}{FBEEDF}
+\definecolor{soft3}{HTML}{E3F3E9}
+\definecolor{soft4}{HTML}{EEE8FA}
+\definecolor{soft5}{HTML}{FDF3DA}
+\definecolor{soft6}{HTML}{F1F0EC}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\SP}{S\&P500}
+\newcommand{\T}{^{\top}}
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\IC}{\mathrm{IC}}
+\newcommand{\IR}{\mathrm{IR}}
+\newcommand{\TE}{\mathrm{TE}}
+\newcommand{\SR}{\mathrm{SR}}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\newcommand{\chapref}[1]{第~\ref{#1}~章}
+\newcommand{\term}[1]{\textsf{#1}}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+
+\makeatletter
+\def\@makechapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \ifnum\c@secnumdepth>\m@ne\if@mainmatter{\Large\headfont\@chapapp\thechapter\@chappos}\par\nobreak\vskip0.4\Cvs\fi\fi
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.2\Cvs}}
+\def\@makeschapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.2\Cvs}}
+\makeatother
+
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{notebox}[1][注意]{enhanced,breakable,colback=soft2,colframe=c2,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{exbox}[1][例]{enhanced,breakable,colback=soft3,colframe=c3,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{defbox}[1][定義]{enhanced,breakable,colback=soft6,colframe=ink2,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{paperbox}[1][論文]{enhanced,breakable,colback=white,colframe=c7,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{projbox}[1][この研究との関係]{enhanced,breakable,colback=soft5,colframe=c4!85!black,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=black}
+
+\tikzset{
+  box/.style={draw=#1,fill=#1!8,rounded corners=2pt,align=center,font=\footnotesize,inner sep=4pt,
+              minimum height=10mm,text width=24mm},
+  box/.default=c1,
+  arr/.style={-{Stealth[length=2mm]},color=ink2,line width=0.6pt},
+  lab/.style={font=\scriptsize,color=ink2},
+}
+
+\title{ヘッジファンドの投資手法とアルゴリズム\\[8pt]
+  \Large 基本の考え方と、研究で分かっていること}
+\author{LLM-BLM の解説}
+\date{2026 年 10 月}
+
+\begin{document}
+\maketitle
+\setcounter{tocdepth}{1}
+{\small\tableofcontents}
+
+\input{章/00_この報告書について}
+
+\part{基本}
+\input{章/01_ヘッジファンドとは}
+\input{章/02_戦略の分類}
+\input{章/03_成績の測り方}
+\input{章/04_資産価格とファクター}
+\input{章/05_シグナル}
+\input{章/06_予測モデル}
+\input{章/07_ポートフォリオ構築}
+\input{章/08_リスク管理}
+\input{章/09_取引コストと執行}
+\input{章/10_バックテストと過学習}
+\input{章/11_マーケットメイクと高頻度}
+
+\part{研究で分かっていること}
+\input{章/20_調査の方法}
+\input{章/21_株式とファクター}
+\input{章/22_統計的裁定}
+\input{章/23_トレンドフォロー}
+\input{章/24_マクロとキャリー}
+\input{章/25_イベントドリブン}
+\input{章/26_レラティブバリューとボラティリティ}
+\input{章/27_高頻度とマーケットメイク}
+\input{章/28_機械学習}
+\input{章/29_テキストとLLM}
+\input{章/30_構築とリスクと執行の研究}
+\input{章/31_ヘッジファンドの成績}
+\input{章/32_失敗と混雑}
+\input{章/33_この研究への含み}
+
+\appendix
+\input{章/A1_用語}
+\input{章/A2_文献の照合}
+
+\input{章/文献}
+
+\end{document}

@@ -1,0 +1,85 @@
+\chapter{用語の一覧}
+\label{ch:glossary}
+
+本文で使った主な用語を、英語の名前と、説明した章とともに並べる。
+
+{\small
+\begin{longtable}{@{}P{0.2\linewidth}P{0.21\linewidth}P{0.42\linewidth}P{0.08\linewidth}@{}}
+\toprule
+用語 & 英語 & 意味 & 章 \\
+\midrule
+\endfirsthead
+\toprule
+用語 & 英語 & 意味 & 章 \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\multicolumn{4}{@{}l}{\textbf{ヘッジファンドの仕組み}} \\
+プライムブローカー & prime broker & ヘッジファンドに資金・株を貸し、売買の決済と保管をする投資銀行の部門 & \ref{ch:hf} \\
+管理報酬・成功報酬 & management / performance fee & 資産に比例する報酬と、利益に比例する報酬。伝統的には 2\% と 20\% & \ref{ch:hf} \\
+ハイウォーターマーク & high-water mark & 過去の最高値を超えた分にだけ成功報酬をとる決まり & \ref{ch:hf} \\
+ロックアップ・ゲート & lock-up / gate & 解約できない期間と、1 回に解約できる額の上限 & \ref{ch:hf} \\
+マルチマネージャー & multi-manager platform & 多数の運用チームに資金を割り当て、中央でリスクを管理する運用会社 & \ref{ch:hf} \\
+グロス・ネット & gross / net exposure & 買いと売りの金額の和と差（自己資本に対する比） & \ref{ch:pc} \\
+\multicolumn{4}{@{}l}{\textbf{成績の物差し}} \\
+シャープレシオ & Sharpe ratio & 超過リターンの平均 ÷ その標準偏差 & \ref{ch:perf} \\
+アルファ・ベータ & alpha / beta & ファクターで説明できない平均の超過リターンと、ファクターへの感応度 & \ref{ch:perf} \\
+トラッキングエラー & tracking error (TE) & 比べる相手との差のリターンの標準偏差 & \ref{ch:perf} \\
+情報レシオ & information ratio (IR) & 比べる相手との差の平均 ÷ TE & \ref{ch:perf} \\
+情報係数 & information coefficient (IC) & 予測と実際のリターンの（順位）相関 & \ref{ch:perf}, \ref{ch:signal} \\
+基本法則 & fundamental law & $\IR \approx \mathrm{TC} \times \IC \times \sqrt{\mathrm{BR}}$ & \ref{ch:perf} \\
+移転係数 & transfer coefficient (TC) & 制約のため、予測を比率に移しきれない度合い（0〜1） & \ref{ch:perf}, \ref{ch:pc} \\
+最大ドローダウン & maximum drawdown & 過去の最高値からの最大の下落率 & \ref{ch:perf} \\
+VaR・期待ショートフォール & value at risk / expected shortfall & 一定の確率で超えない損失と、それを超えた損失の平均 & \ref{ch:risk} \\
+\multicolumn{4}{@{}l}{\textbf{ファクターとシグナル}} \\
+ファクター & factor & 多くの資産のリターンに共通する要因。上位と下位のロング・ショートで作る & \ref{ch:factor} \\
+アノマリー & anomaly & 既知のリスクで説明できない平均リターンの規則性 & \ref{ch:factor}, \ref{ch:equityfactor} \\
+モメンタム & momentum & 過去に上がったものがさらに上がる傾向（横断面・時系列） & \ref{ch:equityfactor}, \ref{ch:trend} \\
+割安 & value & 簿価・利益に比べて価格の低いものが上回る傾向 & \ref{ch:equityfactor} \\
+キャリー & carry & 価格が変わらなかったときに得られる収益 & \ref{ch:macro} \\
+低ボラティリティ・BAB & low risk / betting against beta & 低ベータ・低変動の資産がリスクの割に高いリターンを持つ傾向 & \ref{ch:equityfactor} \\
+決算発表の後のドリフト & post-earnings-announcement drift (PEAD) & 決算の驚きの方向に、発表の後も株価が動き続ける傾向 & \ref{ch:event} \\
+SUE & standardized unexpected earnings & 利益の驚きを、その変動の大きさで割ったもの & \ref{ch:signal}, \ref{ch:event} \\
+中立化 & neutralization & シグナルから業種・規模などの影響を回帰で除くこと & \ref{ch:signal} \\
+減衰 & signal decay & シグナルの情報が時間とともに価格に入り、予測力がなくなること & \ref{ch:signal} \\
+\multicolumn{4}{@{}l}{\textbf{ポートフォリオとリスク}} \\
+平均分散最適化 & mean-variance optimization & 期待リターンと分散のトレードオフを最適化する方法 & \ref{ch:pc} \\
+Black--Litterman & Black--Litterman model & 時価総額加重から逆算した均衡のリターンに、見通しをベイズで混ぜる方法 & \ref{ch:pc} \\
+リスクパリティ & risk parity & 各資産のリスクへの寄与をそろえる方法 & \ref{ch:pc} \\
+階層的リスクパリティ & hierarchical risk parity (HRP) & クラスタリングで木を作り、逆行列を使わずにリスクを配る方法 & \ref{ch:pc}, \ref{ch:pcresearch} \\
+ケリー基準 & Kelly criterion & 資産の対数の期待値を最大にする賭けの割合 & \ref{ch:pc} \\
+ボラティリティ・ターゲット & volatility targeting & 予測した変動率が一定になるように量を調整すること & \ref{ch:pc}, \ref{ch:pcresearch} \\
+縮小推定 & shrinkage estimator & 標本の推定値を構造のある目標に向けて縮め、誤差を減らす推定 & \ref{ch:risk} \\
+ファクター型のリスクモデル & factor risk model & 共分散を少数のファクターと固有の分散で近似するモデル & \ref{ch:risk} \\
+GARCH・実現ボラティリティ & GARCH / realized volatility & 変動率の予測のモデルと、日中のデータで測った変動率 & \ref{ch:risk} \\
+\multicolumn{4}{@{}l}{\textbf{取引と市場の仕組み}} \\
+スプレッド & bid-ask spread & 最良の売値と買値の差 & \ref{ch:cost}, \ref{ch:mm} \\
+マーケット・インパクト & market impact & 自分の売買が価格を不利に動かす分 & \ref{ch:cost} \\
+平方根則 & square-root law & インパクトが（注文 ÷ 売買高）の平方根に比例する経験則 & \ref{ch:cost}, \ref{ch:pcresearch} \\
+インプリメンテーション・ショートフォール & implementation shortfall & 判断の時点の価格で売買できた場合との成績の差 & \ref{ch:cost} \\
+容量 & capacity & コストの後の利益が消えるまでに運用できる資金の大きさ & \ref{ch:cost}, \ref{ch:pcresearch} \\
+板 & limit order book & 指値の注文が価格ごとに並んだもの & \ref{ch:mm} \\
+逆選択 & adverse selection & 情報を持った相手と取引して損をすること & \ref{ch:mm} \\
+高頻度取引 & high-frequency trading (HFT) & 秒以下の速さで注文を出し取り消す取引 & \ref{ch:mm}, \ref{ch:hft} \\
+\multicolumn{4}{@{}l}{\textbf{戦略}} \\
+統計的裁定・ペアトレード & statistical arbitrage / pairs trading & 似た資産の一時的なずれが戻ることに賭ける & \ref{ch:statarb} \\
+共和分 & cointegration & 個々は非定常な系列の線形結合が定常になる関係 & \ref{ch:statarb} \\
+トレンドフォロー & trend following, time-series momentum & 資産自身の過去のリターンの符号で売買する & \ref{ch:trend} \\
+合併裁定 & merger arbitrage & 買収の発表の後、成立までの価格差をとる & \ref{ch:event} \\
+ベーシス取引 & basis trade & 現物と先物の価格差をとる（国債など） & \ref{ch:rv} \\
+転換社債の裁定 & convertible arbitrage & 転換社債を買い、その株を空売りする & \ref{ch:rv} \\
+ボラティリティ・リスク・プレミアム & volatility risk premium & オプションが示す変動率が、実現の変動率より平均して高いこと & \ref{ch:rv} \\
+\multicolumn{4}{@{}l}{\textbf{検証}} \\
+先読み & look-ahead bias & その時点で知られていなかった情報を使うこと & \ref{ch:backtest}, \ref{ch:text} \\
+生存者バイアス & survivorship bias & 生き残ったものだけで評価して成績が良く見えること & \ref{ch:backtest}, \ref{ch:hfperf} \\
+遡って入る偏り & backfill / instant-history bias & 成績が良かったときだけ過去の成績と一緒にデータに加わる偏り & \ref{ch:hfperf} \\
+デフレートしたシャープレシオ & deflated Sharpe ratio (DSR) & 試した数・歪度・尖度を考慮して補正したシャープレシオ & \ref{ch:backtest} \\
+バックテストの過学習の確率 & probability of backtest overfitting (PBO) & 学習の期間で最良のものが評価の期間で中央値を下回る確率 & \ref{ch:backtest} \\
+パージ・エンバーゴ & purging / embargo & 学習と評価の正解の期間の重なりを除き、隙間を空けること & \ref{ch:model}, \ref{ch:backtest} \\
+事前登録 & pre-registration & 仮説と方法を結果を見る前に固定すること & \ref{ch:backtest} \\
+\multicolumn{4}{@{}l}{\textbf{失敗}} \\
+混雑 & crowding & 多くの運用者が同じ取引をしていること & \ref{ch:failures} \\
+解消のらせん & liquidation spiral & 損失 → 担保の追加 → 投げ売り → 価格の下落 → 損失の連鎖 & \ref{ch:risk}, \ref{ch:failures} \\
+\end{longtable}
+}

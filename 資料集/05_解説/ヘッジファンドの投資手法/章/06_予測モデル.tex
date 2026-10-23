@@ -1,0 +1,153 @@
+\chapter{予測モデル}
+\label{ch:model}
+
+\section{予測の問題}
+
+シグナルの組 $\bm{x}_{i,t} \in \mathbb{R}^K$ から、将来のリターン $r_{i,t+h}$ を予測する関数 $f$ を学ぶ。
+\begin{equation}
+r_{i,t+h} = f(\bm{x}_{i,t}) + \varepsilon_{i,t+h}
+\end{equation}
+資産の予測は、画像認識などとは性質がまったく違う。
+
+\begin{itemize}
+\item \textbf{信号が極めて弱い}：月次の株のリターンの変動のうち、予測できる部分は 1\% に満たない（決定係数 $R^2 < 0.01$）。99\% 以上は雑音である。
+\item \textbf{分布が変わる}：市場の参加者が学習して行動を変えるので、過去の関係が将来も続くとは限らない（非定常）。
+\item \textbf{データが少ない}：米国株の月次のデータは、銘柄が数千でも、時点は数百しかない。独立な時点の数が、過学習を防ぐうえでの実質的な標本の大きさになる。
+\item \textbf{予測が当たると、それ自体で消える}：多くの人が同じ予測で売買すると、価格がそれを織り込む。
+\end{itemize}
+
+このため、単純で頑健なモデルが、複雑なモデルと同じくらい、あるいはそれ以上に良いことが多い。
+
+\section{線形のモデル}
+
+\subsection{最小二乗}
+
+最も基本的なのは、線形回帰
+\begin{equation}
+\hat{r}_{i,t+h} = \bm{x}_{i,t}\T \bm{b}, \qquad \hat{\bm{b}}_{\mathrm{OLS}} = (X\T X)^{-1} X\T \bm{y}
+\end{equation}
+である。説明変数が多く、互いに相関していると、係数の推定値が大きく振れ、標本外で悪くなる。
+
+\subsection{正則化回帰}
+
+係数の大きさに罰則をつけて、推定を安定させる。
+\begin{align}
+\text{リッジ}&: \quad \hat{\bm{b}} = \arg\min_{\bm b} \|\bm y - X \bm b\|^2 + \lambda \|\bm b\|_2^2 = (X\T X + \lambda I)^{-1} X\T \bm y \\
+\text{ラッソ}&: \quad \hat{\bm{b}} = \arg\min_{\bm b} \|\bm y - X \bm b\|^2 + \lambda \|\bm b\|_1 \\
+\text{エラスティックネット}&: \quad \hat{\bm{b}} = \arg\min_{\bm b} \|\bm y - X \bm b\|^2 + \lambda\big(\alpha \|\bm b\|_1 + (1-\alpha)\|\bm b\|_2^2\big)
+\end{align}
+
+\begin{itemize}
+\item \textbf{リッジ}は、すべての係数をゼロに向けて縮める。説明変数の主成分のうち、分散の小さい方向の係数を強く縮める。説明変数の数が標本より多くても解ける。LLM-BLM で、言語モデルのベクトル（数百〜数千次元）を株価の反応に結びつけるのに使ったのはこれである。
+\item \textbf{ラッソ}は、多くの係数をちょうどゼロにする（変数の選択）。相関した変数の中から一つだけを選びがちで、どれを選ぶかが不安定になる。
+\item \textbf{エラスティックネット}は、両者の中間。
+\end{itemize}
+
+罰則の強さ $\lambda$ は、交差検証（\ref{sec:cv} 節）で選ぶ。
+
+\subsection{次元の削減}
+
+説明変数が多いとき、まず少数の成分にまとめてから回帰する。
+
+\begin{itemize}
+\item \textbf{主成分回帰}（PCR）：説明変数の主成分（分散の大きい方向）の上位を使う。目的変数を見ずに成分を選ぶので、予測に効かない成分を選ぶことがある。
+\item \textbf{部分最小二乗}（PLS）：目的変数との共分散が大きい方向を選ぶ。
+\end{itemize}
+
+\section{非線形のモデル}
+
+\subsection{決定木とアンサンブル}
+
+\textbf{決定木}は、説明変数の値で標本を分け続け、各葉の平均を予測にする。相互作用（「小型株で、かつ割安なら」）を自然に表せるが、一本の木は不安定で過学習しやすい。そこで多くの木を組み合わせる。
+
+\begin{itemize}
+\item \textbf{ランダムフォレスト}：標本と変数を無作為に選んで多くの木を育て、平均する。分散を下げる。
+\item \textbf{勾配ブースティング}（XGBoost、LightGBM など）：前の木の誤差（残差）を次の木で当てることを繰り返す。表形式のデータで最も強い方法の一つ。
+\end{itemize}
+
+\subsection{ニューラルネット}
+
+多層のパーセプトロン（全結合のネットワーク）は、任意の滑らかな関数を近似できる。資産価格の予測では、層の浅い（2〜3 層）ネットワークが、深いものより良いという報告が多い（第 II 部、第 \ref{ch:ml} 章）。信号が弱く、データが少ないためである。
+
+時系列の構造を使うモデル（LSTM、トランスフォーマー）は、価格の系列から直接予測するのに使われるが、資産の予測で一貫して強いという証拠は、まだ限られる。
+
+\subsection{言語モデル}
+
+LLM や FinBERT のような言語モデルは、文章を数値のベクトル（埋め込み）や点数に変える「特徴量の抽出器」として使う。抽出した特徴量を、上の線形・非線形のモデルで将来のリターンに結びつける。LLM に直接「この株は上がるか」と聞く使い方もあるが、LLM が学習した期間の後の出来事を知っている（先読み）おそれがあり、検証が難しい。
+
+\section{時系列のモデル}
+
+一つの資産の時系列を予測するモデルもある。
+
+\begin{itemize}
+\item \textbf{自己回帰}（AR）：$r_t = c + \sum_{j=1}^{p} \phi_j r_{t-j} + \varepsilon_t$。ARMA は誤差の移動平均を加える。
+\item \textbf{ベクトル自己回帰}（VAR）：複数の系列（金利、インフレ、株価）を同時に扱う。
+\item \textbf{状態空間モデルとカルマン・フィルター}：観測できない状態（真の価値、時間とともに変わるベータ）を、観測から逐次推定する。ペアトレードのヘッジ比率の推定などに使う。
+\item \textbf{レジーム・スイッチング}（Hamilton 1989 \cite{hamilton1989}）：経済が「好況」「不況」などの状態を確率的に行き来するとし、状態ごとに別のモデルを当てる。
+\item \textbf{ボラティリティのモデル}（GARCH など）：リターンの平均より、分散の予測のほうがずっと容易である（\chapref{ch:risk}）。
+\end{itemize}
+
+\section{予測の評価}
+
+\subsection{標本外の決定係数}
+
+Campbell・Thompson（2008）\cite{campbellthompson2008} は、標本外の予測の決定係数を、過去の平均 $\bar r$ を予測に使った場合と比べて定義した。
+\begin{equation}
+R^2_{\mathrm{OS}} = 1 - \frac{\sum_t (r_t - \hat r_t)^2}{\sum_t (r_t - \bar r_t)^2}
+\end{equation}
+$R^2_{\mathrm{OS}} > 0$ なら、過去の平均より良い予測である。
+
+\subsection{小さな \texorpdfstring{$R^2$}{R2} の価値}
+
+$R^2$ が小さくても、経済的な価値は大きいことがある。一つの資産の売買のタイミングでいえば、もとのシャープレシオを $\SR_0$ とし、予測の $R^2$ を使って最適に売買すると、シャープレシオは
+\begin{equation}
+\SR^{*} = \sqrt{\frac{\SR_0^2 + R^2}{1 - R^2}}
+\end{equation}
+になる（Campbell・Thompson 2008 の考え方）。月次の $R^2 = 0.5\%$ でも、$\SR_0 = 0$ から月次の $\SR^{*} \approx 0.071$、年率で約 0.25 になる。横断面の予測では、多くの銘柄に同時に賭けられるので、基本法則（\ref{sec:flam} 節）により、さらに大きくなりうる。
+
+\subsection{そのほかの物差し}
+
+\begin{itemize}
+\item \textbf{IC}：予測とリターンの順位相関（\chapref{ch:signal}）。
+\item \textbf{的中率}：符号が当たった割合。50\% を少し超えれば十分なことが多い。
+\item \textbf{ポートフォリオの成績}：予測で並べた分位のポートフォリオのリターン。最終的な目的に最も近い。
+\item \textbf{予測の比較の検定}：二つの予測の誤差の差の平均がゼロかを検定する（Diebold・Mariano 1995 \cite{dieboldmariano1995}）。
+\end{itemize}
+
+\section{検証の方法}
+\label{sec:cv}
+
+\subsection{時系列の分割}
+
+ふつうの機械学習の交差検証は、データを無作為に分ける。資産のデータでこれをすると、未来のデータで学習して過去を予測することになり、成績が良く見える。そこで、時間の順に分ける。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=11mm,y=5.5mm]
+\foreach \k in {0,1,2,3} {
+  \pgfmathsetmacro{\e}{4+\k*2}
+  \fill[c1!35] (0,-\k) rectangle (\e,-\k+0.7);
+  \fill[c2!60] (\e+0.3,-\k) rectangle (\e+2.3,-\k+0.7);
+  \node[lab,anchor=east] at (-0.1,-\k+0.35) {第 \the\numexpr\k+1\relax 回};
+}
+\fill[c1!35] (0,-5) rectangle (0.8,-4.3); \node[lab,anchor=west] at (0.9,-4.65) {学習};
+\fill[c2!60] (2.6,-5) rectangle (3.4,-4.3); \node[lab,anchor=west] at (3.5,-4.65) {評価};
+\draw[c4,line width=0.8pt] (4,-5) -- (4.3,-5) -- (4.3,-4.3) -- (4,-4.3) -- cycle; \node[lab,anchor=west] at (4.4,-4.65) {空ける（エンバーゴ）};
+\draw[arr] (0,-3.6)--(11.2,-3.6) node[below left,font=\scriptsize]{時間};
+\end{tikzpicture}
+\caption{ウォークフォワードの検証（学習の窓を広げていく場合）。学習と評価の間に隙間を空けるのは、正解のリターンの期間が重なるのを防ぐため。}
+\label{fig:walkforward}
+\end{figure}
+
+\begin{itemize}
+\item \textbf{ウォークフォワード}：ある日までのデータで学習し、その後の期間で評価する。評価の期間を進めながら繰り返す。学習の窓は、広げていく（拡大窓）か、一定の長さで動かす（移動窓）。
+\item \textbf{パージとエンバーゴ}：正解のリターンが期間を持つ（例：60 日後までのリターン）と、学習の最後の標本の正解の期間が、評価の期間と重なる。重なる標本を学習から除き（パージ）、さらに少し隙間を空ける（エンバーゴ）。López de Prado（2018）\cite{lopezdeprado2018} が体系化した。
+\end{itemize}
+
+\subsection{ハイパーパラメータの選び方}
+
+罰則の強さや木の深さなどは、学習の期間の中だけで、さらに時系列の分割をして選ぶ（入れ子の交差検証）。評価の期間を見てハイパーパラメータを選ぶと、評価が楽観的になる。
+
+\begin{projbox}
+LLM-BLM のリッジ回帰は、四半期ごとに、その四半期が始まる前に正解の 2 日の窓が閉じた発表だけで学習し、その四半期の発表を予測した。これは、拡大窓のウォークフォワードに、パージを組み合わせた形である。罰則の強さは、学習の期間の中の交差検証（RidgeCV）で選んだ。
+\end{projbox}
