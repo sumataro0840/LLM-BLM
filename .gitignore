@@ -2,6 +2,7 @@
 .venv/
 __pycache__/
 *.sqlite
+*.sqlite-journal
 # Monthly reports (copyrighted, kept locally)
 data/reports/*
 !data/reports/.gitkeep
@@ -10,6 +11,9 @@ data/cache/
 
 # E2 panel (rebuilt from the database by experiments/E2_event_reaction/run.py)
 experiments/E2_event_reaction/results/panel.csv
+# S1 panel and the dry run (rebuilt by experiments/S1_smallcap_drift/run.py)
+experiments/S1_smallcap_drift/results/panel.csv
+experiments/S1_smallcap_drift/results/dry/
 
 # macOS folder metadata
 .DS_Store

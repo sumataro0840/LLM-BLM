@@ -1,0 +1,51 @@
+{
+ "filings": 38800,
+ "companies_with_filings": 999,
+ "releases_stored": 38794,
+ "with_text": 38390,
+ "ex991_share_of_texts": 0.9955457150299557,
+ "how_chosen": {
+  "named": 29991,
+  "largest": 6202,
+  "cached": 1305,
+  "refined": 723,
+  "none": 404,
+  "named_not_ex991": 125,
+  "largest_not_ex991": 44
+ },
+ "event_date_share": 0.9999479030997656,
+ "n_chars_median": 24129.0,
+ "session": {
+  "late": 15933,
+  "post": 8577,
+  "open": 8222,
+  "pre": 5658
+ },
+ "companies_with_4_texts": 998,
+ "texts_per_year": {
+  "2015": 2358,
+  "2016": 2449,
+  "2017": 2566,
+  "2018": 2704,
+  "2019": 2837,
+  "2020": 3153,
+  "2021": 3456,
+  "2022": 3744,
+  "2023": 3869,
+  "2024": 4009,
+  "2025": 4140,
+  "2026": 3105
+ },
+ "top_industries": {
+  "Pharmaceutical Preparations": 80,
+  "State Commercial Banks": 54,
+  "Biological Products, (No Diagnostic Substances)": 45,
+  "Services-Prepackaged Software": 43,
+  "Real Estate Investment Trusts": 42,
+  "National Commercial Banks": 25,
+  "Semiconductors & Related Devices": 24,
+  "Services-Business Services, NEC": 20,
+  "Finance Services": 18,
+  "": 18
+ }
+}

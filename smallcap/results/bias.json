@@ -1,0 +1,174 @@
+{
+ "band_company_years": 22000,
+ "relevant_company_years": 20282,
+ "kept_company_years": 13851,
+ "lost_company_years": 6431,
+ "lost_share": 0.3170791835124741,
+ "companies_relevant": 4217,
+ "companies_kept_ever": 2411,
+ "companies_lost": 1826,
+ "by_year": [
+  {
+   "year": 2015,
+   "band": 2000.0,
+   "relevant": 1897.0,
+   "kept": 920.0,
+   "lost": 977.0,
+   "lost_share": 0.5150237216657881
+  },
+  {
+   "year": 2016,
+   "band": 2000.0,
+   "relevant": 1874.0,
+   "kept": 973.0,
+   "lost": 901.0,
+   "lost_share": 0.4807897545357524
+  },
+  {
+   "year": 2017,
+   "band": 2000.0,
+   "relevant": 1875.0,
+   "kept": 1033.0,
+   "lost": 842.0,
+   "lost_share": 0.44906666666666667
+  },
+  {
+   "year": 2018,
+   "band": 2000.0,
+   "relevant": 1865.0,
+   "kept": 1085.0,
+   "lost": 780.0,
+   "lost_share": 0.41823056300268097
+  },
+  {
+   "year": 2019,
+   "band": 2000.0,
+   "relevant": 1853.0,
+   "kept": 1166.0,
+   "lost": 687.0,
+   "lost_share": 0.37075013491635184
+  },
+  {
+   "year": 2020,
+   "band": 2000.0,
+   "relevant": 1858.0,
+   "kept": 1238.0,
+   "lost": 620.0,
+   "lost_share": 0.333692142088267
+  },
+  {
+   "year": 2021,
+   "band": 2000.0,
+   "relevant": 1760.0,
+   "kept": 1236.0,
+   "lost": 524.0,
+   "lost_share": 0.29772727272727273
+  },
+  {
+   "year": 2022,
+   "band": 2000.0,
+   "relevant": 1744.0,
+   "kept": 1330.0,
+   "lost": 414.0,
+   "lost_share": 0.23738532110091742
+  },
+  {
+   "year": 2023,
+   "band": 2000.0,
+   "relevant": 1874.0,
+   "kept": 1524.0,
+   "lost": 350.0,
+   "lost_share": 0.18676627534685167
+  },
+  {
+   "year": 2024,
+   "band": 2000.0,
+   "relevant": 1867.0,
+   "kept": 1631.0,
+   "lost": 236.0,
+   "lost_share": 0.12640599892876273
+  },
+  {
+   "year": 2025,
+   "band": 2000.0,
+   "relevant": 1815.0,
+   "kept": 1715.0,
+   "lost": 100.0,
+   "lost_share": 0.05509641873278237
+  }
+ ],
+ "lost_company_years_by_reason": {
+  "acquired": 5193,
+  "bankruptcy": 910,
+  "delisted_or_deregistered": 234,
+  "still_filing": 89,
+  "other": 4,
+  "listed_but_no_price": 1
+ },
+ "lost_companies_by_reason": {
+  "acquired": 1447,
+  "bankruptcy": 277,
+  "delisted_or_deregistered": 74,
+  "still_filing": 25,
+  "other": 2,
+  "listed_but_no_price": 1
+ },
+ "float_change_kept": {
+  "n": 13851,
+  "n_with_change": 12030,
+  "median_change": 0.04117088420456591,
+  "mean_log_change": 0.0827338297233604,
+  "share_down_40pct": 0.11546134663341646
+ },
+ "float_change_lost_all_years": {
+  "n": 6431,
+  "n_with_change": 4989,
+  "median_change": 0.016077946423292078,
+  "mean_log_change": 0.051518394619006556,
+  "share_down_40pct": 0.15213469633193025
+ },
+ "float_change_lost_last_year_by_reason": {
+  "acquired": {
+   "n": 1447,
+   "n_with_change": 1205,
+   "median_change": 0.023475887170154582,
+   "mean_log_change": 0.049800000529221844,
+   "share_down_40pct": 0.13858921161825727
+  },
+  "bankruptcy": {
+   "n": 277,
+   "n_with_change": 226,
+   "median_change": -0.22006827381722785,
+   "mean_log_change": -0.14885658709774371,
+   "share_down_40pct": 0.38495575221238937
+  },
+  "delisted_or_deregistered": {
+   "n": 74,
+   "n_with_change": 61,
+   "median_change": 0.09410646387832712,
+   "mean_log_change": 0.3555514942977096,
+   "share_down_40pct": 0.13114754098360656
+  },
+  "listed_but_no_price": {
+   "n": 1,
+   "n_with_change": 0,
+   "median_change": null,
+   "mean_log_change": null,
+   "share_down_40pct": null
+  },
+  "other": {
+   "n": 2,
+   "n_with_change": 2,
+   "median_change": -0.051414844387878106,
+   "mean_log_change": -0.052783714393839415,
+   "share_down_40pct": 0.0
+  },
+  "still_filing": {
+   "n": 25,
+   "n_with_change": 23,
+   "median_change": 0.044733621660024266,
+   "mean_log_change": -0.09113393708871372,
+   "share_down_40pct": 0.13043478260869565
+  }
+ }
+}
