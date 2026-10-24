@@ -21,3 +21,5 @@ experiments/S1_smallcap_drift/results/dry/
 # The overall record: rebuilt from the other documents by 資料集/00_全体の記録/作成スクリプト/make.sh
 資料集/00_全体の記録/取り込み/
 資料集/00_全体の記録/LLM-BLM_全体の記録.tex
+experiments/S2_smallcap_risk/results/panel.csv
+experiments/S2_smallcap_risk/results/dry/
