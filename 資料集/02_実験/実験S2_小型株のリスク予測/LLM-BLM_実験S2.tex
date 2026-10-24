@@ -1,0 +1,167 @@
+% ============================================================
+% LLM-BLM 実験 S2：小型株で、決算発表文の読み取りは発表後の変動率（リスク）を予測するか（事前登録した検定の結果）
+% コンパイル：tectonic -X compile LLM-BLM_実験S2.tex   （XeTeX 系。このフォルダで実行する）
+% 数値と表は 図/values.tex・図/tab_*.tex（作成スクリプト/values.py）、図は 図/*.pdf（作成スクリプト/figs.py）。
+% どちらも experiments/S2_smallcap_risk/results から作る。本文に数値を手で書かない。
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt,openany]{bxjsreport}
+\setpagelayout*{left=24mm,right=24mm,top=24mm,bottom=26mm,footskip=11mm}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,multirow,longtable}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+
+\graphicspath{{図/}}
+\input{図/values.tex}
+\newcommand{\V}[1]{\ifcsname v@#1\endcsname\csname v@#1\endcsname\else\textbf{??#1??}\fi}
+\newcommand{\tabin}[1]{\adjustbox{max width=\linewidth}{\input{図/tab_#1.tex}}}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{c2}{HTML}{EB6834}
+\definecolor{ink2}{HTML}{52514E}
+\definecolor{soft1}{HTML}{E4EEF9}
+\definecolor{soft2}{HTML}{FBEEDF}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\SP}{S\&P500}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\newcommand{\chapref}[1]{第~\ref{#1}~章}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+
+\makeatletter
+\def\@makechapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \ifnum\c@secnumdepth>\m@ne\if@mainmatter{\Large\headfont\@chapapp\thechapter\@chappos}\par\nobreak\vskip0.4\Cvs\fi\fi
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\def\@makeschapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\makeatother
+
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{notebox}[1][注意]{enhanced,breakable,colback=soft2,colframe=c2,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+\title{LLM-BLM 実験 S2\\[6pt]
+  \large 小型株で、決算発表文の読み取りは\\発表後の変動率（リスク）を予測するか}
+\author{実験の報告書（事前登録した検定の結果）}
+\date{2026 年 10 月 24 日}
+
+\begin{document}
+\maketitle
+
+\input{章/概要}
+
+\setcounter{tocdepth}{1}
+{\small\tableofcontents}
+
+% ============================================================
+\chapter{目的}\label{ch:purpose}
+
+実験 S1 では、小型株で、ChronoGPT＋リッジの決算発表文の読み取りが、発表後 2〜60 日のドリフト（リターンの向き）を予測した。しかし、規模で加重した月次のポートフォリオでは、有意な差にならなかった。
+
+リターンの平均より、変動率（リスク）のほうが予測しやすい。変動率には強い持続性があり、過去の変動率でかなり説明できる。文章の不確実さや否定的な語が、その後の変動率と関係するという研究もある。そこで、次の問いを確かめた。
+
+\begin{keybox}[問い]
+決算発表文の読み取りは、過去の変動率と 2 日の反応の大きさを超えて、発表後 2〜60 取引日の変動率を予測するか。
+\end{keybox}
+
+予測できれば、BLM の見通しの不確かさ（$\Omega$）や量の調整に使える。この実験では、その応用は検定しない。
+
+% ============================================================
+\chapter{事前登録}\label{ch:prereg}
+
+検定の仮説・データ・変数・方法・判定の基準は \code{experiments/S2\_smallcap\_risk/preregistration.md} に書き、実行するコード（\code{run.py}）と同じコミットで固定してから、1 回だけ実行した。実行に使ったコミットは \code{\V{commit}}（\code{results/summary.json} に記録）。
+
+\begin{itemize}
+\item \textbf{書いた時点で見ていたもの}：S1 のすべての結果（点数と符号つきの超過リターンの関係）。
+\item \textbf{見ていなかったもの}：どの銘柄の、どの期間の変動率も計算していなかった。点数と変動率、点数と反応の大きさ（絶対値）の関係も、一度も計算していなかった。
+\item \textbf{主な検定 P}：2020 年以降・範囲の中の発表で、\code{log\_rv\_2\_60} を \code{chrono\_risk} と統制・固定効果で回帰した係数が正か。
+\item \textbf{判定}：片側 $t$ の $p < 0.05$、かつ、同じ反応日の中で点数を 1,000 回入れ替える置換の片側 $p < 0.05$ なら「支持」。
+\item \textbf{副次}（判定に使わない）：ほかの点数（2 つの族でそれぞれ Holm）、2 つの期間 × 4 つの目的変数の比較の表、標本外の予測の比較、2021 年以降と 2 日の反応の大きさを統制から外した頑健性。
+\end{itemize}
+
+% ============================================================
+\chapter{データと変数}\label{ch:data}
+
+\section{標本}
+
+S1 と同じ 1,000 社（今も上場している会社）の決算発表文。2015 年以降の発表は \V{npanel} 件、評価する発表（2020 年以降、提出日に範囲の中）は \V{neval} 件、gpt-4o-mini の点数がそろう 2024 年以降の発表は \V{nevalgpt} 件。2015〜2019 年の発表は学習にだけ使った。
+
+\section{目的変数}
+
+反応日を day 0 として、調整後終値の日次の対数リターンから計算した（年率、$\sqrt{252}$ 倍）。
+
+\begin{itemize}
+\item 主：\code{log\_rv\_2\_60}：2〜60 取引日目の変動率の対数（59 日のうち 40 日以上のリターンがあるもの）
+\item 副：\code{log\_rv\_2\_21}（2〜21 日目）、\code{log\_ivol\_2\_60}（IWM との日次の差の変動率、2〜60 日目）、\code{abs\_r\_0\_1}（2 日の反応の大きさ $|$\code{abn\_r\_0\_1}$|$）
+\end{itemize}
+
+係数は、点数が 1 標準偏差高いときの差で、対数の変動率では「\%」（対数の差 × 100、ほぼ変動率の比の \%）、反応の大きさでは「bp」で示す。
+
+\section{統制}
+
+発表の前の変動率（\code{log\_rv\_pre}：$-60$〜$-1$ 日、\code{log\_rv\_long}：$-252$〜$-61$ 日）、規模（\code{log\_float}）、決算と売上の驚きの大きさ（$|$SUE$|$、$|$売上の驚き$|$、欠けの印）、業種と年・四半期の固定効果。2 日の反応の大きさ（day 1 の終値で分かる）も統制に入れた（目的変数が反応の大きさのときは除く）。標準誤差は反応日ごとにまとめた。
+
+\section{点数}
+
+\begin{table}[H]
+\centering\small
+\caption{比べた点数（どれも「高いほどリスクが高い」向き。評価する標本の中で標準化）}
+\label{tab:scores}
+\begin{tabular}{@{}lp{0.6\linewidth}l@{}}
+\toprule
+列 & 中身 & 学習 \\
+\midrule
+\code{chrono\_risk} & ChronoGPT 2015 年版、元の文章の最後の層の平均（S1 と同じベクトル）に、四半期ごとのリッジ（主） & 変動率の驚き \\
+\code{chrono\_mid\_risk} & ChronoGPT 2015 年版、掃除した文章の 26 層目の平均に、同じリッジ & 変動率の驚き \\
+\code{dict\_uncertainty} & Loughran--McDonald の不確実さの語の割合 & なし \\
+\code{dict\_negative} & Loughran--McDonald の否定的な語の割合 & なし \\
+\code{finbert\_negative} & FinBERT の否定的な文の割合 & なし \\
+\code{gpt\_flags} & gpt-4o-mini のリスクの印 10 個の数 & なし \\
+\code{gpt\_risk} & gpt-4o-mini の 14 の項目に、同じリッジ & 変動率の驚き \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+学習ありの点数の正解は「変動率の驚き」$\log(\mathrm{rv}_{2\text{〜}60} / \mathrm{rv}_{\text{pre}})$ で、その四半期が始まる前に 60 日の窓が閉じた発表だけで学習した。
+
+% ============================================================
+\input{章/結果}
+
+% ============================================================
+\chapter{限界}\label{ch:limits}
+
+\begin{itemize}
+\item \textbf{生き残った会社だけ}：上場をやめた会社は、変動率の高い時期に消えやすいので、高い変動率の発表が欠けている可能性がある。
+\item \textbf{日次の終値だけ}：日中のデータはないので、実現の変動率は日次の終値で測った。
+\item \textbf{gpt-4o-mini の期間}は短く、\code{gpt\_risk} は 60 日の窓が閉じるまで学習できないので、さらに短い。
+\item \textbf{応用は未検定}：予測した変動率を BLM の $\Omega$ や量の調整に使う効果は、この実験では確かめていない。
+\item \textbf{1 回の結果}：事前登録の通り 1 回だけ実行した。
+\end{itemize}
+
+% ============================================================
+\chapter*{再現の手順}
+\addcontentsline{toc}{chapter}{再現の手順}
+
+リポジトリの直下で（\code{.venv} の Python）：
+
+\begin{enumerate}
+\item データと点数：S1 と同じ（\code{smallcap.build}、\code{smallcap.score}）。
+\item 検定：\code{python experiments/S2\_smallcap\_risk/run.py}（結果は \code{results/}。2 回目は summary.json があると止まる）。
+\item この報告書の数値・表と図：\code{資料集/02\_実験/実験S2\_小型株のリスク予測/作成スクリプト/} の \code{values.py} と \code{figs.py}。
+\item コンパイル：このフォルダで \code{tectonic -X compile LLM-BLM\_実験S2.tex}。
+\end{enumerate}
+
+\end{document}
