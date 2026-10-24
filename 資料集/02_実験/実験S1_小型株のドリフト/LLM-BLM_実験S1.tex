@@ -1,0 +1,179 @@
+% ============================================================
+% LLM-BLM 実験 S1：小型株で、決算発表文の読み取りは発表後のドリフトを予測するか（事前登録した検定の結果）
+% コンパイル：tectonic -X compile LLM-BLM_実験S1.tex   （XeTeX 系。このフォルダで実行する）
+% 数値と表は 図/values.tex・図/tab_*.tex（作成スクリプト/values.py）、図は 図/*.pdf（作成スクリプト/figs.py）。
+% どちらも experiments/S1_smallcap_drift/results から作る。本文に数値を手で書かない。
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt,openany]{bxjsreport}
+\setpagelayout*{left=24mm,right=24mm,top=24mm,bottom=26mm,footskip=11mm}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,multirow,longtable}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+
+\graphicspath{{図/}}
+\input{図/values.tex}
+\newcommand{\V}[1]{\ifcsname v@#1\endcsname\csname v@#1\endcsname\else\textbf{??#1??}\fi}
+\newcommand{\tabin}[1]{\adjustbox{max width=\linewidth}{\input{図/tab_#1.tex}}}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{c2}{HTML}{EB6834}
+\definecolor{c3}{HTML}{1BAF7A}
+\definecolor{c4}{HTML}{EDA100}
+\definecolor{ink2}{HTML}{52514E}
+\definecolor{soft1}{HTML}{E4EEF9}
+\definecolor{soft2}{HTML}{FBEEDF}
+\definecolor{soft5}{HTML}{FDF3DA}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\SP}{S\&P500}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\newcommand{\chapref}[1]{第~\ref{#1}~章}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+
+\makeatletter
+\def\@makechapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \ifnum\c@secnumdepth>\m@ne\if@mainmatter{\Large\headfont\@chapapp\thechapter\@chappos}\par\nobreak\vskip0.4\Cvs\fi\fi
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\def\@makeschapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\makeatother
+
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{notebox}[1][注意]{enhanced,breakable,colback=soft2,colframe=c2,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+\title{LLM-BLM 実験 S1\\[6pt]
+  \large 小型株で、決算発表文の読み取りは\\発表後のドリフトを予測するか}
+\author{実験の報告書（事前登録した検定の結果）}
+\date{2026 年 10 月 24 日}
+
+\begin{document}
+\maketitle
+
+\input{章/概要}
+
+\setcounter{tocdepth}{1}
+{\small\tableofcontents}
+
+% ============================================================
+\chapter{目的}\label{ch:purpose}
+
+\section{これまでの結果}
+
+\SP{} の決算発表文では、LLM（gpt-4o-mini）・FinBERT・ChronoGPT の読み取りは、発表をはさむ 2 日の株価の反応を強く説明した（実験 2〜5・11）。しかし、翌日以降のドリフトは有意に予測しなかった（実験 2・3・8）。情報は発表の当日に株価に入りきっていた。
+
+\section{問い}
+
+Hong・Stein（1999）、Akbas ほか（2017）などによれば、反応の遅れは注目されていない銘柄に集中する。そこで、注目の低い小型株で、次の問いを確かめた。
+
+\begin{keybox}[問い]
+注目の低い小型株では、決算発表文の読み取りが、発表後 2〜60 取引日の超過リターン（ドリフト）を予測するか。
+\end{keybox}
+
+あわせて、利用者の依頼（2026-10-23）に従い、FinBERT・ChronoGPT の学習あり、gpt-4o-mini、gpt-4o-mini の学習あり（点数に重みを学習）を比べ、四半期・半年・1 年ごとにリバランスする BLM の資産の推移を作った（事前登録の追記 1）。
+
+% ============================================================
+\chapter{事前登録}\label{ch:prereg}
+
+検定の仮説・データ・変数・方法・判定の基準は、\code{experiments/S1\_smallcap\_drift/preregistration.md} に書き、実行するコード（\code{run.py}・\code{blm\_paths.py}）と同じコミットで固定してから、1 回だけ実行した。株価の反応は、それまで一度も計算していない（\code{--dry} は、株価の代わりに乱数を入れて動作だけを確かめたもの）。実行に使ったコミットは \code{\V{commit}}（\code{results/summary.json} に記録）。
+
+\begin{itemize}
+\item \textbf{主な検定 P}：2020 年以降に提出され、提出日に小型株の範囲（浮動株時価総額の 1,001〜3,000 位）にいた会社の発表で、2〜60 取引日の IWM との超過リターン（\code{abn\_drift\_2\_60}）を、\code{chrono\_ridge}（ChronoGPT 2015 年版の最後の層の平均のベクトルに、四半期ごとのリッジで 2 日の反応を学習）と統制・固定効果で回帰した係数が正か。
+\item \textbf{判定}：片側 $t$ の $p < 0.05$、かつ、同じ反応日の中で点数を 1,000 回入れ替える置換の片側 $p < 0.05$ なら「支持」。
+\item \textbf{副次}（判定には使わない）：ほかの点数のドリフトの回帰（2 つの族でそれぞれ Holm の補正）、2 つの期間 × 3 つの目的変数の比較の表、時価総額加重との対決（毎月）、2021 年以降の頑健性。
+\item \textbf{追記 1}（どの株価の反応も計算する前に追加）：BLM の資産の推移。検定はせず、報告だけする。
+\item \textbf{探索}：ドリフトを正解にして学習したリッジ（\code{chrono\_ridge\_drift}）。
+\end{itemize}
+
+% ============================================================
+\chapter{データと変数}\label{ch:data}
+
+\section{標本}
+
+\begin{itemize}
+\item \code{data/smallcap.sqlite} の 1,000 社（いま上場している会社。生き残った会社だけ）の決算発表文（8-K Item 2.02 の EX-99）。データの作り方と生存者バイアスの見積もりは、「LLM-BLM 小型株のデータ」の報告書にある。
+\item 2015 年以降の発表のうち、点数と反応の窓がそろうもの：\V{npanel} 件。
+\item 評価する発表（2020 年以降、範囲の中）：\V{neval} 件。そのうち gpt-4o-mini の点数がそろう 2024 年以降の発表：\V{nevalgpt} 件。
+\item 2015〜2019 年の発表は、学習にだけ使った。
+\end{itemize}
+
+\section{目的変数}
+
+すべて IWM（Russell 2000 の ETF）との差。上下 1\% で丸めた（評価する標本の中で）。
+
+\begin{itemize}
+\item 主：\code{abn\_drift\_2\_60}（反応日を day 0 として、2〜60 取引日目）
+\item 副：\code{abn\_r\_0\_1}（day 0 の前日の終値から day 1 の終値まで、2 取引日の反応）、\code{abn\_drift\_2\_21}
+\end{itemize}
+
+\section{統制}
+
+SUE、売上の驚き（欠けは 0 で埋めて欠けの印を足す）、\code{abn\_pre}（$-21$〜$-1$ 日）、\code{log\_float}、業種（SIC の上 2 桁）と年・四半期の固定効果。ドリフトの回帰には \code{abn\_r\_0\_1} も統制に入れた（市場が 2 日で反応した分を超えるかを見るため）。標準誤差は反応日ごとにまとめた。
+
+\section{点数}
+
+\begin{table}[H]
+\centering\small
+\caption{比べた点数（評価する標本の中で標準化）}
+\label{tab:scores}
+\begin{tabular}{@{}lp{0.62\linewidth}l@{}}
+\toprule
+列 & 中身 & 学習 \\
+\midrule
+\code{dictionary} & Loughran--McDonald の net tone & なし \\
+\code{finbert} & FinBERT（先頭 200 文の平均） & なし \\
+\code{finbert\_ft} & 実験 4 と同じ設定の FinBERT の追加学習（2020 年より前に窓が閉じた発表の 2 日の反応で学習） & 2 日の反応 \\
+\code{chrono\_ridge} & ChronoGPT 2015 年版、元の文章の最後の層の平均に、四半期ごとのリッジ（主） & 2 日の反応 \\
+\code{chrono\_mid\_ridge} & ChronoGPT 2015 年版、掃除した文章の 26 層目の平均に、同じリッジ & 2 日の反応 \\
+\code{gpt} & gpt-4o-mini（H06 の質問、温度 0）の語調＋見通し＋ガイダンス & なし \\
+\code{gpt\_ridge} & gpt-4o-mini の 14 の項目に、同じ四半期ごとのリッジ & 2 日の反応 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+学習ありのモデルは、どれも 2 日の反応を正解にして学習した（読み取りの強さを学ぶ）。ドリフトの検定では、その点数が反応の向きに遅れて動く分を予測するかを見る。リッジの学習は、その四半期が始まる前に 2 日の窓が閉じた発表だけを使った。
+
+% ============================================================
+\input{章/結果}
+
+% ============================================================
+\chapter{限界}\label{ch:limits}
+
+\begin{itemize}
+\item \textbf{生き残った会社だけ}：小型株の会社・年の 32\% が欠ける（小型株のデータの報告書）。倒産で消えた会社はこちらに不利（保守的）、買収で消えた会社は向きが読めない。2015 年からの BLM の推移は、範囲の会社の約半分が欠ける時期を含み、資産の水準は 2 本とも実際より高く出うる。意味があるのは 2 本の差である。
+\item \textbf{アナリストの予想を統制できない}：無料の範囲では取れない。SUE は前年同期からの変化で作った。
+\item \textbf{浮動株時価総額}は、測った日から数か月遅れの、年 1 回の規模の目安である。
+\item \textbf{gpt-4o-mini の期間}は 2024 年以降の約 2 年半と短い。
+\item \textbf{取引コスト}は片道 0.3\%（0\%・0.5\% も並べた）の一定とした。小型株の大きな資金の売買では、インパクトでこれより大きくなる。
+\item \textbf{1 回だけの実行}：事前登録の通り 1 回だけ実行した。事前登録にない分析は探索として扱う。
+\end{itemize}
+
+% ============================================================
+\chapter*{再現の手順}
+\addcontentsline{toc}{chapter}{再現の手順}
+
+リポジトリの直下で（\code{.venv} の Python）：
+
+\begin{enumerate}
+\item データ：\code{python -m smallcap.build ...}（小型株のデータの報告書の手順。2015 年の範囲のために \code{add\_year 2014}、統制のために \code{fundamentals}・\code{surprise} も）。点数：\code{python -m smallcap.score all} と \code{python -m smallcap.score llm}（gpt-4o-mini、有料）。
+\item 主な検定と副次：\code{python experiments/S1\_smallcap\_drift/run.py}（結果は \code{results/}。2 回目は summary.json があると止まる）。
+\item BLM の推移：\code{python experiments/S1\_smallcap\_drift/blm\_paths.py}。
+\item この報告書の数値・表と図：\code{python 資料集/02\_実験/実験S1\_小型株のドリフト/作成スクリプト/values.py}、同じフォルダの \code{figs.py}。
+\item コンパイル：このフォルダで \code{tectonic -X compile LLM-BLM\_実験S1.tex}。
+\end{enumerate}
+
+\end{document}

@@ -26,14 +26,14 @@ NAMES = {'dictionary': '辞書', 'finbert': 'FinBERT（学習なし）', 'finber
          'gpt': 'gpt-4o-mini（学習なし）', 'gpt_ridge': 'gpt-4o-mini（重みを学習）'}
 COLORS = {'dictionary': GRAY, 'finbert': YELLOW, 'finbert_ft': AQUA, 'chrono_ridge': VIOLET, 'chrono_mid_ridge': '#9b8fe6',
           'gpt': BLUE, 'gpt_ridge': '#7fb0ea'}
-TARGETS = {'abn_r_0_1': '発表 2 日の反応', 'abn_drift_2_60': '2〜60 日のドリフト', 'abn_drift_2_21': '2〜21 日のドリフト'}
+TARGETS = {'abn_r_0_1': '2 日の\n反応', 'abn_drift_2_60': '2〜60 日の\nドリフト', 'abn_drift_2_21': '2〜21 日の\nドリフト'}
 
 
 def fig_compare(c):
     """t of each model, for each target, in the two periods."""
     fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.6), sharey=False, width_ratios=[5, 7])
-    for ax, (period, title) in zip(axes, [('2020-', '2020 年以降（範囲の中、全モデルのうち gpt 以外）'),
-                                          ('2024- (gpt)', '2024 年以降（gpt-4o-mini の点数がある発表）')]):
+    for ax, (period, title) in zip(axes, [('2020-', '2020 年以降（gpt-4o-mini 以外）'),
+                                          ('2024- (gpt)', '2024 年以降（gpt-4o-mini の期間）')]):
         d = c[(c.period == period) & c.t.notna()]
         models = [m for m in NAMES if m in set(d.model)]
         x = np.arange(len(TARGETS))
@@ -74,6 +74,33 @@ def fig_portfolio(name, out):
     fig.savefig(OUT / out)
 
 
+BLM_NAMES = {'band': '範囲の全社（浮動株時価総額で加重）', **{k: f'BLM：{v}' for k, v in NAMES.items()}}
+BLM_COLORS = {'band': INK2, **COLORS}
+FREQ_NAMES = {'quarter': '四半期ごと', 'half': '半年ごと', 'year': '1 年ごと'}
+
+
+def fig_blm_paths(start, out):
+    """Value from 1 at the end of the start year, one panel per rebalancing frequency (addendum 1)."""
+    df = pd.read_csv(RES / 'blm_paths.csv')
+    df = df[df.start == start]
+    fig, axes = plt.subplots(1, 3, figsize=(7.8, 2.9), sharey=True)
+    for ax, (freq, title) in zip(axes, FREQ_NAMES.items()):
+        d = df[df.freq == freq]
+        for m in [m for m in BLM_NAMES if m in set(d.model)]:
+            s = d[d.model == m].sort_values('month')
+            x = pd.to_datetime(s.month)
+            ax.plot(x, s.value, color=BLM_COLORS[m], lw=1.9 if m == 'band' else 1.3,
+                    ls='--' if m == 'band' else '-', label=BLM_NAMES[m])
+        ax.axhline(1, color=GRAY, lw=0.7)
+        ax.set_title(title, fontsize=9, loc='left')
+        ax.tick_params(axis='x', labelsize=7.5, rotation=30)
+    axes[0].set_ylabel(f'{start} 年末を 1 とした価値')
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc='lower center', ncol=3, frameon=False, fontsize=7.8)
+    fig.tight_layout(rect=(0, 0.14 if len(labels) > 3 else 0.1, 1, 1))
+    fig.savefig(OUT / out)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     c = pd.read_csv(RES / 'comparison.csv')
@@ -81,6 +108,9 @@ def main():
     fig_portfolio('by_month.csv', 'portfolio.pdf')
     if (RES / 'by_month_gpt.csv').exists():
         fig_portfolio('by_month_gpt.csv', 'portfolio_gpt.pdf')
+    if (RES / 'blm_paths.csv').exists():
+        fig_blm_paths(2015, 'blm_2015.pdf')
+        fig_blm_paths(2023, 'blm_2023.pdf')
     print('saved to', OUT)
 
 
