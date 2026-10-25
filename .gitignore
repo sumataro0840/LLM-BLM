@@ -25,3 +25,11 @@ experiments/S2_smallcap_risk/results/panel.csv
 experiments/S2_smallcap_risk/results/dry/
 experiments/S3_smallcap_risk_blm/results/dry/
 experiments/S4_te_calibration/results/dry/
+# R1 replication: panels and dry runs of the new sample (rebuilt by the run.py of each experiment)
+experiments/S1_smallcap_drift/results_rep/panel.csv
+experiments/S1_smallcap_drift/results_rep/dry/
+experiments/S2_smallcap_risk/results_rep/panel.csv
+experiments/S2_smallcap_risk/results_rep/dry/
+experiments/S3_smallcap_risk_blm/results_rep/dry/
+experiments/S4_te_calibration/results_rep/dry/
+experiments/R1_replication/results/dry/
