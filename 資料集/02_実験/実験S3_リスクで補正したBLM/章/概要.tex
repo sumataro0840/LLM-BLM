@@ -1,0 +1,14 @@
+\chapter*{概要}
+\addcontentsline{toc}{chapter}{概要}
+
+実験 S2 で、決算発表文のリスクの読み取りは、発表後の変動率を（小さいが）予測した。この実験 S3 では、その点数で銘柄の分散を相対的に補正した共分散を使い、S1 のリターンの見通しと組み合わせた BLM を作った。リスクの見積もりが正確になるかを事前登録して検定し、2015 年末と 2023 年末を 1 とした四半期・半年・1 年ごとの推移を報告した。gpt-4o-mini の版も並べた。
+
+\begin{keybox}[要点]
+\begin{itemize}
+\item \textbf{主な検定は\V{primaryverdict}}。テキストのリスクの点数を足しても（C）、株価だけで補正した場合（B）より、TE の見積もりの偏りは小さくならなかった（偏り $b$ は \V{primarybref} から \V{primarybnew}、片側 $p$ = \V{primaryp}）。補正の回帰の中で、ChronoGPT のリスクの点数にはほとんど重みがつかなかった。
+\item \textbf{株価による補正ははっきり効いた}（副次）。発表の後の銘柄の分散を、直近の変動率と 2 日の反応の大きさで補正すると、偏りは \V{BvsAbref} から \V{BvsAbnew} に小さくなり（95\% 区間が 0 を含まない）、すべての組み合わせで改善した。
+\item \textbf{それでも事前の TE は小さすぎる}。どの組み合わせでも $b > 1$ で、gpt-4o-mini の見通しの BLM では、四半期・半年ごとで 2 を超えた。
+\item \textbf{推移は 3 つの版でほぼ同じ}。ChronoGPT の見通しの BLM は、どの版・どの頻度でも比べる相手を上回った（2015 年末から四半期ごとで、最終の値は A が \V{B2015quarterchronoridgeA}、C が \V{B2015quarterchronoridgeC}、比べる相手が \V{B2015quarterband}）。
+\item \textbf{注意}：S1・S2 と同じ 1,000 社で、その結果を見た後に設計した。資産の水準は生存者バイアスで高く出ている。
+\end{itemize}
+\end{keybox}

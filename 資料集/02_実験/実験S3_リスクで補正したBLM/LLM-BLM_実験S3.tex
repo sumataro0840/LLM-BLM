@@ -1,0 +1,151 @@
+% ============================================================
+% LLM-BLM 実験 S3：リスクの読み取りで共分散を補正すると、BLM の TE の見積もりは正確になるか（事前登録した検定の結果）
+% コンパイル：tectonic -X compile LLM-BLM_実験S3.tex   （XeTeX 系。このフォルダで実行する）
+% 数値と表は 図/values.tex・図/tab_*.tex（作成スクリプト/values.py）、図は 図/*.pdf（作成スクリプト/figs.py）。
+% どちらも experiments/S3_smallcap_risk_blm/results から作る。本文に数値を手で書かない。
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt,openany]{bxjsreport}
+\setpagelayout*{left=22mm,right=22mm,top=24mm,bottom=26mm,footskip=11mm}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,multirow,longtable}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+
+\graphicspath{{図/}}
+\input{図/values.tex}
+\newcommand{\V}[1]{\ifcsname v@#1\endcsname\csname v@#1\endcsname\else\textbf{??#1??}\fi}
+\newcommand{\tabin}[1]{\adjustbox{max width=\linewidth}{\input{図/tab_#1.tex}}}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{c2}{HTML}{EB6834}
+\definecolor{soft1}{HTML}{E4EEF9}
+\definecolor{soft2}{HTML}{FBEEDF}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\SP}{S\&P500}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\newcommand{\chapref}[1]{第~\ref{#1}~章}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+
+\makeatletter
+\def\@makechapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \ifnum\c@secnumdepth>\m@ne\if@mainmatter{\Large\headfont\@chapapp\thechapter\@chappos}\par\nobreak\vskip0.4\Cvs\fi\fi
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\def\@makeschapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\makeatother
+
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+\title{LLM-BLM 実験 S3\\[6pt]
+  \large リスクの読み取りで共分散を補正すると、\\BLM の TE の見積もりは正確になるか}
+\author{実験の報告書（事前登録した検定の結果）}
+\date{2026 年 10 月 25 日}
+
+\begin{document}
+\maketitle
+
+\input{章/概要}
+
+\setcounter{tocdepth}{1}
+{\small\tableofcontents}
+
+% ============================================================
+\chapter{目的}\label{ch:purpose}
+
+\begin{itemize}
+\item 実験 S1：小型株で、ChronoGPT＋リッジのリターンの点数は、発表後 2〜60 日のドリフトを予測した。その点数を見通しにした BLM（追記 1）は、比べる相手を上回ったが、実現の TE は事前の上限（年 3\%）を超えた。
+\item 実験 S2：ChronoGPT＋リッジのリスクの点数は、発表後の変動率を、過去の変動率を超えて予測した。ただし大きさは小さく、情報は「同じ時期の銘柄どうしの相対的なリスク」についてのものだった。
+\end{itemize}
+
+そこで、リスクの読み取りで銘柄の分散を相対的に補正し、S1 のリターンの見通しと組み合わせた BLM を作った。
+
+\begin{keybox}[問い]
+リスクの点数で共分散を補正すると、BLM のポートフォリオの事前の TE は、実現の TE をより正確に見積もるようになるか。あわせて、その BLM の資産の推移はどうなるか。
+\end{keybox}
+
+% ============================================================
+\chapter{事前登録}\label{ch:prereg}
+
+仮説・方法・判定の基準は \code{experiments/S3\_smallcap\_risk\_blm/preregistration.md} に書き、コード（\code{run.py}）と同じコミットで固定してから、1 回だけ実行した。実行に使ったコミットは \code{\V{commit}}。
+
+\begin{itemize}
+\item \textbf{同じ標本}：S1・S2 と同じ 1,000 社で、S1・S2 の結果を見た後に設計した。S3 の結果は、S2 の結果（リスクの点数が変動率を予測すること）を前提にしている。
+\item \textbf{計算していなかったもの}：補正した共分散による BLM の比率・推移・TE は、どれも計算していなかった。
+\end{itemize}
+
+% ============================================================
+\chapter{方法}\label{ch:method}
+
+\section{ポートフォリオ}
+
+範囲、リバランスの日（四半期・半年・1 年ごと）、始点（2015 年 12 月末と 2023 年 12 月末を 1 とする）、見通しの作り方、BLM（$\delta = 2.5$、$\tau = 0.025$、He--Litterman の $\Omega$、IC $= 0.05$）、事前の TE の上限（年 3\%）、費用（片道 0.3\%）、比べる相手（範囲を浮動株時価総額で加重）は、S1 の追記 1 と同じにした。違うのは共分散だけである。
+
+\section{共分散の 3 つの版}
+
+各リバランスの日に、直近 252 日の Ledoit--Wolf の共分散 $\Sigma$ を作り、銘柄ごとの倍率 $s_i$ で $\Sigma' = S\Sigma S$（$S = \mathrm{diag}(s)$。分散を変え、相関の形は保つ）とした。$\Sigma'$ を、均衡のリターン（$\delta\Sigma' w$）、$\Omega$、見通しの $\sigma$、最適化と TE のすべてに使った。倍率は、その日以前の 60 取引日以内に発表があった銘柄にだけかけた。
+
+\begin{table}[H]
+\centering\small
+\caption{共分散の 3 つの版}
+\label{tab:versions}
+\begin{tabular}{@{}lp{0.72\linewidth}@{}}
+\toprule
+版 & 倍率 \\
+\midrule
+A 基準 & $s = 1$（追記 1 と同じ） \\
+B 株価で補正 & 過去の発表（その日より前に 60 日の窓が閉じたもの）で、発表後 2〜60 日の対数の変動率を、発表の前の変動率・規模・2 日の反応の大きさ・驚きの大きさに、年・四半期の中で平均を引いて回帰する。その日の発表の後の銘柄の、予測した相対的な変動率と、Ledoit--Wolf の相対的な変動率の比を倍率にする（$[0.5, 2]$ に丸める） \\
+C 株価＋テキスト & B の説明変数に、リスクの点数（ChronoGPT：S2 の \code{chrono\_risk}、gpt-4o-mini の版は \code{gpt\_risk}）を足す。点数のない銘柄は B の倍率 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{主な検定}
+
+2015 年末から四半期ごとにリバランスする、ChronoGPT＋リッジの見通しの BLM で、日次の超過リターン（ポートフォリオ − 比べる相手）を、直近のリバランスの日の事前の日次の TE（その版の $\Sigma'$ で計算）で割った $z_t$ を作る。偏りの統計量 $b = \sqrt{\overline{z_t^2}}$ は、$b = 1$ なら事前の TE が実現の TE を正しく見積もっていることを表す。
+
+\begin{itemize}
+\item \textbf{P}：$D = |\log b_B| - |\log b_C| > 0$（C のほうが 1 に近い）か。
+\item \textbf{判定}：ブロックの長さ 63 日の円形のブロック・ブートストラップ（B と C の同じ日を一緒に引く、2,000 回）で、$D^* \leq 0$ の割合を片側 $p$ とし、$p < 0.05$ なら「支持」。
+\item \textbf{副次}：B と A、C と A（同じ形）、gpt-4o-mini の版（2023 年末から四半期ごと、C と B）。資産の推移は報告だけ。
+\end{itemize}
+
+% ============================================================
+\input{章/結果}
+
+% ============================================================
+\chapter{限界}\label{ch:limits}
+
+\begin{itemize}
+\item \textbf{同じ 1,000 社}：S1・S2 と同じ標本で、今も上場している会社だけである。別の会社での確認は、まだしていない。
+\item \textbf{推移は 1 回の実現}：TE 3\% の違いを、推移の差で見分ける検出力は低い。
+\item \textbf{倍率の期間}：倍率は発表後 60 日の変動率の予測から作るが、保有期間（四半期・半年・1 年）とは一致しない。
+\item \textbf{gpt-4o-mini の期間は短い}：2023 年末からの約 2 年 9 か月で、gpt-4o-mini のリスクの点数で補正できるのは、学習の発表が十分にたまった後だけである。
+\end{itemize}
+
+% ============================================================
+\chapter*{再現の手順}
+\addcontentsline{toc}{chapter}{再現の手順}
+
+リポジトリの直下で（\code{.venv} の Python）、S1 と S2 の \code{run.py} の後に：
+
+\begin{enumerate}
+\item \code{python experiments/S3\_smallcap\_risk\_blm/run.py}（結果は \code{results/}。2 回目は summary.json があると止まる）。
+\item \code{資料集/02\_実験/実験S3\_リスクで補正したBLM/作成スクリプト/} の \code{values.py} と \code{figs.py}。
+\item このフォルダで \code{tectonic -X compile LLM-BLM\_実験S3.tex}。
+\end{enumerate}
+
+\end{document}

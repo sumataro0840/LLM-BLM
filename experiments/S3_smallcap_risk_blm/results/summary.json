@@ -1,0 +1,596 @@
+{
+ "commit": "a6107fb01ef7a8e993997781775d4401a2d213fc",
+ "dry": false,
+ "tests": {
+  "primary": {
+   "days": 2701,
+   "b_ref": 1.2198571476878508,
+   "b_new": 1.219478199951691,
+   "D": 0.0003106975345352758,
+   "ci95": [
+    -0.00037003785180124915,
+    0.0011632716155433281
+   ],
+   "p_one_sided": 0.201,
+   "verdict": "not supported"
+  },
+  "B_vs_A": {
+   "days": 2701,
+   "b_ref": 1.2538382817655698,
+   "b_new": 1.2198571476878508,
+   "D": 0.027475712154776732,
+   "ci95": [
+    0.010261381919575211,
+    0.048087600936028006
+   ],
+   "p_one_sided": 0.0
+  },
+  "C_vs_A": {
+   "days": 2701,
+   "b_ref": 1.2538382817655698,
+   "b_new": 1.219478199951691,
+   "D": 0.02778640968931201,
+   "ci95": [
+    0.010670527117843087,
+    0.04847575638143885
+   ],
+   "p_one_sided": 0.0
+  },
+  "gpt_C_vs_B": {
+   "days": 628,
+   "b_ref": 2.1746880721450865,
+   "b_new": 2.1305614377643636,
+   "D": 0.02049970835644621,
+   "ci95": [
+    -0.005662409272636133,
+    0.02752735552390351
+   ],
+   "p_one_sided": 0.177
+  }
+ },
+ "runs": {
+  "2015/quarter/chrono_ridge/A": {
+   "final_value": 5.078097415945149,
+   "annual_return": 0.16319873893810488,
+   "rebalances": 44,
+   "mean_views": 491.0,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.4474349069386628,
+   "status": {
+    "optimal": 28,
+    "optimal_inaccurate": 16
+   },
+   "te_ex_mean": 0.03000000039749101,
+   "te_realized_mean": 0.036056964037917215,
+   "bias_b": 1.2538382817655698,
+   "days": 2701,
+   "annual_excess_over_band": 0.028059147998639178
+  },
+  "2015/quarter/chrono_ridge/B": {
+   "final_value": 5.171188189911851,
+   "annual_return": 0.16516624406937974,
+   "rebalances": 44,
+   "mean_views": 491.0,
+   "mean_scaled": 489.95454545454544,
+   "turnover_mean": 0.4478049565250642,
+   "status": {
+    "optimal": 32,
+    "optimal_inaccurate": 12
+   },
+   "te_ex_mean": 0.0300000004404266,
+   "te_realized_mean": 0.035083803797362326,
+   "bias_b": 1.2198571476878508,
+   "days": 2701,
+   "annual_excess_over_band": 0.030026653129914038
+  },
+  "2015/quarter/chrono_ridge/C": {
+   "final_value": 5.1719216318139685,
+   "annual_return": 0.16518161765840111,
+   "rebalances": 44,
+   "mean_views": 491.0,
+   "mean_scaled": 489.95454545454544,
+   "turnover_mean": 0.4477730360782887,
+   "status": {
+    "optimal": 30,
+    "optimal_inaccurate": 14
+   },
+   "te_ex_mean": 0.030000000392724716,
+   "te_realized_mean": 0.03506912615689294,
+   "bias_b": 1.219478199951691,
+   "days": 2701,
+   "annual_excess_over_band": 0.03004202671893541
+  },
+  "2015/quarter/band": {
+   "final_value": 3.905833496567885,
+   "annual_return": 0.1351395909394657,
+   "rebalances": 44,
+   "mean_views": 0.0,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.14688921244701134,
+   "status": {
+    "band": 44
+   }
+  },
+  "2015/half/chrono_ridge/A": {
+   "final_value": 4.807211049973145,
+   "annual_return": 0.15728145352963407,
+   "rebalances": 22,
+   "mean_views": 486.0,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.5349959449326669,
+   "status": {
+    "optimal": 13,
+    "optimal_inaccurate": 9
+   },
+   "te_ex_mean": 0.030000000337868017,
+   "te_realized_mean": 0.03736328106330237,
+   "bias_b": 1.284606549424096,
+   "days": 2701,
+   "annual_excess_over_band": 0.023983849462228424
+  },
+  "2015/half/chrono_ridge/B": {
+   "final_value": 4.7881451922291145,
+   "annual_return": 0.1568536696104481,
+   "rebalances": 22,
+   "mean_views": 486.0,
+   "mean_scaled": 484.8636363636364,
+   "turnover_mean": 0.5358645393633558,
+   "status": {
+    "optimal": 15,
+    "optimal_inaccurate": 7
+   },
+   "te_ex_mean": 0.030000000541321358,
+   "te_realized_mean": 0.03644868561580862,
+   "bias_b": 1.2617977197039734,
+   "days": 2701,
+   "annual_excess_over_band": 0.02355606554304246
+  },
+  "2015/half/chrono_ridge/C": {
+   "final_value": 4.794904602497965,
+   "annual_return": 0.15700550813928027,
+   "rebalances": 22,
+   "mean_views": 486.0,
+   "mean_scaled": 484.8636363636364,
+   "turnover_mean": 0.5357297376284739,
+   "status": {
+    "optimal": 15,
+    "optimal_inaccurate": 7
+   },
+   "te_ex_mean": 0.030000000190725743,
+   "te_realized_mean": 0.036436407695320666,
+   "bias_b": 1.2613658862704382,
+   "days": 2701,
+   "annual_excess_over_band": 0.02370790407187462
+  },
+  "2015/half/band": {
+   "final_value": 3.838244094449879,
+   "annual_return": 0.13329760406740565,
+   "rebalances": 22,
+   "mean_views": 0.0,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.23273143997638582,
+   "status": {
+    "band": 22
+   }
+  },
+  "2015/year/chrono_ridge/A": {
+   "final_value": 4.731917510824689,
+   "annual_return": 0.15558302191275697,
+   "rebalances": 11,
+   "mean_views": 474.3636363636364,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.6240490264157679,
+   "status": {
+    "optimal_inaccurate": 6,
+    "optimal": 5
+   },
+   "te_ex_mean": 0.030000000095438042,
+   "te_realized_mean": 0.03944203133902849,
+   "bias_b": 1.3404188821953202,
+   "days": 2701,
+   "annual_excess_over_band": 0.016224491054128487
+  },
+  "2015/year/chrono_ridge/B": {
+   "final_value": 4.782328185194087,
+   "annual_return": 0.1567228448286917,
+   "rebalances": 11,
+   "mean_views": 474.3636363636364,
+   "mean_scaled": 473.6363636363636,
+   "turnover_mean": 0.623041427936331,
+   "status": {
+    "optimal": 7,
+    "optimal_inaccurate": 4
+   },
+   "te_ex_mean": 0.030000000132917436,
+   "te_realized_mean": 0.038650555124711536,
+   "bias_b": 1.314113026508998,
+   "days": 2701,
+   "annual_excess_over_band": 0.017364313970063217
+  },
+  "2015/year/chrono_ridge/C": {
+   "final_value": 4.785347915337127,
+   "annual_return": 0.1567907767150123,
+   "rebalances": 11,
+   "mean_views": 474.3636363636364,
+   "mean_scaled": 473.6363636363636,
+   "turnover_mean": 0.6229433745951884,
+   "status": {
+    "optimal": 6,
+    "optimal_inaccurate": 5
+   },
+   "te_ex_mean": 0.030000000092717596,
+   "te_realized_mean": 0.03864316236272563,
+   "bias_b": 1.3138823587244783,
+   "days": 2701,
+   "annual_excess_over_band": 0.01743224585638381
+  },
+  "2015/year/band": {
+   "final_value": 4.064728309281501,
+   "annual_return": 0.13935853085862848,
+   "rebalances": 11,
+   "mean_views": 0.0,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.35405363007801505,
+   "status": {
+    "band": 11
+   }
+  },
+  "2023/quarter/chrono_ridge/A": {
+   "final_value": 1.872897397253909,
+   "annual_return": 0.256432543405392,
+   "rebalances": 12,
+   "mean_views": 639.75,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.44738781028017277,
+   "status": {
+    "optimal": 7,
+    "optimal_inaccurate": 5
+   },
+   "te_ex_mean": 0.030000000416797738,
+   "te_realized_mean": 0.039978764470833275,
+   "bias_b": 1.4042132970430474,
+   "days": 689,
+   "annual_excess_over_band": 0.10328465454075131
+  },
+  "2023/quarter/chrono_ridge/B": {
+   "final_value": 1.8438249620104792,
+   "annual_return": 0.24930203403993212,
+   "rebalances": 12,
+   "mean_views": 639.75,
+   "mean_scaled": 638.75,
+   "turnover_mean": 0.4473245486432587,
+   "status": {
+    "optimal": 9,
+    "optimal_inaccurate": 3
+   },
+   "te_ex_mean": 0.030000000397581134,
+   "te_realized_mean": 0.03666210086647021,
+   "bias_b": 1.2962254803493163,
+   "days": 689,
+   "annual_excess_over_band": 0.09615414517529142
+  },
+  "2023/quarter/chrono_ridge/C": {
+   "final_value": 1.8435466113727863,
+   "annual_return": 0.2492334193119241,
+   "rebalances": 12,
+   "mean_views": 639.75,
+   "mean_scaled": 638.75,
+   "turnover_mean": 0.4473671584880921,
+   "status": {
+    "optimal": 8,
+    "optimal_inaccurate": 4
+   },
+   "te_ex_mean": 0.030000000635608245,
+   "te_realized_mean": 0.0366627921704081,
+   "bias_b": 1.296196082808702,
+   "days": 689,
+   "annual_excess_over_band": 0.09608553044728341
+  },
+  "2023/quarter/gpt_ridge/A": {
+   "final_value": 1.5268487451358823,
+   "annual_return": 0.16644439039020664,
+   "rebalances": 12,
+   "mean_views": 594.8333333333334,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.5451278245682051,
+   "status": {
+    "optimal_inaccurate": 6,
+    "optimal": 5,
+    "no views": 1
+   },
+   "te_ex_mean": 0.027500000537188596,
+   "te_realized_mean": 0.04945136080614947,
+   "bias_b": 2.493644181474946,
+   "days": 628,
+   "annual_excess_over_band": 0.01329650152556594
+  },
+  "2023/quarter/gpt_ridge/B": {
+   "final_value": 1.5376430440282902,
+   "annual_return": 0.169437653931505,
+   "rebalances": 12,
+   "mean_views": 594.8333333333334,
+   "mean_scaled": 638.75,
+   "turnover_mean": 0.541721643776785,
+   "status": {
+    "optimal": 7,
+    "optimal_inaccurate": 4,
+    "no views": 1
+   },
+   "te_ex_mean": 0.027500000517105938,
+   "te_realized_mean": 0.04544255339508423,
+   "bias_b": 2.1746880721450865,
+   "days": 628,
+   "annual_excess_over_band": 0.016289765066864303
+  },
+  "2023/quarter/gpt_ridge/C_gpt": {
+   "final_value": 1.53892866550143,
+   "annual_return": 0.16979326535604589,
+   "rebalances": 12,
+   "mean_views": 594.8333333333334,
+   "mean_scaled": 638.75,
+   "turnover_mean": 0.5424062347576749,
+   "status": {
+    "optimal": 6,
+    "optimal_inaccurate": 5,
+    "no views": 1
+   },
+   "te_ex_mean": 0.027500000382245347,
+   "te_realized_mean": 0.04501154969006443,
+   "bias_b": 2.1305614377643636,
+   "days": 628,
+   "annual_excess_over_band": 0.016645376491405184
+  },
+  "2023/quarter/band": {
+   "final_value": 1.4794818654315343,
+   "annual_return": 0.1531478888646407,
+   "rebalances": 12,
+   "mean_views": 0.0,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.18239926190223352,
+   "status": {
+    "band": 12
+   }
+  },
+  "2023/half/chrono_ridge/A": {
+   "final_value": 1.7662971824420253,
+   "annual_return": 0.2299303606959875,
+   "rebalances": 6,
+   "mean_views": 634.3333333333334,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.5312630416081152,
+   "status": {
+    "optimal_inaccurate": 5,
+    "optimal": 1
+   },
+   "te_ex_mean": 0.03000000014652773,
+   "te_realized_mean": 0.04028689654978335,
+   "bias_b": 1.4011599568164805,
+   "days": 689,
+   "annual_excess_over_band": 0.06879351050494598
+  },
+  "2023/half/chrono_ridge/B": {
+   "final_value": 1.7659342152239315,
+   "annual_return": 0.22983840702915703,
+   "rebalances": 6,
+   "mean_views": 634.3333333333334,
+   "mean_scaled": 633.1666666666666,
+   "turnover_mean": 0.5329182072643869,
+   "status": {
+    "optimal": 5,
+    "optimal_inaccurate": 1
+   },
+   "te_ex_mean": 0.03000000048542456,
+   "te_realized_mean": 0.03696639726835777,
+   "bias_b": 1.322863697611704,
+   "days": 689,
+   "annual_excess_over_band": 0.06870155683811552
+  },
+  "2023/half/chrono_ridge/C": {
+   "final_value": 1.766394012197553,
+   "annual_return": 0.22995488939532316,
+   "rebalances": 6,
+   "mean_views": 634.3333333333334,
+   "mean_scaled": 633.1666666666666,
+   "turnover_mean": 0.5328821204776681,
+   "status": {
+    "optimal": 4,
+    "optimal_inaccurate": 2
+   },
+   "te_ex_mean": 0.03000000005780218,
+   "te_realized_mean": 0.03694006417038653,
+   "bias_b": 1.32135380713182,
+   "days": 689,
+   "annual_excess_over_band": 0.06881803920428164
+  },
+  "2023/half/gpt_ridge/A": {
+   "final_value": 1.4550726492313721,
+   "annual_return": 0.14618996545490393,
+   "rebalances": 6,
+   "mean_views": 544.5,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.5921087559257922,
+   "status": {
+    "optimal": 3,
+    "optimal_inaccurate": 2,
+    "no views": 1
+   },
+   "te_ex_mean": 0.025000000170272308,
+   "te_realized_mean": 0.060205960472441034,
+   "bias_b": 2.6138899930267674,
+   "days": 565,
+   "annual_excess_over_band": -0.014946884736137589
+  },
+  "2023/half/gpt_ridge/B": {
+   "final_value": 1.451104675538927,
+   "annual_return": 0.14505188136319624,
+   "rebalances": 6,
+   "mean_views": 544.5,
+   "mean_scaled": 633.1666666666666,
+   "turnover_mean": 0.5907901849420892,
+   "status": {
+    "optimal": 4,
+    "no views": 1,
+    "optimal_inaccurate": 1
+   },
+   "te_ex_mean": 0.02500000056951553,
+   "te_realized_mean": 0.05389811219818585,
+   "bias_b": 2.2757088298912977,
+   "days": 565,
+   "annual_excess_over_band": -0.01608496882784527
+  },
+  "2023/half/gpt_ridge/C_gpt": {
+   "final_value": 1.4525425953798643,
+   "annual_return": 0.14546453033635487,
+   "rebalances": 6,
+   "mean_views": 544.5,
+   "mean_scaled": 633.1666666666666,
+   "turnover_mean": 0.5917417653725302,
+   "status": {
+    "optimal": 4,
+    "no views": 1,
+    "optimal_inaccurate": 1
+   },
+   "te_ex_mean": 0.025000000465690144,
+   "te_realized_mean": 0.05313574323805593,
+   "bias_b": 2.2296588951934737,
+   "days": 565,
+   "annual_excess_over_band": -0.015672319854686645
+  },
+  "2023/half/band": {
+   "final_value": 1.50782748172631,
+   "annual_return": 0.16113685019104151,
+   "rebalances": 6,
+   "mean_views": 0.0,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.2934611121592338,
+   "status": {
+    "band": 6
+   }
+  },
+  "2023/year/chrono_ridge/A": {
+   "final_value": 1.682685853260262,
+   "annual_return": 0.20842231568495317,
+   "rebalances": 3,
+   "mean_views": 612.3333333333334,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.5605951884293029,
+   "status": {
+    "optimal_inaccurate": 2,
+    "optimal": 1
+   },
+   "te_ex_mean": 0.030000000222756295,
+   "te_realized_mean": 0.04528501735299886,
+   "bias_b": 1.5116645254197536,
+   "days": 689,
+   "annual_excess_over_band": 0.03571120636938363
+  },
+  "2023/year/chrono_ridge/B": {
+   "final_value": 1.682478572629129,
+   "annual_return": 0.208368159514553,
+   "rebalances": 3,
+   "mean_views": 612.3333333333334,
+   "mean_scaled": 611.6666666666666,
+   "turnover_mean": 0.5608263244845013,
+   "status": {
+    "optimal": 3
+   },
+   "te_ex_mean": 0.030000000130216923,
+   "te_realized_mean": 0.04351212914725686,
+   "bias_b": 1.4555564441703575,
+   "days": 689,
+   "annual_excess_over_band": 0.035657050198983464
+  },
+  "2023/year/chrono_ridge/C": {
+   "final_value": 1.6819725754651536,
+   "annual_return": 0.20823593990252132,
+   "rebalances": 3,
+   "mean_views": 612.3333333333334,
+   "mean_scaled": 611.6666666666666,
+   "turnover_mean": 0.5610470936884916,
+   "status": {
+    "optimal": 3
+   },
+   "te_ex_mean": 0.03000000013773062,
+   "te_realized_mean": 0.043449774638892456,
+   "bias_b": 1.4533010730857308,
+   "days": 689,
+   "annual_excess_over_band": 0.03552483058695177
+  },
+  "2023/year/gpt_ridge/A": {
+   "final_value": 1.4704179777210935,
+   "annual_return": 0.1505727849259315,
+   "rebalances": 3,
+   "mean_views": 432.6666666666667,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.5835471545630211,
+   "status": {
+    "optimal_inaccurate": 2,
+    "no views": 1
+   },
+   "te_ex_mean": 0.020000000002396923,
+   "te_realized_mean": 0.031194907451654087,
+   "bias_b": 1.544556917659743,
+   "days": 437,
+   "annual_excess_over_band": -0.02213832438963803
+  },
+  "2023/year/gpt_ridge/B": {
+   "final_value": 1.4607338943608223,
+   "annual_return": 0.14781029631034692,
+   "rebalances": 3,
+   "mean_views": 432.6666666666667,
+   "mean_scaled": 611.6666666666666,
+   "turnover_mean": 0.58117708354856,
+   "status": {
+    "optimal": 2,
+    "no views": 1
+   },
+   "te_ex_mean": 0.020000000401073113,
+   "te_realized_mean": 0.02865588124718574,
+   "bias_b": 1.4202885540735697,
+   "days": 437,
+   "annual_excess_over_band": -0.024900813005222622
+  },
+  "2023/year/gpt_ridge/C_gpt": {
+   "final_value": 1.4636703753432538,
+   "annual_return": 0.1486491866806987,
+   "rebalances": 3,
+   "mean_views": 432.6666666666667,
+   "mean_scaled": 611.6666666666666,
+   "turnover_mean": 0.583451029690076,
+   "status": {
+    "no views": 1,
+    "optimal_inaccurate": 1,
+    "optimal": 1
+   },
+   "te_ex_mean": 0.02000000002462071,
+   "te_realized_mean": 0.028016839328385095,
+   "bias_b": 1.3905082075480366,
+   "days": 437,
+   "annual_excess_over_band": -0.024061922634870836
+  },
+  "2023/year/band": {
+   "final_value": 1.5495032106129667,
+   "annual_return": 0.17271110931556954,
+   "rebalances": 3,
+   "mean_views": 0.0,
+   "mean_scaled": 0.0,
+   "turnover_mean": 0.40051322769584036,
+   "status": {
+    "band": 3
+   }
+  }
+ },
+ "scaling": {
+  "dates": 100,
+  "used_share": {
+   "B": 1.0,
+   "C": 0.9772727272727273,
+   "C_gpt": 0.75
+  },
+  "beta_score_mean": {
+   "C": -0.0003385691313508908,
+   "C_gpt": 0.017617515554953174
+  }
+ },
+ "seconds": 580
+}
