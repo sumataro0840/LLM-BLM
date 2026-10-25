@@ -24,3 +24,4 @@ experiments/S1_smallcap_drift/results/dry/
 experiments/S2_smallcap_risk/results/panel.csv
 experiments/S2_smallcap_risk/results/dry/
 experiments/S3_smallcap_risk_blm/results/dry/
+experiments/S4_te_calibration/results/dry/
