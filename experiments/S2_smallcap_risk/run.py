@@ -11,6 +11,7 @@ import argparse
 import importlib.util
 import json
 import subprocess
+import os
 import sys
 import time
 from pathlib import Path
@@ -24,7 +25,7 @@ from events.evaluate import holm, permutation_test, regress  # noqa: E402
 from events.returns import load_closes  # noqa: E402
 from smallcap.build import open_db  # noqa: E402
 
-OUT = Path(__file__).resolve().parent / 'results'
+OUT = Path(__file__).resolve().parent / os.environ.get('SMALLCAP_RESULTS', 'results')  # results_rep: replication
 spec = importlib.util.spec_from_file_location('s1_run', REPO / 'experiments' / 'S1_smallcap_drift' / 'run.py')
 s1 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(s1)

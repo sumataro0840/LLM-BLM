@@ -11,6 +11,7 @@ import argparse
 import importlib.util
 import json
 import subprocess
+import os
 import sys
 import time
 from pathlib import Path
@@ -24,8 +25,8 @@ from events.evaluate import holm, permutation_test, regress  # noqa: E402
 from events.returns import load_closes, reactions  # noqa: E402
 from smallcap.build import open_db  # noqa: E402
 
-OUT = Path(__file__).resolve().parent / 'results'
-CACHE = REPO / 'data' / 'cache' / 'smallcap'
+OUT = Path(__file__).resolve().parent / os.environ.get('SMALLCAP_RESULTS', 'results')  # results_rep: replication
+CACHE = Path(os.environ.get('SMALLCAP_CACHE', REPO / 'data' / 'cache' / 'smallcap'))
 
 EVAL_START = '2020-01-01'          # releases filed from this day are evaluated; earlier ones only train
 GPT_START = '2024-01-01'           # the gpt-4o-mini table (its learned weights need two months of 2023-11/12 first)

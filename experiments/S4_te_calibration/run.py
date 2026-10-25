@@ -12,6 +12,7 @@ import argparse
 import importlib.util
 import json
 import subprocess
+import os
 import sys
 import time
 from pathlib import Path
@@ -27,7 +28,7 @@ from events.returns import load_closes  # noqa: E402
 from smallcap.build import open_db  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-OUT = HERE / 'results'
+OUT = HERE / os.environ.get('SMALLCAP_RESULTS', 'results')  # results_rep: replication
 spec = importlib.util.spec_from_file_location('s3_run', REPO / 'experiments' / 'S3_smallcap_risk_blm' / 'run.py')
 s3 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(s3)

@@ -12,6 +12,7 @@ import argparse
 import importlib.util
 import json
 import subprocess
+import os
 import sys
 import time
 from pathlib import Path
@@ -25,7 +26,7 @@ from events.returns import load_closes  # noqa: E402
 from smallcap.build import open_db  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-OUT = HERE / 'results'
+OUT = HERE / os.environ.get('SMALLCAP_RESULTS', 'results')  # results_rep: replication
 
 
 def _load(name, path):
@@ -37,8 +38,8 @@ def _load(name, path):
 
 bp = _load('s1_blm_paths', REPO / 'experiments' / 'S1_smallcap_drift' / 'blm_paths.py')
 s1, x02 = bp.s1, bp.x02
-S1_RES = REPO / 'experiments' / 'S1_smallcap_drift' / 'results'
-S2_RES = REPO / 'experiments' / 'S2_smallcap_risk' / 'results'
+S1_RES = REPO / 'experiments' / 'S1_smallcap_drift' / os.environ.get('SMALLCAP_RESULTS', 'results')
+S2_RES = REPO / 'experiments' / 'S2_smallcap_risk' / os.environ.get('SMALLCAP_RESULTS', 'results')
 
 COMBOS = {'2015': {'chrono_ridge': ['A', 'B', 'C']},
           '2023': {'chrono_ridge': ['A', 'B', 'C'], 'gpt_ridge': ['A', 'B', 'C_gpt']}}

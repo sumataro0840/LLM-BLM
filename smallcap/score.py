@@ -11,6 +11,7 @@ the raw text (E5's vector) and the three vectors of the cleaned text (mean of th
 26th layer), under data/cache/smallcap/ (outside Git).
 """
 import argparse
+import os
 import sys
 import time
 from pathlib import Path
@@ -24,7 +25,7 @@ from events import texts  # noqa: E402
 from experiments.F_fixes import score as F  # noqa: E402
 from smallcap.build import open_db  # noqa: E402
 
-OUT = REPO / 'data' / 'cache' / 'smallcap'
+OUT = Path(os.environ.get('SMALLCAP_CACHE', REPO / 'data' / 'cache' / 'smallcap'))  # the replication uses its own
 NOTE = 'small caps (設計_小型株.md)'
 
 

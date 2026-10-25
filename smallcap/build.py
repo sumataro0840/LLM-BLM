@@ -20,6 +20,7 @@ cut made from SEC data, so that companies that later disappear are in it too). S
 import argparse
 import json
 import random
+import os
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -37,7 +38,7 @@ from marketdb.db.connection import connect, init_db  # noqa: E402
 from marketdb.db.market import now_utc, save_prices  # noqa: E402
 from marketdb.sources.prices import download_prices  # noqa: E402
 
-DB_PATH = REPO / 'data' / 'smallcap.sqlite'
+DB_PATH = Path(os.environ.get('SMALLCAP_DB', REPO / 'data' / 'smallcap.sqlite'))  # the replication uses its own
 YEARS = range(2015, 2026)                       # years of the public float (measured at the second fiscal quarter)
 BAND = (1001, 3000)                             # ranks of the public float
 FLOAT_MIN, FLOAT_MAX = 1e6, 4e12                # values outside are reporting errors (wrong scale)
