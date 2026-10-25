@@ -23,3 +23,4 @@ experiments/S1_smallcap_drift/results/dry/
 資料集/00_全体の記録/LLM-BLM_全体の記録.tex
 experiments/S2_smallcap_risk/results/panel.csv
 experiments/S2_smallcap_risk/results/dry/
+experiments/S3_smallcap_risk_blm/results/dry/
