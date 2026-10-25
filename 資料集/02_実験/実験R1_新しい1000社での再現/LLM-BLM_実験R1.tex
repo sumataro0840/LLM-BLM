@@ -1,0 +1,125 @@
+% ============================================================
+% LLM-BLM 実験 R1：新しい 1,000 社で S1〜S4 を再現し、BLM が比べる相手を上回るかを検定する（事前登録した検定の結果）
+% コンパイル：tectonic -X compile LLM-BLM_実験R1.tex   （XeTeX 系。このフォルダで実行する）
+% 数値と表は 図/values.tex・図/tab_*.tex（作成スクリプト/values.py）、図は 図/*.pdf（作成スクリプト/figs.py）。
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt,openany]{bxjsreport}
+\setpagelayout*{left=22mm,right=22mm,top=24mm,bottom=26mm,footskip=11mm}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,multirow,longtable}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+
+\graphicspath{{図/}}
+\input{図/values.tex}
+\newcommand{\V}[1]{\ifcsname v@#1\endcsname\csname v@#1\endcsname\else\textbf{??#1??}\fi}
+\newcommand{\tabin}[1]{\adjustbox{max width=\linewidth}{\input{図/tab_#1.tex}}}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{soft1}{HTML}{E4EEF9}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\SP}{S\&P500}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\newcommand{\chapref}[1]{第~\ref{#1}~章}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+
+\makeatletter
+\def\@makechapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \ifnum\c@secnumdepth>\m@ne\if@mainmatter{\Large\headfont\@chapapp\thechapter\@chappos}\par\nobreak\vskip0.4\Cvs\fi\fi
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\def\@makeschapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\makeatother
+
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+\title{LLM-BLM 実験 R1\\[6pt]
+  \large 新しい 1,000 社での S1〜S4 の再現と、\\BLM が比べる相手を上回るかの検定}
+\author{実験の報告書（事前登録した検定の結果）}
+\date{2026 年 10 月 25 日}
+
+\begin{document}
+\maketitle
+
+\input{章/概要}
+
+\setcounter{tocdepth}{1}
+{\small\tableofcontents}
+
+% ============================================================
+\chapter{目的}\label{ch:purpose}
+
+S1〜S4 は、同じ 1,000 社（元の標本）で行った。S1 の検定自体は事前登録して 1 回だけ実行したが、S2〜S4 の設計は S1 の結果を見た後であり、BLM の推移が比べる相手を上回ったことは検定していなかった。そこで、次の 2 つを、元の標本に含まれない新しい 1,000 社で確かめた。
+
+\begin{keybox}[問い]
+\begin{enumerate}
+\item S1〜S4 の主な検定の結果は、別の 1,000 社でも同じになるか（再現）。
+\item S4 の形の BLM（ChronoGPT の見通し・株価で補正した共分散・TE の校正）は、比べる相手（範囲の全社、浮動株時価総額で加重）を上回るか（新しい主な検定）。
+\end{enumerate}
+\end{keybox}
+
+% ============================================================
+\chapter{事前登録と方法}\label{ch:method}
+
+仮説・方法・判定の基準は \code{experiments/R1\_replication/preregistration.md} に書き、コードと同じコミットで固定してから実行した。新しい標本の株価の反応・変動率・ポートフォリオは、それまで一度も計算していない。
+
+\section{新しい標本}
+
+元の標本を選んだのと同じ条件（小型株の範囲に一度でも入った会社のうち、いま上場して株価があり、2016 年以降の決算の 8-K が 4 件以上）を満たす 2,400 社から、元の 1,000 社を除いた 1,400 社のうち、1,000 社を乱数の種 1 で選んだ（元の標本との重なりは 0）。決算発表文・財務データ・驚き・点数（辞書、FinBERT、ChronoGPT、gpt-4o-mini）は、元の標本と同じコードで作った。
+
+2015 年以降の発表は \V{npanel} 件（元の標本は \V{npanelorig} 件）、評価する発表（2020 年以降、範囲の中）は \V{neval} 件（元は \V{nevalorig} 件）。
+
+\section{実行}
+
+S1〜S4 のコードを、データベース・点数の保存先・結果のフォルダだけを環境変数で切り替えて、元と同じ順・同じ設定・同じ乱数の種で 1 回ずつ実行した。
+
+\section{再現の判定}
+
+S1・S2・S4 の主な検定は、元と同じ基準で「支持」なら「再現した」。S3 の主な検定は、元の結果が「支持されない」だったので、再び「支持されない」なら「再現した（効果なし）」とした。
+
+\section{新しい主な検定（R-BLM）}
+
+2015 年末から四半期ごと、ChronoGPT＋リッジの見通し、株価で補正した共分散（B）、TE の校正ありの BLM について、2017 年以降の日次の超過リターン（BLM − 比べる相手）の平均が正かを、円形のブロック・ブートストラップ（ブロック 63 日、2,000 回）で検定した（片側 $p < 0.05$ で「支持」）。
+
+% ============================================================
+\input{章/結果}
+
+% ============================================================
+\chapter{限界}\label{ch:limits}
+
+\begin{itemize}
+\item \textbf{株価データの誤り}：yfinance の調整後終値には、破産から再出発した会社の古い株と新しい株のつなぎや、1 日だけの価格の乱れが残っている（\chapref{ch:explore}）。S1・S2 の回帰は目的変数を 1\%・99\% で切るので影響は小さいが、BLM の日々のリターンと TE は切らないので、大きく左右される。誤りを除いた計算は探索で、事前登録していない。
+\item \textbf{生存者バイアス}：新しい標本も、いま上場している会社だけである。元の標本と同じ選び方なので、同じ偏りを共有する。資産の水準は高く出ている。
+\item \textbf{同じ母集団}：新しい標本は、元の標本と同じ母集団（米国の小型株、2015〜2026 年）の残りの会社である。別の市場・別の期間での再現ではない。
+\item \textbf{費用と規模}：費用は片道 0.3\% の一定とした。小型株で大きな資金を動かすと、インパクトでもっとかかる。
+\end{itemize}
+
+% ============================================================
+\chapter*{再現の手順}
+\addcontentsline{toc}{chapter}{再現の手順}
+
+リポジトリの直下で（\code{.venv} の Python）：
+
+\begin{enumerate}
+\item \code{python -m smallcap.replica}（新しい標本のデータベースを作る）。
+\item \code{smallcap/start\_replica.ps1}、\code{smallcap/start\_replica\_llm.ps1}（決算発表文・財務データ・驚き・点数）。
+\item \code{experiments/R1\_replication/start\_analysis.ps1}（S1〜S4 と R1 を、環境変数を切り替えて 1 回ずつ）。
+\item 探索：\code{python experiments/R1\_replication/explore.py orig} と \code{... explore.py rep}（それぞれ約 30 分）。
+\item \code{資料集/02\_実験/実験R1\_新しい1000社での再現/作成スクリプト/} の \code{values.py} と \code{figs.py}、このフォルダで \code{tectonic -X compile LLM-BLM\_実験R1.tex}。
+\end{enumerate}
+
+\end{document}
