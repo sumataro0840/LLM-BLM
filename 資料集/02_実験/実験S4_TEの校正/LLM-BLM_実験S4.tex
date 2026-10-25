@@ -1,0 +1,117 @@
+% ============================================================
+% LLM-BLM 実験 S4：過去の偏りで TE の上限を校正すると、小型株の BLM の実現の TE は約束の 3% に近づくか
+% コンパイル：tectonic -X compile LLM-BLM_実験S4.tex   （XeTeX 系。このフォルダで実行する）
+% 数値と表は 図/values.tex・図/tab_*.tex（作成スクリプト/values.py）、図は 図/*.pdf（作成スクリプト/figs.py）。
+% どちらも experiments/S4_te_calibration/results から作る。本文に数値を手で書かない。
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt,openany]{bxjsreport}
+\setpagelayout*{left=22mm,right=22mm,top=24mm,bottom=26mm,footskip=11mm}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,multirow,longtable}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+
+\graphicspath{{図/}}
+\input{図/values.tex}
+\newcommand{\V}[1]{\ifcsname v@#1\endcsname\csname v@#1\endcsname\else\textbf{??#1??}\fi}
+\newcommand{\tabin}[1]{\adjustbox{max width=\linewidth}{\input{図/tab_#1.tex}}}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{soft1}{HTML}{E4EEF9}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\SP}{S\&P500}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\newcommand{\chapref}[1]{第~\ref{#1}~章}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+
+\makeatletter
+\def\@makechapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \ifnum\c@secnumdepth>\m@ne\if@mainmatter{\Large\headfont\@chapapp\thechapter\@chappos}\par\nobreak\vskip0.4\Cvs\fi\fi
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\def\@makeschapterhead#1{\vspace*{0.3\Cvs}{\parindent\z@\raggedright\normalfont
+  \interlinepenalty\@M\LARGE\headfont #1\par\nobreak\vskip 1.5\Cvs}}
+\makeatother
+
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+\title{LLM-BLM 実験 S4\\[6pt]
+  \large 過去の偏りで TE の上限を校正すると、\\小型株の BLM の実現の TE は約束の 3\% に近づくか}
+\author{実験の報告書（事前登録した検定の結果）}
+\date{2026 年 10 月 25 日}
+
+\begin{document}
+\maketitle
+
+\input{章/概要}
+
+\setcounter{tocdepth}{1}
+{\small\tableofcontents}
+
+% ============================================================
+\chapter{目的}\label{ch:purpose}
+
+実験 S3 で、小型株の BLM の事前の TE は、実現の TE を小さく見積もっていた。偏り $b$（実現 ÷ 事前の TE の目安）は、どの組み合わせでも 1 を超えた。株価のデータで共分散を補正すると偏りは小さくなったが、1 には届かなかった。
+
+\SP{} の補足実験 X03 では、過去 36 か月の「実現 ÷ 事前の TE」で上限を割るだけで、実現の TE が約束の 3\% にずっと近づいた。
+
+\begin{keybox}[問い]
+小型株の BLM で、その運用自身の過去の偏りで TE の上限を割ると、実現の TE は約束の年 3\% に近づくか。
+\end{keybox}
+
+% ============================================================
+\chapter{事前登録と方法}\label{ch:method}
+
+仮説・方法・判定の基準は \code{experiments/S4\_te\_calibration/preregistration.md} に書き、コード（\code{run.py}）と同じコミットで固定してから、1 回だけ実行した。実行に使ったコミットは \code{\V{commit}}。S1〜S3 と同じ 1,000 社で、S3 の結果（$b > 1$）を見た後に設計した。
+
+\section{校正の規則}
+
+各リバランスの日に、その運用自身の、それより前の日の標準化した超過リターン（超過リターン ÷ その日に有効だった事前の日次の TE）の直近 756 日（約 3 年）から、偏り $b_{\text{past}}$ を計算する。事前の TE の上限を $L = 3\% / b_{\text{past}}$ とし、$[1\%, 6\%]$ に丸める。過去の日が 126 日に満たないあいだは $L = 3\%$ のままにする。
+
+\section{比べる組み合わせ}
+
+ポートフォリオは S3 と同じ（範囲、リバランスの日、BLM、費用、比べる相手）。共分散は S3 の A（直近 252 日の Ledoit--Wolf）と B（株価のデータで補正）で、それぞれ校正なしと校正あり（\_cal）を作った。見通しは ChronoGPT＋リッジ（2015 年末と 2023 年末から）と、gpt-4o-mini（重みを学習、2023 年末から、B と B\_cal）。
+
+\section{主な検定}
+
+2015 年末から四半期ごと、ChronoGPT＋リッジの見通し、共分散 B で、校正なし（B）と校正あり（B\_cal）を比べる。2017 年以降の日について、約束に対する日次の比 $u_t$ = 超過リターン ÷ $(3\% / \sqrt{252})$ から $g = \sqrt{\overline{u_t^2}}$（$g = 1$ なら実現の TE がちょうど 3\%）を作り、$D = |\log g_B| - |\log g_{B\_cal}| > 0$ かを、S3 と同じブロック・ブートストラップで検定した（片側 $p < 0.05$ で「支持」）。
+
+% ============================================================
+\input{章/結果}
+
+% ============================================================
+\chapter{限界}\label{ch:limits}
+
+\begin{itemize}
+\item \textbf{同じ 1,000 社}：S1〜S3 と同じ標本で、今も上場している会社だけである。
+\item \textbf{規則は 1 つ}：756 日・126 日・$[1\%, 6\%]$ の組み合わせだけを試した。選び直すと過剰適合になる。
+\item \textbf{リスクとリターンの交換}：校正はリスクを小さくした分だけ、比べる相手との差も小さくする。
+\item \textbf{2023 年末からの版}は、校正が働く期間が短い。
+\end{itemize}
+
+% ============================================================
+\chapter*{再現の手順}
+\addcontentsline{toc}{chapter}{再現の手順}
+
+リポジトリの直下で（\code{.venv} の Python）、S1・S2 の \code{run.py} の後に：
+
+\begin{enumerate}
+\item \code{python experiments/S4\_te\_calibration/run.py}（結果は \code{results/}。2 回目は summary.json があると止まる）。
+\item \code{資料集/02\_実験/実験S4\_TEの校正/作成スクリプト/} の \code{values.py} と \code{figs.py}。
+\item このフォルダで \code{tectonic -X compile LLM-BLM\_実験S4.tex}。
+\end{enumerate}
+
+\end{document}

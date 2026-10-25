@@ -1,0 +1,15 @@
+\chapter*{概要}
+\addcontentsline{toc}{chapter}{概要}
+
+実験 S3 で、小型株の BLM の事前の TE は、実現の TE を小さく見積もっていた。この実験 S4 では、各リバランスの日に、その運用自身の過去 3 年の偏り（実現 ÷ 事前の TE の目安）で TE の上限を割る校正を入れ、実現の TE が約束の年 3\% に近づくかを、事前登録して 1 回だけ確かめた。
+
+\begin{keybox}[要点]
+\begin{itemize}
+\item \textbf{主な検定は\V{primaryverdict}された}。株価で補正した共分散（S3 の B）に校正を足すと、2017 年以降の実現の TE は \V{primaryteref} から \V{primarytenew} になり、約束の 3\% にはっきり近づいた（片側 $p$ = \V{primaryp}）。
+\item 補正なしの共分散でも（\V{AvsAcalteref} → \V{AvsAcaltenew}）、gpt-4o-mini の見通しでも（\V{gptBvsBcalteref} → \V{gptBvsBcaltenew}）、同じように効いた。
+\item \textbf{校正した後は、共分散の補正の差はなくなった}（\V{AcalvsBcalteref} と \V{AcalvsBcaltenew}）。
+\item \textbf{リスク 1 単位あたりの成績（情報レシオ）は保たれた}。リスクを小さくした分、比べる相手との差は小さくなった（2015 年末から四半期ごとで、年 \V{2015quarterchronoridgeBannualexcessoverband} → \V{2015quarterchronoridgeBcalannualexcessoverband}）。
+\item \textbf{急な変化には追いつかない}。2020 年と 2025 年には、校正しても実現の TE が 4\% を超えた。
+\item これからの BLM では、この校正を標準にする。
+\end{itemize}
+\end{keybox}
