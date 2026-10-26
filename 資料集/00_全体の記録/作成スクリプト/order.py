@@ -248,7 +248,9 @@ ORDER = [
     ('imp', 'r3', '結果の確かさ', {'title': '今どこまで言えるか（2026-10-25）'}),
     ('imp', 'r3', 'BLM が効くことの証明の計画'),
     ('imp', 'r3', 'この先の研究の形'),
-    ('imp', 'r3', '証明の結果', {'title': '証明の結果（未完成）'}),
+    ('chap', '実験 G：小型株の BLM が効くことの確かめ（探索）', all_of('gx', [
+        '概要', '目的', '方法', '結果', '考察', '再現の手順'])),
+    ('imp', 'r3', '証明の結果', {'title': '証明の結果：G3 の事前登録した検定（2026-10-27）'}),
 
     # ======================================================================
     ('part', '結論'),
@@ -292,6 +294,8 @@ ORDER = [
         ('md', PREG.format('S3_smallcap_risk_blm'), '実験 S3'),
         ('md', PREG.format('S4_te_calibration'), '実験 S4'),
         ('md', PREG.format('R1_replication'), '実験 R1'),
+        ('md', 'experiments/G_proof/plan.md', '実験 G（計画、探索）'),
+        ('md', PREG.format('G3_confirm'), 'G3'),
     ]),
     ('chap', '結果の記録の原文（実験 2〜9、X02〜X05、S1〜S4、R1）', [
         ('md', FIND.format('E2_event_reaction'), '実験 2'),
@@ -311,6 +315,8 @@ ORDER = [
         ('md', FIND.format('S3_smallcap_risk_blm'), '実験 S3'),
         ('md', FIND.format('S4_te_calibration'), '実験 S4'),
         ('md', FIND.format('R1_replication'), '実験 R1'),
+        ('md', FIND.format('G_proof'), '実験 G'),
+        ('md', FIND.format('G3_confirm'), 'G3'),
     ]),
     ('md', '設計_小型株.md', '小型株の設計'),
     ('chap', 'ヘッジファンドの報告書の付録', all_of('hf', ['用語の一覧', '文献と数値の照合'])),

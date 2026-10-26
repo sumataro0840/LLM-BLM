@@ -71,6 +71,8 @@ DOCS = {
                src='実験 S4 の報告書（2026-10-25）'),
     'rep': dict(path='02_実験/実験R1_新しい1000社での再現/LLM-BLM_実験R1.tex', figs=['図'], tabs='図', vals=True,
                 src='実験 R1 の報告書（2026-10-25）'),
+    'gx': dict(path='02_実験/実験G_BLMが効くことの確かめ/LLM-BLM_実験G.tex', figs=['図'],
+               src='実験 G の報告書（2026-10-27）'),
     'r3': dict(path='01_総合報告書/総合報告3/LLM-BLM_総合報告書3.tex', figs=['LLM-BLM_総合報告書3_図'],
                src='総合報告書 3（2026-10-25）'),
 }
