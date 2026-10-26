@@ -1,0 +1,12 @@
+{
+ "orig": {
+  "power_p05": 0.9,
+  "mean_annual": 0.01879,
+  "mean_ir": 0.6020000000000001
+ },
+ "rep": {
+  "power_p05": 0.5,
+  "mean_annual": 0.0149,
+  "mean_ir": 0.465
+ }
+}
