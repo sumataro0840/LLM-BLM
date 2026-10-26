@@ -1,0 +1,236 @@
+{
+ "orig": {
+  "total_annual": 0.030358077145224108,
+  "n_stocks": 993,
+  "top10_share": 0.5114525192069453,
+  "annual_without_top10": 0.014831362111020447,
+  "bottom10_annual": -0.009273482005709745,
+  "top20_share": 0.8657373745985465,
+  "annual_without_top20": 0.004075955139657653,
+  "bottom20_annual": -0.016021804048063058,
+  "top50_share": 1.606043199638922,
+  "annual_without_top50": -0.018398306207976847,
+  "bottom50_annual": -0.03149616112901275,
+  "positive_stocks": 504,
+  "negative_stocks": 489,
+  "top10": {
+   "IONQ": 0.233,
+   "DAVE": 0.217,
+   "ACHR": 0.157,
+   "ZETA": 0.156,
+   "ARLP": 0.156,
+   "MHO": 0.14,
+   "VCYT": 0.129,
+   "NSP": 0.123,
+   "MOV": 0.122,
+   "IBP": 0.12
+  },
+  "bottom5": {
+   "HRTX": -0.124,
+   "RIOT": -0.104,
+   "CMTL": -0.103,
+   "CYTK": -0.097,
+   "OXM": -0.091
+  },
+  "quantum": {
+   "IONQ": 0.233,
+   "QBTS": 0.0,
+   "QUBT": -0.01,
+   "RGTI": 0.0
+  },
+  "by_year": {
+   "2017": 3.79,
+   "2018": 3.58,
+   "2019": 0.19,
+   "2020": -0.86,
+   "2021": 4.27,
+   "2022": -1.9,
+   "2023": -0.15,
+   "2024": 14.48,
+   "2025": 6.54,
+   "2026": -0.49
+  },
+  "G6": {
+   "blm_cost0.0": {
+    "annual_excess": 3.04,
+    "te_realized": 3.12,
+    "ir": 0.974,
+    "ci95_annual": [
+     1.22,
+     4.93
+    ],
+    "p_one_sided": 0.001
+   },
+   "blm_cost0.003": {
+    "annual_excess": 2.37,
+    "te_realized": 3.14,
+    "ir": 0.755,
+    "ci95_annual": [
+     0.56,
+     4.26
+    ],
+    "p_one_sided": 0.007
+   },
+   "blm_turnover": 0.839,
+   "top_float_cost0.0": {
+    "annual_excess": 5.99,
+    "te_realized": 6.57,
+    "ir": 0.912,
+    "ci95_annual": [
+     2.36,
+     9.46
+    ],
+    "p_one_sided": 0.001
+   },
+   "top_float_cost0.003": {
+    "annual_excess": 5.2,
+    "te_realized": 6.58,
+    "ir": 0.791,
+    "ci95_annual": [
+     1.56,
+     8.64
+    ],
+    "p_one_sided": 0.003
+   },
+   "top_float_turnover": 0.942,
+   "top_equal_cost0.0": {
+    "annual_excess": 6.58,
+    "te_realized": 6.09,
+    "ir": 1.08,
+    "ci95_annual": [
+     3.18,
+     10.15
+    ],
+    "p_one_sided": 0.0
+   },
+   "top_equal_cost0.003": {
+    "annual_excess": 5.81,
+    "te_realized": 6.1,
+    "ir": 0.952,
+    "ci95_annual": [
+     2.42,
+     9.38
+    ],
+    "p_one_sided": 0.0
+   },
+   "top_equal_turnover": 0.923
+  }
+ },
+ "rep": {
+  "total_annual": 0.03011074795378318,
+  "n_stocks": 990,
+  "top10_share": 0.5317009877512612,
+  "annual_without_top10": 0.014100833524827395,
+  "bottom10_annual": -0.011415754252666877,
+  "top20_share": 0.9191007039478781,
+  "annual_without_top20": 0.002435938313063929,
+  "bottom20_annual": -0.01781899449822038,
+  "top50_share": 1.7047046723023402,
+  "annual_without_top50": -0.021219184769549138,
+  "bottom50_annual": -0.03257118510565319,
+  "positive_stocks": 485,
+  "negative_stocks": 505,
+  "top10": {
+   "MOD": 0.205,
+   "LGIH": 0.181,
+   "ENSG": 0.172,
+   "ANF": 0.158,
+   "VKTX": 0.157,
+   "ROOT": 0.157,
+   "WMS": 0.151,
+   "VRT": 0.148,
+   "PRAX": 0.141,
+   "BCO": 0.131
+  },
+  "bottom5": {
+   "LUMN": -0.193,
+   "OPEN": -0.187,
+   "MUR": -0.15,
+   "NKTR": -0.122,
+   "NTLA": -0.098
+  },
+  "quantum": {
+   "IONQ": 0.0,
+   "QBTS": -0.0,
+   "QUBT": 0.0,
+   "RGTI": 0.0
+  },
+  "by_year": {
+   "2017": 5.26,
+   "2018": -1.62,
+   "2019": 4.33,
+   "2020": -2.07,
+   "2021": 3.25,
+   "2022": 3.57,
+   "2023": 3.98,
+   "2024": 7.9,
+   "2025": 2.47,
+   "2026": 3.07
+  },
+  "G6": {
+   "blm_cost0.0": {
+    "annual_excess": 3.01,
+    "te_realized": 3.18,
+    "ir": 0.946,
+    "ci95_annual": [
+     1.16,
+     4.93
+    ],
+    "p_one_sided": 0.001
+   },
+   "blm_cost0.003": {
+    "annual_excess": 2.29,
+    "te_realized": 3.22,
+    "ir": 0.71,
+    "ci95_annual": [
+     0.44,
+     4.2
+    ],
+    "p_one_sided": 0.009
+   },
+   "blm_turnover": 0.871,
+   "top_float_cost0.0": {
+    "annual_excess": 3.03,
+    "te_realized": 5.73,
+    "ir": 0.529,
+    "ci95_annual": [
+     -0.33,
+     6.31
+    ],
+    "p_one_sided": 0.036
+   },
+   "top_float_cost0.003": {
+    "annual_excess": 2.18,
+    "te_realized": 5.75,
+    "ir": 0.379,
+    "ci95_annual": [
+     -1.17,
+     5.47
+    ],
+    "p_one_sided": 0.1
+   },
+   "top_float_turnover": 0.992,
+   "top_equal_cost0.0": {
+    "annual_excess": 4.47,
+    "te_realized": 6.23,
+    "ir": 0.718,
+    "ci95_annual": [
+     1.13,
+     8.43
+    ],
+    "p_one_sided": 0.003
+   },
+   "top_equal_cost0.003": {
+    "annual_excess": 3.65,
+    "te_realized": 6.25,
+    "ir": 0.584,
+    "ci95_annual": [
+     0.33,
+     7.61
+    ],
+    "p_one_sided": 0.016
+   },
+   "top_equal_turnover": 0.966
+  }
+ }
+}
