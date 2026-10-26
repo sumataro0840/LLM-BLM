@@ -38,3 +38,9 @@ experiments/R1_replication/results/dry/
 experiments/G_proof/results/*/shuffle_*.csv
 experiments/G_proof/results/*/power_*.csv
 experiments/G_proof/results/logs/
+# G3: panels and dry runs of the G3 sample (rebuilt by the run.py of each experiment)
+experiments/S1_smallcap_drift/results_g3/panel.csv
+experiments/S1_smallcap_drift/results_g3/dry/
+experiments/S2_smallcap_risk/results_g3/panel.csv
+experiments/S2_smallcap_risk/results_g3/dry/
+experiments/G3_confirm/results/dry/
