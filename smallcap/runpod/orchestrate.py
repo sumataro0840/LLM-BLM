@@ -6,6 +6,7 @@ release list and puts them where smallcap/score.py looks (data/cache/smallcap_re
 done. The pod is deleted at the end, also when something fails. Log: data/cache/logs/runpod_rep.log.
 """
 import math
+import os
 import subprocess
 import sys
 import tarfile
@@ -21,11 +22,12 @@ sys.path.insert(0, str(REPO / 'smallcap' / 'runpod'))
 import pod  # noqa: E402
 
 LOGS = REPO / 'data' / 'cache' / 'logs'
-LOG = LOGS / 'runpod_rep.log'
-BUNDLE = REPO / 'data' / 'cache' / 'runpod' / 'smallcap_rep.tar.gz'
-STAGE = REPO / 'data' / 'cache' / 'runpod' / 'bundle_rep'
-BACK = REPO / 'data' / 'cache' / 'runpod' / 'rep_out'
-DEST = REPO / 'data' / 'cache' / 'smallcap_rep'
+TAG = os.environ.get('SMALLCAP_TAG', 'rep')   # rep: R1's sample; g3: the G3 sample (data/smallcap_g3.sqlite)
+LOG = LOGS / f'runpod_{TAG}.log'
+BUNDLE = REPO / 'data' / 'cache' / 'runpod' / f'smallcap_{TAG}.tar.gz'
+STAGE = REPO / 'data' / 'cache' / 'runpod' / f'bundle_{TAG}'
+BACK = REPO / 'data' / 'cache' / 'runpod' / f'{TAG}_out'
+DEST = REPO / 'data' / 'cache' / f'smallcap_{TAG}'
 STEPS = ['chrono_raw', 'chrono_clean']
 SSH = 'C:/Program Files/Git/usr/bin/ssh.exe'
 SCP = 'C:/Program Files/Git/usr/bin/scp.exe'
@@ -42,7 +44,7 @@ def log(msg):
 
 
 def chain_text():
-    p = LOGS / 'rep_chain.log'
+    p = LOGS / f'{TAG}_chain.log'
     if not p.exists():
         return ''
     raw = p.read_bytes()
@@ -82,14 +84,14 @@ def check_and_place(step, n, accessions):
 def main():
     global LOG, BUNDLE, STAGE, BACK, DEST
     test = '--test' in sys.argv        # 30 releases of the original sample, results kept apart
-    name, db, extra = ('test2', 'data/smallcap.sqlite', ['--limit', '30']) if test else ('rep', 'data/smallcap_rep.sqlite', [])
+    name, db, extra = ('test2', 'data/smallcap.sqlite', ['--limit', '30']) if test else (TAG, f'data/smallcap_{TAG}.sqlite', [])
     if test:
         R = REPO / 'data' / 'cache' / 'runpod'
         LOG, BUNDLE, STAGE, BACK, DEST = (LOGS / 'runpod_test.log', R / 'smallcap_test2.tar.gz', R / 'bundle_test2',
                                           R / 'test2_out', R / 'test2_dest')
     LOGS.mkdir(parents=True, exist_ok=True)
     log('waiting for the release fetch')
-    while not test and 'done: rep_build_releases' not in chain_text():
+    while not test and f'done: {TAG}_build_releases' not in chain_text():
         if 'failed' in chain_text():
             log('the data chain failed; stop')
             return

@@ -17,10 +17,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 SAMPLE, MODE = sys.argv[1], sys.argv[2]
-if SAMPLE == 'rep':                      # before the imports: smallcap.build and S1-S4 read these when loaded
-    os.environ['SMALLCAP_DB'] = str(REPO / 'data' / 'smallcap_rep.sqlite')
-    os.environ['SMALLCAP_CACHE'] = str(REPO / 'data' / 'cache' / 'smallcap_rep')
-    os.environ['SMALLCAP_RESULTS'] = 'results_rep'
+if SAMPLE in ('rep', 'g3'):              # before the imports: smallcap.build and S1-S4 read these when loaded
+    os.environ['SMALLCAP_DB'] = str(REPO / 'data' / f'smallcap_{SAMPLE}.sqlite')
+    os.environ['SMALLCAP_CACHE'] = str(REPO / 'data' / 'cache' / f'smallcap_{SAMPLE}')
+    os.environ['SMALLCAP_RESULTS'] = f'results_{SAMPLE}'
 sys.path.insert(0, str(REPO))
 
 import numpy as np  # noqa: E402

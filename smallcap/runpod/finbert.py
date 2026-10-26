@@ -29,9 +29,10 @@ import orchestrate as O  # noqa: E402
 import pod  # noqa: E402
 from marketdb.db import events as db  # noqa: E402
 
-LOG = O.LOGS / 'runpod_finbert.log'
-DB = REPO / 'data' / 'smallcap_rep.sqlite'
-WORK = REPO / 'data' / 'cache' / 'runpod' / 'finbert_rep'
+LOG = O.LOGS / f'runpod_finbert_{O.TAG}.log'
+TAG = O.TAG
+DB = REPO / 'data' / f'smallcap_{TAG}.sqlite'
+WORK = REPO / 'data' / 'cache' / 'runpod' / f'finbert_{TAG}'
 O.LOG = LOG
 
 
@@ -60,8 +61,8 @@ def pod_part():
             if O.ssh(addr, 'nvidia-smi -L', check=False).returncode == 0:
                 break
             time.sleep(15)
-        O.scp(addr, str(REPO / 'data' / 'cache' / 'runpod' / 'smallcap_rep.tar.gz'), 'POD:/workspace/')
-        O.ssh(addr, 'cd /workspace && tar xzf smallcap_rep.tar.gz', timeout=1800)
+        O.scp(addr, str(REPO / 'data' / 'cache' / 'runpod' / f'smallcap_{TAG}.tar.gz'), 'POD:/workspace/')
+        O.ssh(addr, f'cd /workspace && tar xzf smallcap_{TAG}.tar.gz', timeout=1800)
         O.scp(addr, str(REPO / 'events' / 'scorers' / 'finbert.py'), 'POD:/workspace/bundle/LLM-BLM/events/scorers/')
         O.scp(addr, str(REPO / 'smallcap' / 'runpod' / 'score_finbert.py'), 'POD:/workspace/bundle/')
         O.scp(addr, str(WORK / 'skip.txt'), 'POD:/workspace/bundle/')
@@ -108,31 +109,31 @@ def pod_part():
 
 
 def append_chain(text):
-    with open(O.LOGS / 'rep_chain.log', 'ab') as f:            # PowerShell's Out-File wrote it in UTF-16 LE
+    with open(O.LOGS / f'{TAG}_chain.log', 'ab') as f:            # PowerShell's Out-File wrote it in UTF-16 LE
         f.write((text + '\r\n').encode('utf-16-le'))
 
 
 def pc_part():
-    O.log('waiting for the ChronoGPT pod (runpod_rep.log)')
-    rp = O.LOGS / 'runpod_rep.log'
+    O.log(f'waiting for the ChronoGPT pod (runpod_{TAG}.log)')
+    rp = O.LOGS / f'runpod_{TAG}.log'
     while True:
         t = rp.read_text(encoding='utf-8') if rp.exists() else ''
         if 'all done' in t or 'failed' in t:
             break
         time.sleep(120)
     O.log('ChronoGPT pod: ' + ('all done' if 'all done' in t else 'failed (the PC computes ChronoGPT itself)'))
-    env = {**os.environ, 'SMALLCAP_DB': str(DB), 'SMALLCAP_CACHE': str(REPO / 'data' / 'cache' / 'smallcap_rep'),
+    env = {**os.environ, 'SMALLCAP_DB': str(DB), 'SMALLCAP_CACHE': str(REPO / 'data' / 'cache' / f'smallcap_{TAG}'),
            'PYTHONIOENCODING': 'utf-8'}
-    with open(O.LOGS / 'rep_score_rest.log', 'w', encoding='utf-8') as out, \
-            open(O.LOGS / 'rep_score_rest.err', 'w', encoding='utf-8') as err:
+    with open(O.LOGS / f'{TAG}_score_rest.log', 'w', encoding='utf-8') as out, \
+            open(O.LOGS / f'{TAG}_score_rest.err', 'w', encoding='utf-8') as err:
         r = subprocess.run([sys.executable, '-W', 'ignore', '-m', 'smallcap.score', 'finbert', 'chrono_raw', 'chrono_clean'],
                            cwd=REPO, env=env, stdout=out, stderr=err)
     if r.returncode != 0:
-        raise RuntimeError('smallcap.score finbert chrono_raw chrono_clean failed (rep_score_rest.err)')
+        raise RuntimeError(f'smallcap.score finbert chrono_raw chrono_clean failed ({TAG}_score_rest.err)')
     stamp = time.strftime('%Y-%m-%dT%H:%M:%S')
-    append_chain(f'done: rep_score_all {stamp} (FinBERT: PC and RunPod; ChronoGPT: RunPod)')
+    append_chain(f'done: {TAG}_score_all {stamp} (FinBERT: PC and RunPod; ChronoGPT: RunPod)')
     append_chain(f'all done {stamp}')
-    O.log('rep_chain.log: all done (the R1 analysis starts)')
+    O.log(f'{TAG}_chain.log: all done')
 
 
 def main():
