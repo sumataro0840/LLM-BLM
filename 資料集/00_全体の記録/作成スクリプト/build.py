@@ -57,6 +57,22 @@ DOCS = {
                 src='解説「平均分散から Black-Litterman へ」（2026-10-14）'),
     'tips': dict(path='05_解説/BLMビューとリスクのコツ/BLMビューとリスクのコツ.tex', figs=['生成'], tabs='生成',
                  chapters_dir='章', src='解説「BLM のビューとリスクのコツ」（2026-10-14）'),
+    'hf': dict(path='05_解説/ヘッジファンドの投資手法/ヘッジファンドの投資手法.tex', figs=[], chapters_dir='章',
+               src='報告書「ヘッジファンドの投資手法」（2026-10-23）'),
+    # small caps and the replication: chapters in 章/ (\input inline), values and tables in 図/ (keys prefixed)
+    'scd': dict(path='02_実験/小型株のデータ/LLM-BLM_小型株のデータ.tex', figs=['図'], src='小型株のデータの報告書（2026-10-23）'),
+    's1': dict(path='02_実験/実験S1_小型株のドリフト/LLM-BLM_実験S1.tex', figs=['図'], tabs='図', vals=True,
+               src='実験 S1 の報告書（2026-10-24）'),
+    's2': dict(path='02_実験/実験S2_小型株のリスク予測/LLM-BLM_実験S2.tex', figs=['図'], tabs='図', vals=True,
+               src='実験 S2 の報告書（2026-10-24）'),
+    's3': dict(path='02_実験/実験S3_リスクで補正したBLM/LLM-BLM_実験S3.tex', figs=['図'], tabs='図', vals=True,
+               src='実験 S3 の報告書（2026-10-25）'),
+    's4': dict(path='02_実験/実験S4_TEの校正/LLM-BLM_実験S4.tex', figs=['図'], tabs='図', vals=True,
+               src='実験 S4 の報告書（2026-10-25）'),
+    'rep': dict(path='02_実験/実験R1_新しい1000社での再現/LLM-BLM_実験R1.tex', figs=['図'], tabs='図', vals=True,
+                src='実験 R1 の報告書（2026-10-25）'),
+    'r3': dict(path='01_総合報告書/総合報告3/LLM-BLM_総合報告書3.tex', figs=['LLM-BLM_総合報告書3_図'],
+               src='総合報告書 3（2026-10-25）'),
 }
 REF_CMDS = 'label|ref|eqref|pageref|figref|tabref|chapref|secref|appref|autoref|nameref'
 
@@ -79,12 +95,19 @@ def braced(s, start):
 def body_of(doc):
     d = DOCS[doc]
     text = (SRC / d['path']).read_text(encoding='utf-8')
+    folder = (SRC / d['path']).parent
+
+    def inline(t):
+        """Files kept in 章/*.tex and \\input on a line of their own are put in place (also inside those files)."""
+        for _ in range(3):
+            t = re.sub(r'^\\input\{(章/[^}]+)\}\s*$',
+                       lambda m: (folder / (m.group(1) + '.tex')).read_text(encoding='utf-8'), t, flags=re.M)
+        return t
     if d.get('chapters_dir'):
         files = re.findall(r'\\input\{' + d['chapters_dir'] + r'/([^}]+)\}', text.split('\\begin{document}')[1])
-        folder = (SRC / d['path']).parent / d['chapters_dir']
-        return '\n'.join((folder / (f + '.tex')).read_text(encoding='utf-8') for f in files)
+        return inline('\n'.join((folder / d['chapters_dir'] / (f + '.tex')).read_text(encoding='utf-8') for f in files))
     body = text.split('\\begin{document}', 1)[1].split('\\end{document}')[0]
-    return body
+    return inline(body)
 
 
 def chapters(doc):
@@ -160,6 +183,9 @@ def transform(doc, text, title=None, inject=''):
     text = re.sub(r'\\includegraphics(\[[^\]]*\])?\{([^}]+)\}',
                   lambda m: '\\includegraphics' + (m.group(1) or '') + '{' + copy_fig(doc, find_fig(doc, m.group(2))) + '}', text)
     text = text.replace('\\tabin{', '\\tabinD{' + doc + '}{')
+    if DOCS[doc].get('vals'):
+        # the keys of the report's values.tex overlap between reports: \V{x} -> \V{doc:x}
+        text = text.replace('\\V{', '\\V{' + doc + ':')
     # heading
     m = re.search(r'\\chapter(\*?)\{', text)
     if m:
@@ -309,8 +335,13 @@ def build():
             dst = IMP / '表' / doc
             dst.mkdir(parents=True, exist_ok=True)
             for f in src.glob('*.tex'):
-                shutil.copy2(f, dst / f.name)
+                t = f.read_text(encoding='utf-8')
+                if d.get('vals'):
+                    t = t.replace('\\V{', '\\V{' + doc + ':').replace('\\csname v@', '\\csname v@' + doc + ':')
+                (dst / f.name).write_text(t, encoding='utf-8')
     parts, n = [], 0
+    # values of the reports whose keys are prefixed (the two 解説 are read in the preamble)
+    parts += ['\\input{取り込み/表/' + doc + '/values}\n' for doc, d in DOCS.items() if d.get('vals')]
     for item in ORDER:
         kind = item[0]
         if kind == 'part':
