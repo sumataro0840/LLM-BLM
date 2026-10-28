@@ -62,25 +62,38 @@ def fig_timing(panel):
     fig.savefig(OUT / 'timing.pdf')
 
 
-def fig_quintile(A):
+def score_groups(A):
+    """Mean 2-day abnormal return per value of the composite score (an integer; the sparse ends -5..-2 and 5..6 are
+    pooled), with the 95% interval of the mean clustered by event date. Until 2026-10-28 this figure used fifths of
+    the score ranked with method='first', which split releases with the same score by their order in the file."""
     d = e2.prepare(A.assign(y=A.abn_r_0_1), 'llm_composite')
-    q = pd.qcut(d.llm_composite.rank(method='first'), 5, labels=False)
-    g = d.groupby(q).y
-    mean, se = g.mean() * 100, g.std() / np.sqrt(g.count()) * 100
-    fig, ax = plt.subplots(figsize=(5.6, 2.9))
-    colors = [ORANGE if m < 0 else BLUE for m in mean]
-    ax.bar(np.arange(1, 6), mean, color=colors, width=0.62)
-    ax.errorbar(np.arange(1, 6), mean, yerr=1.96 * se, fmt='none', ecolor=INK2, capsize=3, lw=1)
-    for x, m in zip(range(1, 6), mean):
-        ax.text(x + 0.33, m, f'{m:+.2f}%', ha='left', va='center', fontsize=8.5, color=INK)
+    grp = A.llm_composite.clip(-2, 5).loc[d.index]
+    rows = []
+    for k, g in d.groupby(grp):
+        r = g.y - g.y.mean()
+        se = np.sqrt((r.groupby(g.event_date).sum() ** 2).sum()) / len(g)
+        rows.append((int(k), len(g), 100 * g.y.mean(), 100 * 1.96 * se))
+    return rows
+
+
+def fig_quintile(A):
+    rows = score_groups(A)
+    x = np.arange(len(rows))
+    mean = np.array([m for _, _, m, _ in rows])
+    ci = np.array([c for _, _, _, c in rows])
+    fig, ax = plt.subplots(figsize=(5.6, 3.0))
+    ax.bar(x, mean, color=[ORANGE if m < 0 else BLUE for m in mean], width=0.62)
+    ax.errorbar(x, mean, yerr=ci, fmt='none', ecolor=INK2, capsize=3, lw=1)
     ax.axhline(0, color=INK2, lw=0.8)
-    ax.set_xticks(range(1, 6), ['1（低い）', '2', '3', '4', '5（高い）'])
-    ax.set_xlabel('LLM の合成点数の 5 分位')
+    names = {-2: '−2以下', 5: '5以上'}
+    ax.set_xticks(x, [f'{names.get(k, str(k).replace("-", "−"))}\n{n:,}本' for k, n, _, _ in rows], fontsize=8.5)
+    ax.set_xlabel('LLM の合成点数（語調・見通し・ガイダンスの変化、各 −2〜+2 の和）と発表の本数')
     ax.set_ylabel('2 取引日の超過リターン（%）')
-    ax.set_ylim(-2.6, 2.0)
+    ax.set_ylim(-4, 2.5)
     ax.grid(axis='x', visible=False)
     fig.tight_layout()
     fig.savefig(OUT / 'quintile.pdf')
+    return rows
 
 
 def fig_car(A, conn):

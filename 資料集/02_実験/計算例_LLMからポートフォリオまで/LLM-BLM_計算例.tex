@@ -1,0 +1,446 @@
+% ============================================================
+% LLM-BLM 計算例：決算発表文から小型株のポートフォリオまで（3 銘柄、2024-03-28 の組み替え）
+% コンパイル：tectonic -X compile LLM-BLM_計算例.tex   （XeTeX 系。このフォルダで実行する）
+% 数値はすべて values.tex（作成スクリプト/compute.py → values.json → make_tex.py）から。手で写した数値はない。
+% ============================================================
+\documentclass[xelatex,ja=standard,jafont=haranoaji,a4paper,10pt]{bxjsarticle}
+\setpagelayout*{left=22mm,right=22mm,top=24mm,bottom=26mm,footskip=11mm}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+
+\definecolor{c1}{HTML}{2A78D6}
+\definecolor{c2}{HTML}{EB6834}
+\definecolor{soft1}{HTML}{E4EEF9}
+\definecolor{soft2}{HTML}{FBEEDF}
+\definecolor{soft3}{HTML}{F1F2F1}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\tabref}[1]{表~\ref{#1}}
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.2em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.2em,topsep=0.4em}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.25}
+
+\newtcolorbox{keybox}[1][要点]{enhanced,breakable,colback=soft1,colframe=c1,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{notebox}[1][注意]{enhanced,breakable,colback=soft2,colframe=c2,boxrule=0.5pt,arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+\newtcolorbox{calc}[1][計算]{enhanced,breakable,colback=soft3,colframe=black!45,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=5pt,bottom=5pt,title={#1},fonttitle=\sffamily\bfseries\small,coltitle=white}
+
+\input{values.tex}
+\newcommand{\Sym}[1]{\textsf{\V{sym#1}}}
+
+\title{LLM-BLM 計算例\\[4pt]
+  \large 決算発表文から小型株のポートフォリオまで：3 銘柄で途中の式をすべて追う}
+\author{2024 年 3 月 28 日の組み替え（元の 1,000 社、実験 S1・S4・G の主な形）}
+\date{2026 年 10 月 28 日}
+
+\begin{document}
+\maketitle
+
+\begin{keybox}[この文書について]
+小型株の BLM（実験 S1 の点数、S4 の組み方、実験 G の計算）が、ある 1 日にどう計算されたかを、3 銘柄について最初から最後まで数値で追う。
+数値は\textbf{すべて実際のデータと実際のコード}から計算した（\code{作成スクリプト/compute.py}）。
+手で写した数値はなく、本文の数字は計算結果から自動で入れている。
+\textbf{途中式}：前処理（リッジの点数、順位、共分散、TE の上限）と BLM（均衡、ビュー、事後の期待リターン、最適化）と結果は、掛け算と足し算を 1 つずつ書いた（灰色の囲み）。途中の数は丸めて表示し、計算は丸めずに行ったので、最後の桁が 1 ずれることがある。ChronoGPT の中の計算（1,792 トークン × 15.5 億パラメータ）だけは手で追えないので、式だけを示す。
+
+
+\smallskip
+\textbf{検算}：この日のリッジを学習し直した点数は、研究で保存してある点数と小数第 7 位まで一致した（\tabref{tab:pred}）。
+2015 年からの組み替えをこの日まで再現した BLM の、翌営業日（\V{chkday}）のリターンは $\V{chkport}\%$、
+保存してある実行の値は $\V{chkportst}\%$ で、一致した（比較対象も $\V{chkbench}\%$ と $\V{chkbenchst}\%$）。
+\end{keybox}
+
+\paragraph{例にした日と銘柄}
+組み替えの日は \V{date}（2024 年 1〜3 月期の最後の取引日）。次の組み替えは \V{end} で、その間の取引日は $h=\V{h}$ 日。
+3 銘柄は、この日に見通しを持つ銘柄のうち、直近の発表が 2024 年 1〜3 月に受理された（同じリッジで点数が付いた）もので、
+順位の値 $z$ が $+1.5$・$0$・$-1.5$ に近いものを機械的に選んだ。
+
+\begin{table}[H]\centering\small
+\caption{例の 3 銘柄}\label{tab:stocks}
+\begin{tabular}{llll}
+\toprule
+ & 銘柄 & 決算発表文の受理（米東部時間） & 反応日（day 0） \\
+\midrule
+1 & \Sym{1}（Sana Biotechnology、バイオ） & \V{acc1} & \V{ev1} \\
+2 & \Sym{2}（Aimco、不動産） & \V{acc2} & \V{ev2} \\
+3 & \Sym{3}（Jack in the Box、外食） & \V{acc3} & \V{ev3} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{全体の流れ}
+\begin{enumerate}
+\item 決算発表文を ChronoGPT（2015 年版、学習しない）に通し、1,536 次元のベクトル $\bm x$ にする（\S\ref{sec:vec}）。
+\item 四半期ごとに過去の発表だけで学習したリッジ回帰で、$\bm x$ を 1 つの点数 $\hat y$（2 日の反応の予測）にする（\S\ref{sec:ridge}）。
+\item 組み替えの日に、見通しを持てる銘柄を決め、点数を銘柄間の順位 $z$ にする（\S\ref{sec:z}）。
+\item 共分散 $\Sigma$ を推定し、発表後の銘柄の変動率を株価で補正する（\S\ref{sec:cov}）。TE の上限を過去の実績で補正する（\S\ref{sec:te}）。
+\item $z$ からビュー $q$ を作り、BLM で事後の期待リターン $\mu$ を出し、TE の上限の下で比率 $w$ を決める（\S\ref{sec:blm}）。
+\item 次の組み替えまで持ち、比較対象との差と売買費用を計算する（\S\ref{sec:hold}）。
+\end{enumerate}
+
+\begin{notebox}[3 銘柄の計算と実際の計算の違い]
+1〜4 の段階は、実際の計算そのもの（数値も同じ）である。5 の BLM は、実際には範囲の \V{nuniv} 銘柄を同時に解いている。
+この文書では式を追えるように、\textbf{3 銘柄だけの市場}を作り、同じ式・同じコード（\code{blm/black\_litterman.py}、\code{blm/optimizer.py}）で解いた。
+実際の \V{nuniv} 銘柄の計算でこの 3 銘柄がどうなったかは \S\ref{sec:full} に並べる。
+\end{notebox}
+
+% ------------------------------------------------------------
+\section{決算発表文からベクトルへ（ChronoGPT）}\label{sec:vec}
+
+決算発表文（8-K の EX-99.1）の先頭 9,000 字をトークンに分け、最初の $T\le 1{,}792$ トークンを ChronoGPT（15.5 億パラメータ、2015 年末までの文章だけで学習した版）に通す。
+最後の層の出力を RMS 正規化したもの $\bm h_t\in\mathbb R^{1536}$（語彙の確率を出す直前の状態）を、トークンで平均する。
+\[
+  \bm x \;=\; \frac{1}{T}\sum_{t=1}^{T}\bm h_t \;\in\; \mathbb R^{1536}.
+\]
+ChronoGPT の重みは一切変えない。株価も使わない（文章だけの計算）。3 銘柄の $\bm x$ の最初の 4 個の成分と、長さ $\|\bm x\|$ は次の通り。
+
+\begin{table}[H]\centering\small
+\caption{ChronoGPT のベクトル $\bm x$（1,536 個のうち最初の 4 個）}\label{tab:x}
+\begin{tabular}{lrrrrcr}
+\toprule
+ & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $\cdots$ & $\|\bm x\|$ \\
+\midrule
+\Sym{1} & $\V{x11}$ & $\V{x12}$ & $\V{x13}$ & $\V{x14}$ & & $\V{xnorm1}$ \\
+\Sym{2} & $\V{x21}$ & $\V{x22}$ & $\V{x23}$ & $\V{x24}$ & & $\V{xnorm2}$ \\
+\Sym{3} & $\V{x31}$ & $\V{x32}$ & $\V{x33}$ & $\V{x34}$ & & $\V{xnorm3}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+1 つ 1 つの成分に人が読める意味はない。意味を持たせるのが次のリッジ回帰である。
+
+% ------------------------------------------------------------
+\section{リッジ回帰で 1 つの点数にする（2024 年 1〜3 月期のモデル）}\label{sec:ridge}
+
+\subsection{学習に使う発表}
+リッジは暦の四半期ごとに学習し直す。2024 年 1〜3 月期に受理された発表（\V{nq} 本）に点数を付けるモデルは、
+\textbf{2024-01-01 より前に 2 日の反応の窓が閉じた発表}だけで学習する。該当するのは \V{ntrain} 本
+（受理日 \V{trfrom}〜\V{trto}、窓の最後の日は遅くとも \V{wemax}）。2024 年以降の株価は一切使っていない。
+学習の発表が \V{mintrain} 本に満たない四半期は点数を付けない（2015 年の初めのほう）。
+
+\subsection{正解 $y$ と、ベクトルの標準化}
+正解は、発表をはさむ 2 取引日（day 0 の前日の終値から day 1 の終値まで）の、銘柄と IWM（小型株の指数 ETF）のリターンの差 $r^{\text{abn}}_{0,1}$ である。
+学習の発表の中で、上下 1\% の点で丸め（$[\V{qlo}\%,\ \V{qhi}\%]$）、平均 $\V{ymean}\%$・標準偏差 $\V{ysd}\%$ で標準化する。
+\[
+  y_n = \frac{\operatorname{clip}(r^{\text{abn}}_{0,1,n}) - \V{ymean}\%}{\V{ysd}\%}.
+\]
+ベクトルの各成分も、学習の発表の平均 $m_j$ と標準偏差 $s_j$ で標準化する：$\tilde x_j = (x_j - m_j)/s_j$。
+
+\begin{table}[H]\centering\small
+\caption{標準化に使う値と、学習したリッジの係数（最初の 4 個）}\label{tab:beta}
+\begin{tabular}{lrrrrc}
+\toprule
+ & $j=1$ & $j=2$ & $j=3$ & $j=4$ & $\cdots$ \\
+\midrule
+平均 $m_j$ & $\V{mu1}$ & $\V{mu2}$ & $\V{mu3}$ & $\V{mu4}$ & \\
+標準偏差 $s_j$ & $\V{sd1}$ & $\V{sd2}$ & $\V{sd3}$ & $\V{sd4}$ & \\
+係数 $\beta_j$（$\times 10^{-3}$） & $\V{beta1}$ & $\V{beta2}$ & $\V{beta3}$ & $\V{beta4}$ & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{リッジ回帰}
+\[
+  (\hat b,\hat{\bm\beta}) = \arg\min_{b,\bm\beta}\ \sum_{n=1}^{\V{ntrain}}\bigl(y_n - b - \tilde{\bm x}_n^{\top}\bm\beta\bigr)^2 + \alpha\,\|\bm\beta\|^2 .
+\]
+罰則の強さ $\alpha$ は、$\V{alphalo}$ から $\V{alphahi}$ までの \V{nalphas} 個の候補から、学習の発表の中の 1 つ抜き交差検証で選ぶ（\code{RidgeCV}）。
+選ばれたのは $\alpha=\V{alpha}$。1,536 個の係数の長さは $\|\hat{\bm\beta}\|=\V{betanorm}$、切片は $\hat b=\V{bzero}\times10^{-6}$（$y$ を標準化したのでほぼ 0）。
+
+\subsection{3 銘柄の点数}
+点数は $\hat y = \hat b + \sum_{j=1}^{1536}\tilde x_j\hat\beta_j$。最初の 4 項と、残り 1,532 項の和を並べる。
+
+\begin{table}[H]\centering\small
+\caption{点数の計算：$\tilde x_j$ と $\tilde x_j\hat\beta_j$}\label{tab:pred}
+\begin{tabular}{lrrrrrrr}
+\toprule
+ & & $j=1$ & $j=2$ & $j=3$ & $j=4$ & $j=5..1536$ の和 & 点数 $\hat y$ \\
+\midrule
+\Sym{1} & $\tilde x_j$ & $\V{xs11}$ & $\V{xs12}$ & $\V{xs13}$ & $\V{xs14}$ & & \\
+ & $\tilde x_j\hat\beta_j$ & $\V{c11}$ & $\V{c12}$ & $\V{c13}$ & $\V{c14}$ & $\V{crest1}$ & $\mathbf{\V{pred1}}$ \\
+\Sym{2} & $\tilde x_j$ & $\V{xs21}$ & $\V{xs22}$ & $\V{xs23}$ & $\V{xs24}$ & & \\
+ & $\tilde x_j\hat\beta_j$ & $\V{c21}$ & $\V{c22}$ & $\V{c23}$ & $\V{c24}$ & $\V{crest2}$ & $\mathbf{\V{pred2}}$ \\
+\Sym{3} & $\tilde x_j$ & $\V{xs31}$ & $\V{xs32}$ & $\V{xs33}$ & $\V{xs34}$ & & \\
+ & $\tilde x_j\hat\beta_j$ & $\V{c31}$ & $\V{c32}$ & $\V{c33}$ & $\V{c34}$ & $\V{crest3}$ & $\mathbf{\V{pred3}}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{途中式/ridge}
+
+
+1 項 1 項は小さく、1,536 項が少しずつ足し合わさって点数になる。たとえば \Sym{1} で寄与が最も大きかったのは
+第 \V{td11} 成分（$\tilde x=\V{tdx11}$、$\hat\beta=\V{tdb11}\times10^{-3}$、寄与 $\V{tdc11}$）で、それでも点数の 1 割台である。
+
+\begin{calc}[検算と、点数の意味]
+保存してある点数（研究で使った値）：\Sym{1} $\V{stored1}$、\Sym{2} $\V{stored2}$、\Sym{3} $\V{stored3}$。\\
+この文書で学習し直した値：\Sym{1} $\V{mine1}$、\Sym{2} $\V{mine2}$、\Sym{3} $\V{mine3}$。一致した（差は浮動小数点の丸めの範囲）。
+
+\smallskip
+点数は標準化した $y$ の単位なので、元の単位に戻すと $\hat y\times\V{ysd}\% + \V{ymean}\%$：
+\Sym{1} $\V{predret1}\%$、\Sym{2} $\V{predret2}\%$、\Sym{3} $\V{predret3}\%$。
+「発表をはさむ 2 日に、IWM よりこれだけ上がりそうな文章だった」という意味である。
+ただし BLM はこの大きさを使わず、次の順位だけを使う。
+\end{calc}
+
+% ------------------------------------------------------------
+\section{BLM に入る条件と、順位の値 $z$}\label{sec:z}
+
+\subsection{見通しを持てる銘柄（\V{date}）}
+\begin{enumerate}
+\item \textbf{標本}：元の 1,000 社（\V{nsample} 社）。
+\item \textbf{範囲}：この日に知られていた浮動株時価総額で、米国の 1,001〜3,000 位にいる会社。\V{nband} 社。比較対象（範囲の全社を浮動株時価総額に比例して持つ）もこの範囲で作る。
+\item \textbf{株価}：直近 252 取引日のうち \V{minhist} 日以上の株価があり、この日の終値がある。\V{ncov} 社（この \V{ncov} 社が BLM の対象）。
+\item \textbf{見通し}：反応日が \V{viewfrom} の翌日から \V{date} まで（\V{viewdays} 日以内）の発表があり、その点数がある。\V{nview} 社。
+同じ会社に複数あれば最新の 1 本。残りの \V{nuniv} $-$ \V{nview} 社は見通しなし（BLM では市場の均衡のまま）。
+\end{enumerate}
+
+\subsection{順位を正規分布の値にする（Blom の方法）}
+見通しを持つ $N=\V{N}$ 社の点数を小さい順に並べた順位 $r$（同じ値は平均の順位）を、
+\[
+  z = \Phi^{-1}\!\left(\frac{r-0.375}{N+0.25}\right)
+\]
+に変える（$\Phi^{-1}$ は標準正規分布の分位点）。$z$ は銘柄の間で平均 0・標準偏差およそ 1 になり、点数の外れ値の影響を受けない。
+
+\begin{table}[H]\centering\small
+\caption{点数から $z$ へ}\label{tab:z}
+\begin{tabular}{lrrrr}
+\toprule
+ & 点数 $\hat y$ & 順位 $r$（$N=\V{N}$） & $(r-0.375)/(N+0.25)$ & $z$ \\
+\midrule
+\Sym{1} & $\V{pred1}$ & \V{rank1} & $\V{quant1}$ & $\mathbf{\V{z1}}$ \\
+\Sym{2} & $\V{pred2}$ & \V{rank2} & $\V{quant2}$ & $\mathbf{\V{z2}}$ \\
+\Sym{3} & $\V{pred3}$ & \V{rank3} & $\V{quant3}$ & $\mathbf{\V{z3}}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{途中式/blom}
+
+
+% ------------------------------------------------------------
+\section{共分散と変動率}\label{sec:cov}
+
+\paragraph{1. 過去 252 日の共分散}
+対象の \V{ncov} 社の、直近 252 取引日の日次リターン（ありえない日：$+300\%$ 超・$-80\%$ 未満は欠けとし、欠けは 0 で埋める）から、
+Ledoit--Wolf の縮小推定で共分散 $\Sigma_0$ を作る。縮小の強さは $\V{shrink}$（標本の共分散を $1-\V{shrink}$、対角の目標を $\V{shrink}$ の重みで混ぜる）。
+各銘柄の日次の変動率 $\sigma_{0,i}$ は、同じ 252 日の標準偏差。
+
+\paragraph{2. 発表の後の銘柄の補正（共分散 B）}
+直近 60 取引日以内に発表があった銘柄は、発表後の変動率が普段と違う。そこで、過去の発表で学習した回帰
+（発表前 60 日・1 年の変動率、規模、2 日の反応の大きさ、数値の驚きの大きさから、発表後 2〜60 日の変動率の対数を予測する。文章の点数は使わない）で
+発表後の変動率を予測し、今の変動率との比を倍率 $s_i$ にする（比は発表後の銘柄どうしの平均で基準をそろえ、$0.5$〜$2$ に制限）。
+\[
+  \Sigma = \operatorname{diag}(\bm s)\,\Sigma_0\,\operatorname{diag}(\bm s),\qquad \sigma_i = s_i\,\sigma_{0,i}.
+\]
+
+\begin{table}[H]\centering\small
+\caption{変動率と補正の倍率}\label{tab:sigma}
+\begin{tabular}{lrrrr}
+\toprule
+ & $\sigma_{0,i}$（日次） & 倍率 $s_i$ & $\sigma_i$（日次） & $\sigma_i$（年率 $\times\sqrt{252}$） \\
+\midrule
+\Sym{1} & $\V{sigmazero1}\%$ & $\V{s1}$ & $\V{sigma1}\%$ & $\V{sigmaann1}\%$ \\
+\Sym{2} & $\V{sigmazero2}\%$ & $\V{s2}$ & $\V{sigma2}\%$ & $\V{sigmaann2}\%$ \\
+\Sym{3} & $\V{sigmazero3}\%$ & $\V{s3}$ & $\V{sigma3}\%$ & $\V{sigmaann3}\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{途中式/cov}
+
+
+3 銘柄の部分の $\Sigma$（年率、$\times 252$）と相関は次の通り。\Sym{1} はバイオで、変動率が他の 3 倍ほどある。
+\[
+  252\,\Sigma = \begin{pmatrix} \V{Sa11} & \V{Sa12} & \V{Sa13}\\ \V{Sa21} & \V{Sa22} & \V{Sa23}\\ \V{Sa31} & \V{Sa32} & \V{Sa33}\end{pmatrix},
+  \qquad
+  \text{相関} = \begin{pmatrix} 1 & \V{rho12} & \V{rho13}\\ \V{rho21} & 1 & \V{rho23}\\ \V{rho31} & \V{rho32} & 1\end{pmatrix}.
+\]
+
+% ------------------------------------------------------------
+\section{TE の上限の補正}\label{sec:te}
+
+約束は「比較対象からのずれ（TE）を年 \V{TE}\%」。しかし、最適化が見込む TE（事前の TE）と、実際に出た TE は一致しない。
+そこで、過去の毎日の「実際の差 ÷ 事前の TE（日次）」の値 $u_t$ を貯めておき、直近 \V{histdays} 日（\V{mindays} 日以上たまってから）の二乗平均の平方根
+\[
+  b = \sqrt{\tfrac{1}{n}\textstyle\sum_t u_t^2} = \V{bpast}\quad(\text{この日までに \V{nhist} 日})
+\]
+で上限を割る。$b>1$ は「実際のずれが見込みより大きかった」という意味である。
+\[
+  L = \operatorname{clip}\!\left(\frac{\V{TE}\%}{b},\ \V{Llo}\%,\ \V{Lhi}\%\right) = \frac{\V{TE}\%}{\V{bpast}} = \mathbf{\V{limit}\%}\ (\text{年率}).
+\]
+最適化では日次の単位で使う：$L/\sqrt{252} = \V{limitdaily}\%$。
+
+\input{途中式/te}
+
+
+% ------------------------------------------------------------
+\section{BLM：3 銘柄の市場で、式どおりに}\label{sec:blm}
+
+\subsection{市場の均衡（事前の期待リターン）}
+比較対象の比率 $\bm w_{\text{mkt}}$ は浮動株時価総額に比例する。3 銘柄だけの市場では
+$\bm w_{\text{mkt}} = (\V{w1},\ \V{w2},\ \V{w3})$。逆最適化で、この比率を最適にする期待リターンを出す（$\delta=\V{DELTA}$）。
+\[
+  \bm\pi = \delta\,\Sigma\,\bm w_{\text{mkt}}.
+\]
+\begin{calc}[$\bm\pi$（日次、括弧は $\times252$ の年率）]
+\Sym{1}：$\pi_1=\V{prior1}\%$（$\V{priorann1}\%$）、
+\Sym{2}：$\pi_2=\V{prior2}\%$（$\V{priorann2}\%$）、
+\Sym{3}：$\pi_3=\V{prior3}\%$（$\V{priorann3}\%$）。
+
+\smallskip
+例：$\pi_1 = \V{DELTA}\times(\Sigma_{11}w_1+\Sigma_{12}w_2+\Sigma_{13}w_3)$。
+3 銘柄だけの市場なので、変動率の大きい \Sym{1} の均衡リターンが大きく出る（実際の \V{nuniv} 銘柄の市場では、1 銘柄の比率が小さいのでずっと小さい）。
+\end{calc}
+\input{途中式/pi}
+
+
+\subsection{ビュー：順位 $z$ を期待リターンの上乗せに換算する}
+見通しを持つ銘柄 1 つにつき 1 本の絶対ビュー（その銘柄だけを選ぶ行 $P_k=\bm e_i^\top$）を置く。
+上乗せの大きさは Grinold の式「超過リターン $=$ IC $\times$ 変動率 $\times$ 点数」を、保有期間 $h=\V{h}$ 日のうちの 1 日あたりに直したもの。
+\[
+  q_i = \pi_i + \mathrm{IC}\cdot\sigma_i\cdot z_i/\sqrt{h},\qquad \mathrm{IC}=\V{IC}\ (\text{固定}),\ \sqrt{h}=\V{sqrth}.
+\]
+\begin{calc}[上乗せ $q_i-\pi_i$（日次、括弧は年率）]
+\Sym{1}：$\V{IC}\times\V{sigma1}\%\times\V{z1}/\V{sqrth} = \V{tilt1}\%$（$\V{tiltann1}\%$）\\
+\Sym{2}：$\V{IC}\times\V{sigma2}\%\times\V{z2}/\V{sqrth} = \V{tilt2}\%$（$\V{tiltann2}\%$）\\
+\Sym{3}：$\V{IC}\times\V{sigma3}\%\times(\V{z3})/\V{sqrth} = \V{tilt3}\%$（$\V{tiltann3}\%$）\\
+よって $q = (\V{q1}\%,\ \V{q2}\%,\ \V{q3}\%)$（日次）。
+\end{calc}
+\input{途中式/views}
+
+
+\subsection{ビューの確信度 $\Omega$}
+He--Litterman の決め方で、ビューの不確かさをその銘柄の分散の $\tau$ 倍にする（$\tau=\V{TAU}$）。どの銘柄も同じ程度の自信になる。
+\[
+  \Omega = \tau\,\operatorname{diag}(P\Sigma P^\top) = \operatorname{diag}(\V{om1},\ \V{om2},\ \V{om3})\times10^{-5}.
+\]
+
+\subsection{事後の期待リターン}
+\[
+  \bm\mu = \bm\pi + \tau\Sigma P^\top\bigl(P\tau\Sigma P^\top + \Omega\bigr)^{-1}(\bm q - P\bm\pi).
+\]
+ここでは $P=I$ なので、$\bm\mu = \bm\pi + M(\bm q-\bm\pi)$、$M = \tau\Sigma(\tau\Sigma+\Omega)^{-1}$。
+\[
+  M = \begin{pmatrix} \V{M11} & \V{M12} & \V{M13}\\ \V{M21} & \V{M22} & \V{M23}\\ \V{M31} & \V{M32} & \V{M33}\end{pmatrix}.
+\]
+$\Omega$ の対角が $\tau\Sigma$ の対角と同じなので、$M$ の対角はおよそ $0.5$：\textbf{各ビューの上乗せの約半分が採用される}。
+対角の外は、相関を通じて他の銘柄のビューが少し漏れてくる分である。
+
+\input{途中式/post}
+
+
+\begin{calc}[$\bm\mu$（日次、括弧は年率）と、均衡からの変化]
+\Sym{1}：$\mu_1=\V{post1}\%$（$\V{postann1}\%$）、変化 $\V{gap1}\%$（$\V{gapann1}\%$）\\
+\Sym{2}：$\mu_2=\V{post2}\%$（$\V{postann2}\%$）、変化 $\V{gap2}\%$（$\V{gapann2}\%$）\\
+\Sym{3}：$\mu_3=\V{post3}\%$（$\V{postann3}\%$）、変化 $\V{gap3}\%$（$\V{gapann3}\%$）
+
+\smallskip
+\Sym{2} は $z\approx0$ で自分のビューはほぼ 0 だが、\Sym{1} との相関で少し上がっている。
+\end{calc}
+
+\subsection{TE の上限つきの平均分散最適化}
+\[
+  \max_{\bm w}\ \bm\mu^\top\bm w - \frac{\delta}{2}\bm w^\top\Sigma\bm w
+  \quad\text{s.t.}\quad \textstyle\sum_i w_i = 1,\ \ w_i\ge 0,\ \ (\bm w-\bm w_{\text{mkt}})^\top\Sigma(\bm w-\bm w_{\text{mkt}})\le (L/\sqrt{252})^2 .
+\]
+空売りなし・全額投資・事前の TE が上限以内、の 3 つの制約のもとで解く（Clarabel、状態 \code{\V{status}}）。
+
+\begin{table}[H]\centering\small
+\caption{最適化の結果（3 銘柄の市場）}\label{tab:w}
+\begin{tabular}{lrrrr}
+\toprule
+ & 比較対象 $w_{\text{mkt}}$ & BLM $w$ & 差 $w-w_{\text{mkt}}$ & （参考）TE の上限なし \\
+\midrule
+\Sym{1}（$z=\V{z1}$） & $\V{w1}$ & $\mathbf{\V{wopt1}}$ & $\V{act1}\%$ & $\V{wfree1}$（$\V{actfree1}\%$） \\
+\Sym{2}（$z=\V{z2}$） & $\V{w2}$ & $\mathbf{\V{wopt2}}$ & $\V{act2}\%$ & $\V{wfree2}$（$\V{actfree2}\%$） \\
+\Sym{3}（$z=\V{z3}$） & $\V{w3}$ & $\mathbf{\V{wopt3}}$ & $\V{act3}\%$ & $\V{wfree3}$（$\V{actfree3}\%$） \\
+\midrule
+事前の TE（年率） & 0 & $\V{tethree}\%$ & & $\V{tefree}\%$ \\
+目的関数（$\times10^{-4}$） & $\V{objband}$ & $\V{objopt}$ & & $\V{objfree}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{途中式/opt}
+
+
+TE の上限がなければ、最適化は TE $\V{tefree}\%$ まで比較対象から離れたい。上限 $\V{limit}\%$ がちょうど効いて（事前の TE $=\V{tethree}\%$）、
+その手前で止まっている。\Sym{1}（$z$ 高）を増やし、\Sym{3}（$z$ 低）を減らす方向は、ビューの向きどおりである。
+
+% ------------------------------------------------------------
+\section{実際の \V{nuniv} 銘柄の計算では}\label{sec:full}
+
+実際には、上と同じ式で \V{nuniv} 銘柄（うち \V{nview} 銘柄にビュー）を同時に解いている。そのときの 3 銘柄の比率は次の通り。
+
+\begin{table}[H]\centering\small
+\caption{実際の BLM での 3 銘柄}\label{tab:full}
+\begin{tabular}{lrrr}
+\toprule
+ & $z$ & 比較対象の比率 & BLM の比率 \\
+\midrule
+\Sym{1} & $\V{z1}$ & $\V{wbandfull1}\%$ & $\V{wblmfull1}\%$ \\
+\Sym{2} & $\V{z2}$ & $\V{wbandfull2}\%$ & $\V{wblmfull2}\%$ \\
+\Sym{3} & $\V{z3}$ & $\V{wbandfull3}\%$ & $\V{wblmfull3}\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\Sym{1} は約 2 倍に増え、\Sym{3} はほぼ 0 になった。\Sym{2} は $z\approx 0$ なのに減っている。
+TE の予算が限られているので、最適化は $z$ の高い銘柄を買う資金を、ビューの弱い銘柄から回すためである。
+全体では \V{nuniv} 銘柄のうち \V{nheld} 銘柄を持ち、事前の TE は $\V{teex}\%$（上限 $\V{limit}\%$ と一致）。
+
+% ------------------------------------------------------------
+\section{次の組み替えまで持つ：結果と費用}\label{sec:hold}
+
+\V{date} の終値で組み、\V{end} まで（\V{h} 取引日）持つ。期間の途中では売買しない（比率は値動きで変わる）。
+
+\begin{calc}[3 銘柄の市場での結果]
+期間のリターン：\Sym{1} $\V{g1}\%$、\Sym{2} $\V{g2}\%$、\Sym{3} $\V{g3}\%$。\\
+BLM：$\sum_i w_i R_i = \V{port}\%$、比較対象：$\sum_i w_{\text{mkt},i}R_i = \V{band}\%$、差 $\V{active}\%$。\\
+売買の量（比較対象からの組み替えとして）：$\sum_i|w_i-w_{\text{mkt},i}| = \V{traded}\%$、
+片道 0.3\% の費用 $=0.003\times\V{traded}\% = \V{cost}\%$。費用の後の差 $\V{net}\%$。
+\end{calc}
+\input{途中式/hold}
+
+
+この四半期は、$z$ の最も高かった \Sym{1} が $\V{g1}\%$ と大きく下がり、3 銘柄の市場では BLM がわずかに負けた。
+1 銘柄・1 四半期の予測は外れることが多い。研究で見た優位（元の 1,000 社で費用の後に年 +2.4\%、ただし探索）は、
+毎回数百の銘柄に小さく傾け、それを約 10 年続けた平均として出てくるものである。
+
+\begin{notebox}[実際の計算での費用の扱い]
+実際の計算では、BLM と比較対象の両方について、組み替えの日に前の期間の終わりの比率から新しい比率への売買の量（片道）を記録し、
+費用 $c$ のもとで「差 $-$ $c\times$（BLM の売買の量 $-$ 比較対象の売買の量）」を、その期間の最初の日に引いている（実験 G）。
+上の 3 銘柄の例は、比較対象から組み替えた量で簡単にした。
+\end{notebox}
+
+% ------------------------------------------------------------
+\section*{付録：設定とコードの場所}
+\addcontentsline{toc}{section}{付録：設定とコードの場所}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{p{2.5cm}p{4.3cm}p{8.4cm}}
+\toprule
+段階 & 設定 & コード \\
+\midrule
+ベクトル & ChronoGPT 2015 年版、最後の層の平均、1,792 トークン & \code{LLM/chrono/chrono.py} の \code{embed} \\
+リッジ & 四半期ごと、$\alpha$ は 1 つ抜き、最低 \V{mintrain} 本 & \code{experiments/E5\_chrono\_embeddings/run.py} の \code{rolling\_ridge} \\
+見通しと $z$ & \V{viewdays} 日以内の最新、Blom & \code{experiments/S1\_smallcap\_drift/blm\_paths.py} の \code{views} \\
+共分散 B & Ledoit--Wolf 252 日、倍率 0.5〜2 & \code{experiments/S3\_smallcap\_risk\_blm/run.py} の \code{scale\_factors} \\
+TE の補正 & 年 \V{TE}\%、\V{histdays} 日、\V{Llo}〜\V{Lhi}\% & \code{experiments/S4\_te\_calibration/run.py} \\
+BLM & IC \V{IC}、$\tau$ \V{TAU}、$\delta$ \V{DELTA} & \code{blm/black\_litterman.py}、\code{blm/optimizer.py} \\
+組み替えと費用 & 四半期の最後の取引日、片道 0.3\% & \code{experiments/G\_proof/run.py} の \code{run\_b\_cal} \\
+この文書の計算 & 2024-03-28、元の 1,000 社 & \code{作成スクリプト/compute.py}、\code{make\_tex.py}、\code{make\_steps.py}（途中式） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

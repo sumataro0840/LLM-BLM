@@ -592,7 +592,7 @@ ChronoGPT-Instruct の 2014〜2024 年末の 11 の版を取得した（\code{�
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\linewidth]{quintile.pdf}
-\caption{合成点数の 5 分位ごとの、2 取引日の超過リターン（探索の図）。}
+\caption{合成点数の値ごとの、2 取引日の超過リターン（探索の図。縦線は発表日でクラスタした 95\% 区間。2026-10-28 に 5 分位の図から作り直した）。}
 \end{figure}
 
 \begin{figure}[H]
@@ -617,7 +617,7 @@ ChronoGPT-Instruct の 2014〜2024 年末の 11 の版を取得した（\code{�
 \end{figure}
 
 \begin{itemize}
-\item \textbf{点数の順に反応が並ぶ}：5 分位の平均は $-1.77\%$、$-0.20\%$、$-0.25\%$、$+0.46\%$、$+1.16\%$。
+\item \textbf{点数の順に反応が並ぶ}：合成点数の値ごとの平均は、$-2$ 以下で $-2.82\%$ から $5$ 以上で $+1.48\%$ まで、点数の順に並ぶ（2026-10-28 に作り直した。初めの 5 分位の図は、同じ点数の発表を機械的に割り振っていたため真ん中が平らに見えていた）。
 \item \textbf{LLM を使わない方法の情報をほぼ含む}（\figref{fig:compare}）：1 つずつなら TF-IDF（$+44$bp）、FinBERT（$+39$bp）、SUE（$+28$bp）も効くが、LLM と同時に入れると文章の 3 つの方法はほぼ 0 になる。LLM は 1 つずつでも同時でも $+120$bp。
 \item \textbf{反応は 2 日で出尽くす}（\figref{fig:car}）：その後の 2〜21 日目のドリフトは有意でない（S1、$+10$bp、$t$ 0.8）。
 \item \textbf{語調・見通し・ガイダンスは、どれも単独で強く効く}（S4、$+87$〜$+101$bp）。
